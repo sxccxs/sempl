@@ -15,9 +15,8 @@ class TokenType(StrEnum):
 
     LPAREN = "("
     RPAREN = ")"
-    LCURLY = "{"
-    RCURLY = "}"
     COLON = ":"
+    ARROW = "->"
 
     # operators
     ASSIGN = "="
@@ -25,7 +24,6 @@ class TokenType(StrEnum):
     MINUS = "-"
     ASTERIX = "*"
     SLASH = "/"
-    CIRCUMFLEX = "^"
     APOSTROPHE = "'"
 
     # comparison

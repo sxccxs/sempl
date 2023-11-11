@@ -9,7 +9,7 @@ class Lexer:
         self.current_char = self.input.read(1)
         self.after_char = self.input.read(1)
 
-    def read_char(self) -> None:
+    def _read_char(self) -> None:
         """Moves lexer to the next character."""
         if self.after_char == "":
             self.current_char = "\0"
@@ -18,41 +18,45 @@ class Lexer:
         self.current_char = self.after_char
         self.after_char = self.input.read(1)
 
+    def _token_from_current_char(self, token_type: TokenType) -> Token:
+        return Token(token_type, self.current_char)
+
     def next_token(self) -> Token:
         """Reads a token."""
-        token_type: TokenType = TokenType.ILLEGAL
-        token_value: str | None = None
+        token: Token
 
         match self.current_char:
             case " ":
-                token_type = TokenType.SPACE
+                token = self._token_from_current_char(TokenType.SPACE)
             case "(":
-                token_type = TokenType.LPAREN
+                token = self._token_from_current_char(TokenType.LPAREN)
             case ")":
-                token_type = TokenType.RPAREN
+                token = self._token_from_current_char(TokenType.RPAREN)
             case ":":
-                token_type = TokenType.COLON
+                token = self._token_from_current_char(TokenType.COLON)
             case "+":
-                token_type = TokenType.PLUS
+                token = self._token_from_current_char(TokenType.PLUS)
             case "-":
-                token_type = TokenType.MINUS
+                token = self._token_from_current_char(TokenType.MINUS)
             case "*":
-                token_type = TokenType.ASTERIX
+                token = self._token_from_current_char(TokenType.ASTERIX)
             case "/":
-                token_type = TokenType.SLASH
-            case "^":
-                token_type = TokenType.CIRCUMFLEX
+                token = self._token_from_current_char(TokenType.SLASH)
             case "'":
-                token_type = TokenType.APOSTROPHE
+                token = self._token_from_current_char(TokenType.APOSTROPHE)
             case "\n":
-                token_type = TokenType.ENDL
+                token = self._token_from_current_char(TokenType.ENDL)
             case "\0":
-                token_type = TokenType.EOF
+                token = self._token_from_current_char(TokenType.EOF)
+            case "=":
+                token = self._token_from_current_char(TokenType.ASSIGN)
+            case "<":
+                token = self._token_from_current_char(TokenType.LT)
+            case ">":
+                token = self._token_from_current_char(TokenType.GT)
             case _:
-                pass
+                token = self._token_from_current_char(TokenType.ILLEGAL)
 
-        return (
-            Token(token_type, token_value)
-            if token_value is not None
-            else Token(token_type, self.current_char)
-        )
+        self._read_char()
+
+        return token
