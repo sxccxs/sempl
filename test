@@ -2,4 +2,5 @@
 
 TEST_DIR=./tests
 
-poetry run pytest ${TEST_DIR}/tg*.py
+mkdir -p ./reports
+poetry run pytest ${TEST_DIR}/tg*.py -vvv --md-report --md-report-output=./reports/report.md 

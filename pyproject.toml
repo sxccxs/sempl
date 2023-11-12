@@ -14,6 +14,7 @@ pylint = "^3.0.2"
 black = "^23.11.0"
 ipython = "^8.17.2"
 pytest = "^7.4.3"
+pytest-md-report = "^0.5.0"
 
 [build-system]
 requires = ["poetry-core"]
