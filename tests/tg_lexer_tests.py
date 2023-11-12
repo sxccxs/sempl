@@ -43,7 +43,7 @@ literal_token_map: dict[str, Token] = {
 }
 
 input_and_expected: dict[str, list[Token]] = {
-    "+-/*=\n)(: '><\n": [
+    "+-/*=\n)(: '><\n\t": [
         Token(TokenType.PLUS, "+"),
         Token(TokenType.MINUS, "-"),
         Token(TokenType.SLASH, "/"),
@@ -58,6 +58,7 @@ input_and_expected: dict[str, list[Token]] = {
         Token(TokenType.GT, ">"),
         Token(TokenType.LT, "<"),
         Token(TokenType.ENDL, "\n"),
+        Token(TokenType.ILLEGAL, "\t"),
         Token(TokenType.EOF, "\0"),
     ],
     "5 sqrt == != <= >= -> 10000. \n if num == 2: \n\n": [

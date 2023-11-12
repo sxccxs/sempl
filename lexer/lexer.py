@@ -1,6 +1,8 @@
+from io import StringIO
 from typing import TextIO
 
-from lexer.tokens import Token, TokenType
+from lexer import matchers
+from lexer.tokens import KEYWORDS, Token, TokenType
 
 
 class Lexer:
@@ -18,14 +20,39 @@ class Lexer:
         self.current_char = self.after_char
         self.after_char = self.input.read(1)
 
-    def _token_from_current_char(self, token_type: TokenType) -> Token:
-        return Token(token_type, self.current_char)
-
     def _peek_char(self) -> str:
         """Returns the next character, but does not move the lexer.
         If there is no characters left, returns zero-terminator ("\\0").
         """
         return self.after_char if self.after_char != "" else "\0"
+
+    def _read_identifier(self) -> str:
+        """Reads identifier from input stream.
+        After reading lexer points to the last symbol of the identifier."""
+        if not matchers.is_identifier_char(self.current_char):
+            return ""
+        sio = StringIO()
+        sio.write(self.current_char)
+        while matchers.is_identifier_char(self._peek_char()):
+            sio.write(self._peek_char())
+            self._read_char()
+        return sio.getvalue()
+
+    def _read_number_literal(self) -> str:
+        """Reads number from input stream.
+        After reading lexer points to the last symbol of the number."""
+        if not self.current_char.isdigit():
+            return ""
+        sio = StringIO()
+        sio.write(self.current_char)
+        while matchers.is_number_char(self._peek_char()):
+            sio.write(self._peek_char())
+            self._read_char()
+        return sio.getvalue()
+
+    def _token_from_current_char(self, token_type: TokenType) -> Token:
+        """Creates a token with given type and current lexer character."""
+        return Token(token_type, self.current_char)
 
     def _create_2_symbol_token(
         self,
@@ -47,6 +74,20 @@ class Lexer:
             return Token(two_symbol_token_type, f"{first_char}{self.current_char}")
 
         return Token(one_symbol_token_type, self.current_char)
+
+    @staticmethod
+    def _create_identifier_token(literal: str) -> Token:
+        """Creates a keyword token or an identifier token."""
+        return Token(KEYWORDS.get(literal, TokenType.IDENT), literal)
+
+    @staticmethod
+    def _create_number_token(literal: str) -> Token:
+        """Creates an integer, float or an illegal token."""
+        if literal.isdigit():
+            return Token(TokenType.INT, literal)
+        if matchers.is_valid_unsigned_float(literal):
+            return Token(TokenType.FLOAT, literal)
+        return Token(TokenType.ILLEGAL, literal)
 
     def next_token(self) -> Token:
         """Reads a token."""
@@ -104,7 +145,12 @@ class Lexer:
                     one_symbol_token_type=TokenType.GT,
                 )
             case _:
-                token = self._token_from_current_char(TokenType.ILLEGAL)
+                if matchers.is_identifier_char(self.current_char):
+                    token = self._create_identifier_token(self._read_identifier())
+                elif self.current_char.isdigit():
+                    token = self._create_number_token(self._read_number_literal())
+                else:
+                    token = self._token_from_current_char(TokenType.ILLEGAL)
 
         self._read_char()
 
