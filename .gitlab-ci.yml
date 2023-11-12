@@ -15,8 +15,8 @@ before_script:
   - curl -sSL https://install.python-poetry.org | python3 - --version ${POETRY_VERSION}
   - export PATH=~/.local/bin:$PATH
   - poetry --version
-  - poetry install
   - poetry shell
+  - poetry install
 
 test:
   stage: test
