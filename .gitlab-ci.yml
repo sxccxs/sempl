@@ -20,6 +20,7 @@ before_script:
 test:
   stage: test
   script:
+    - chmod +x ./test
     - ./test
   
 linting:
