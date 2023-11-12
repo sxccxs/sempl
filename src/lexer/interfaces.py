@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from lexer.tokens import Token
+from src.lexer.tokens import Token
 
 
 class ILexer(Protocol):

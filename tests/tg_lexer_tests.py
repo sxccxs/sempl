@@ -2,8 +2,8 @@ from io import StringIO
 
 import pytest
 
-from lexer.lexer import Lexer
-from lexer.tokens import Token, TokenType
+from src.lexer.lexer import Lexer
+from src.lexer.tokens import Token, TokenType
 
 literal_token_map: dict[str, Token] = {
     tt.value: Token(tt, tt.value)

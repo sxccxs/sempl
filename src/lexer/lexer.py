@@ -1,8 +1,8 @@
 from io import StringIO
 from typing import TextIO
 
-from lexer import matchers
-from lexer.tokens import KEYWORDS, Token, TokenType
+from src.lexer import matchers
+from src.lexer.tokens import KEYWORDS, Token, TokenType
 
 
 class Lexer:
