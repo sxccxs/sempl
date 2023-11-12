@@ -1,0 +1,8 @@
+[MAIN]
+
+disable=
+    C0115,
+    C0114,
+    too-few-public-methods,
+
+max-line-length=120

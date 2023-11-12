@@ -1,0 +1,29 @@
+image: 
+  name: python:3.11-slim
+  entrypoint: [ '/bin/bash', '-c', 'ln -snf /bin/bash /bin/sh && /bin/bash -c $0' ]
+
+stages:
+  - format
+  - lint
+  - test
+
+variables:
+  POETRY_VERSION: "1.6.1"
+
+before_script:
+  - apt-get -y update && apt-get -y install curl
+  - curl -sSL https://install.python-poetry.org | python3 - --version ${POETRY_VERSION}
+  - export PATH=~/.local/bin:$PATH
+  - poetry --version
+  - poetry install
+  - poetry shell
+
+test:
+  stage: test
+  script:
+    - ./test
+  
+linting:
+  stage: lint
+  script:
+    - pylint --rcfile=.pylintrc  ./**/*.py
