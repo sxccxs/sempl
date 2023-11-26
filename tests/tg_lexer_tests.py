@@ -5,7 +5,7 @@ import pytest
 from src.lexer.lexer import Lexer
 from src.lexer.tokens import Token, TokenType
 
-literal_token_map: dict[str, Token] = {
+LITERAL_TOKEN_MAP: dict[str, Token] = {
     tt.value: Token(tt, tt.value)
     for tt in [
         TokenType.LPAREN,
@@ -42,7 +42,7 @@ literal_token_map: dict[str, Token] = {
     "False": Token(TokenType.FALSE, "False"),
 }
 
-input_and_expected: dict[str, list[Token]] = {
+INPUT_AND_EXPECTED: dict[str, list[Token]] = {
     "+-/*=\n)(: '><\n\t": [
         Token(TokenType.PLUS, "+"),
         Token(TokenType.MINUS, "-"),
@@ -97,7 +97,7 @@ input_and_expected: dict[str, list[Token]] = {
 
 
 class TestLexer:
-    @pytest.mark.parametrize(("input_", "expected"), list(input_and_expected.items()))
+    @pytest.mark.parametrize(("input_", "expected"), list(INPUT_AND_EXPECTED.items()))
     def test_multiple_literals(self, input_: str, expected: list[Token]) -> None:
         """
         Tests lexer reading multiple literals correctly.
@@ -115,7 +115,7 @@ class TestLexer:
             token = lexer.next_token()
             assert token == expected_token, f"Token #{i} is wrong. {token} != {expected_token}"
 
-    @pytest.mark.parametrize(("literal", "expected_token"), literal_token_map.items())
+    @pytest.mark.parametrize(("literal", "expected_token"), LITERAL_TOKEN_MAP.items())
     def test_one_token(self, literal: str, expected_token: Token) -> None:
         """
         Tests lexer reading one literal correctly.

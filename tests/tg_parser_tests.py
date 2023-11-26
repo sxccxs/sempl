@@ -9,7 +9,7 @@ from src.parser.parser import Parser
 from tests.mock.lexer_mock import LexerMock
 from tests.utils.payloads import ExpectedLetStatement
 
-calid_let_statement_tokens_and_expected: list[tuple[list[Token], ExpectedLetStatement]] = [
+VALID_LET_STATEMENT_TOKENS_AND_EXPECTED: list[tuple[list[Token], ExpectedLetStatement]] = [
     (
         [
             Token(TokenType.LET, "let"),
@@ -103,7 +103,7 @@ calid_let_statement_tokens_and_expected: list[tuple[list[Token], ExpectedLetStat
 class TestParser:
     @pytest.mark.parametrize(
         ("lexer_tokens", "expected_result"),
-        calid_let_statement_tokens_and_expected,
+        VALID_LET_STATEMENT_TOKENS_AND_EXPECTED,
     )
     def test_single_correct_let_statement(
         self, lexer_tokens: Iterable[Token], expected_result: ExpectedLetStatement
