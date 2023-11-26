@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 
 from src.ast_.abstract import ASTNode, Expression, Statement
-from src.lexer.tokens import Token
+from src.lexer.tokens import Keyword
 
 
 @dataclass(slots=True)
@@ -14,21 +14,19 @@ class Program(ASTNode):
 
 
 class Identifier(Statement):
-    token: Token
     value: str
 
     @property
     def token_literal(self) -> str:
-        return self.token.literal
+        return self.value
 
 
 class LetStatement(Statement):
-    token: Token
-    mut_token: Token | None
-    type: Identifier
-    name: Identifier
-    value: Expression
+    is_mut: bool
+    var_type: Identifier
+    var_name: Identifier
+    var_value: Expression
 
     @property
     def token_literal(self) -> str:
-        return self.token.literal
+        return Keyword.LET.value
