@@ -27,4 +27,4 @@ linting:
   stage: lint
   allow_failure: true
   script:
-    - poetry run pylint --rcfile=.pylintrc  ./**/*.py
+    - pylint --rcfile=.pylintrc --recursive=y src tests
