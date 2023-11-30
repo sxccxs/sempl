@@ -6,10 +6,10 @@ from src.lexer.tokens import KEYWORDS, Token, TokenType
 
 
 class Lexer:
-    def __init__(self, input_io: TextIO) -> None:
-        self.input = input_io
-        self.current_char = self.input.read(1)
-        self.after_char = self.input.read(1)
+    def __init__(self, input_stream: TextIO) -> None:
+        self.in_stream = input_stream
+        self.current_char = self.in_stream.read(1)
+        self.after_char = self.in_stream.read(1)
 
     def _read_char(self) -> None:
         """Moves lexer to the next character."""
@@ -18,7 +18,7 @@ class Lexer:
             return
 
         self.current_char = self.after_char
-        self.after_char = self.input.read(1)
+        self.after_char = self.in_stream.read(1)
 
     def _peek_char(self) -> str:
         """Returns the next character, but does not move the lexer.
