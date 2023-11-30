@@ -7,6 +7,10 @@ from src.parser.errors import ParsingError
 
 class Parser:
     def __init__(self, lexer: ILexer) -> None:
+        """
+        Args:
+            lexer (ILexer): Lexer object providing tokens to the parser.
+        """
         self.lexer = lexer
         self.current_token = self.lexer.next_token()
         self.peek_token = self.lexer.next_token()
@@ -18,4 +22,5 @@ class Parser:
 
     def parse_program(self) -> Result[ast_nodes.Program, ParsingError]:
         """Parses the whole program."""
+        # TODO
         ...

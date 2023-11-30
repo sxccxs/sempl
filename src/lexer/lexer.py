@@ -6,7 +6,13 @@ from src.lexer.tokens import KEYWORDS, Token, TokenType
 
 
 class Lexer:
+    """Lexer class working with text stream."""
+
     def __init__(self, input_stream: TextIO) -> None:
+        """
+        Args:
+            input_stream (TextIO): Input text stream for lexer.
+        """
         self.in_stream = input_stream
         self.current_char = self.in_stream.read(1)
         self.after_char = self.in_stream.read(1)
