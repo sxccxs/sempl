@@ -56,6 +56,10 @@ class Lexer:
             self._read_char()
         return sio.getvalue()
 
+    def _skip_whitespaces(self) -> None:
+        while matchers.is_whitespace(self.current_char):
+            self._read_char()
+
     def _token_from_current_char(self, token_type: TokenType) -> Token:
         """Creates a token with given type and current lexer character."""
         return Token(token_type, self.current_char)
@@ -99,13 +103,17 @@ class Lexer:
         """Reads a token."""
         token: Token
 
+        self._skip_whitespaces()
+
         match self.current_char:
-            case " ":
-                token = self._token_from_current_char(TokenType.SPACE)
             case "\n":
                 token = self._token_from_current_char(TokenType.ENDL)
             case "\0":
                 token = self._token_from_current_char(TokenType.EOF)
+            case "{":
+                token = self._token_from_current_char(TokenType.LBRACE)
+            case "}":
+                token = self._token_from_current_char(TokenType.RBRACE)
             case "(":
                 token = self._token_from_current_char(TokenType.LPAREN)
             case ")":

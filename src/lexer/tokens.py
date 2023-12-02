@@ -6,13 +6,14 @@ class TokenType(StrEnum):
     ILLEGAL = auto()
     EOF = auto()
     ENDL = auto()
-    SPACE = auto()
 
     # literals
     INT = auto()
     FLOAT = auto()
     IDENT = auto()
 
+    LBRACE = "{"
+    RBRACE = "}"
     LPAREN = "("
     RPAREN = ")"
     COLON = ":"
