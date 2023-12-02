@@ -9,17 +9,15 @@ from src.parser.parser import Parser
 from tests.mock.lexer_mock import LexerMock
 from tests.utils.payloads import ExpectedLetStatement
 
-VALID_LET_STATEMENT_TOKENS_AND_EXPECTED: list[tuple[list[Token], ExpectedLetStatement]] = [
+VALID_LET_STATEMENT_TOKENS_AND_EXPECTED: list[
+    tuple[list[Token], ExpectedLetStatement]
+] = [
     (
         [
             Token(TokenType.LET, "let"),
-            Token(TokenType.SPACE, " "),
             Token(TokenType.IDENT, "int"),
-            Token(TokenType.SPACE, " "),
             Token(TokenType.IDENT, "x"),
-            Token(TokenType.SPACE, " "),
             Token(TokenType.ASSIGN, "="),
-            Token(TokenType.SPACE, " "),
             Token(TokenType.INT, "10"),
             Token(TokenType.ENDL, "\n"),
             Token(TokenType.EOF, "\0"),
@@ -29,40 +27,25 @@ VALID_LET_STATEMENT_TOKENS_AND_EXPECTED: list[tuple[list[Token], ExpectedLetStat
     (
         [
             Token(TokenType.LET, "let"),
-            Token(TokenType.SPACE, " "),
             Token(TokenType.IDENT, "str"),
-            Token(TokenType.SPACE, " "),
             Token(TokenType.IDENT, "_abcdef11_"),
-            Token(TokenType.SPACE, " "),
             Token(TokenType.ASSIGN, "="),
-            Token(TokenType.SPACE, " "),
             Token(TokenType.ILLEGAL, '"'),
             Token(TokenType.ILLEGAL, '"'),
             Token(TokenType.ENDL, "\n"),
             Token(TokenType.ENDL, "\n"),
-            Token(TokenType.EOF, "\x00"),
+            Token(TokenType.EOF, "\0"),
         ],
         ExpectedLetStatement(False, "str", "_abcdef11_"),
     ),
     (
         [
             Token(TokenType.LET, "let"),
-            Token(TokenType.SPACE, " "),
             Token(TokenType.MUT, "mut"),
-            Token(TokenType.SPACE, " "),
             Token(TokenType.IDENT, "int"),
-            Token(TokenType.SPACE, " "),
             Token(TokenType.IDENT, "y"),
-            Token(TokenType.SPACE, " "),
             Token(TokenType.ASSIGN, "="),
-            Token(TokenType.SPACE, " "),
             Token(TokenType.FLOAT, "20."),
-            Token(TokenType.SPACE, " "),
-            Token(TokenType.SPACE, " "),
-            Token(TokenType.SPACE, " "),
-            Token(TokenType.SPACE, " "),
-            Token(TokenType.SPACE, " "),
-            Token(TokenType.SPACE, " "),
             Token(TokenType.EOF, "\0"),
         ],
         ExpectedLetStatement(True, "int", "y"),
@@ -70,30 +53,19 @@ VALID_LET_STATEMENT_TOKENS_AND_EXPECTED: list[tuple[list[Token], ExpectedLetStat
     (
         [
             Token(TokenType.LET, "let"),
-            Token(TokenType.SPACE, " "),
             Token(TokenType.MUT, "mut"),
-            Token(TokenType.SPACE, " "),
             Token(TokenType.IDENT, "int"),
-            Token(TokenType.SPACE, " "),
             Token(TokenType.IDENT, "word"),
-            Token(TokenType.SPACE, " "),
             Token(TokenType.ASSIGN, "="),
-            Token(TokenType.SPACE, " "),
             Token(TokenType.INT, "25"),
-            Token(TokenType.SPACE, " "),
             Token(TokenType.PLUS, "+"),
-            Token(TokenType.SPACE, " "),
             Token(TokenType.FLOAT, "34."),
-            Token(TokenType.SPACE, " "),
             Token(TokenType.ILLEGAL, "^"),
-            Token(TokenType.SPACE, " "),
             Token(TokenType.INT, "2"),
             Token(TokenType.ENDL, "\n"),
             Token(TokenType.ENDL, "\n"),
             Token(TokenType.ENDL, "\n"),
-            Token(TokenType.SPACE, " "),
-            Token(TokenType.SPACE, " "),
-            Token(TokenType.EOF, "\x00"),
+            Token(TokenType.EOF, "\0"),
         ],
         ExpectedLetStatement(True, "int", "word"),
     ),
@@ -129,11 +101,13 @@ class TestParser:
             program_result, Ok
         ), f"Unexpected error returned: `{repr(program_result.err())}`."
 
-        program = program_result.value
+        program = program_result.ok_value
         assert len(program.statements) == 1, "Invalid program statement length."
 
         stmt = program.statements[0]
-        assert stmt.token_literal == Keyword.LET.value, "Invalid let statement token literal."
+        assert (
+            stmt.token_literal == Keyword.LET.value
+        ), "Invalid let statement token literal."
         assert isinstance(
             stmt, ast_nodes.LetStatement
         ), f"Unexpected statement of type `{type(stmt)}`."

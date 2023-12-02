@@ -23,7 +23,7 @@ class LexerMock:
 
         if not self.strict:
             logging.info(
-                "`LexerMock.next_token()` is called after the provided sequence is exhausted."
+                "`LexerMock.next_token()` is called after the provided sequence is exhausted. "
                 'Returning `Token(TokenType.EOF, "\0")`.'
             )
             return Token(TokenType.EOF, "\0")
@@ -36,3 +36,4 @@ class LexerMock:
     def _create_token_iter(self, expected_tokens: Iterable[Token]) -> Iterator[Token]:
         for token in expected_tokens:
             yield token
+        yield Token(TokenType.EOF, "\0")
