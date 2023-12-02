@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from result import Err, Ok, Result
 
-import src.parser.errors as errors
+import src.parser.errors as p_errors
 from src.ast_ import ast_nodes
 from src.lexer.tokens import TokenType
 from src.parser.errors import StatementValidationError
@@ -40,7 +40,7 @@ def parse_let_statement(
 
     if not parser.peek_token_is(TokenType.ASSIGN):
         return Err(
-            errors.InvalidTokenTypeInStatement(TokenType.ASSIGN, parser.peek_token.type)
+            p_errors.InvalidTokenTypeInStatement(TokenType.ASSIGN, parser.peek_token.type)
         )
     parser.next_token()
 
@@ -58,7 +58,7 @@ def parse_let_statement(
 
 def _validate_parser_cur_and_peek(
     parser: IParser, cur_tt: TokenType, peek_tt: TokenType
-) -> Result[None, errors.InvalidTokenTypeInStatement]:
+) -> Result[None, p_errors.InvalidTokenTypeInStatement]:
     """Checks if current token of parser is `cur_tt`.
     If not, returns corresponding error.
     If yes, makes the same check for peek token and `peek_tt`.
@@ -73,14 +73,14 @@ def _validate_parser_cur_and_peek(
     """
     if not parser.cur_token_is(cur_tt):
         return Err(
-            errors.InvalidTokenTypeInStatement(
+            p_errors.InvalidTokenTypeInStatement(
                 cur_tt,
                 parser.current_token.type,
             )
         )
     if not parser.peek_token_is(peek_tt):
         return Err(
-            errors.InvalidTokenTypeInStatement(
+            p_errors.InvalidTokenTypeInStatement(
                 peek_tt,
                 parser.peek_token.type,
             )

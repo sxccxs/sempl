@@ -3,4 +3,4 @@
 TEST_DIR=./tests
 
 mkdir -p ./reports
-poetry run pytest ${TEST_DIR}/tg*.py -vvv --md-report --md-report-output=./reports/report.md 
+poetry run pytest ${TEST_DIR}/tg*.py -vvv --md-report --md-report-output=./reports/report.md $@
