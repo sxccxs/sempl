@@ -13,6 +13,7 @@ class Program(ASTNode):
         return self.statements[0].token_literal if self.statements else ""
 
 
+@dataclass(slots=True)
 class Identifier(Statement):
     value: str
 
@@ -21,6 +22,7 @@ class Identifier(Statement):
         return self.value
 
 
+@dataclass(slots=True)
 class LetStatement(Statement):
     is_mut: bool
     var_type: Identifier
