@@ -6,9 +6,13 @@ from tests.mock.exceptions import UnexpectedMockCallException
 
 
 class LexerMock:
-    def __init__(self, expected_tokens: Iterable[Token], *, strict: bool = False) -> None:
-        self.token_iter = self._create_token_iter(expected_tokens)
+    def __init__(self, *, strict: bool = False) -> None:
+        """
+        Args:
+            strict (bool, optional): Strict mode flag. Defaults to False.
+        """
         self.strict = strict
+        self.token_iter: Iterator[Token] = iter([])  # set initially to empty iterator
 
     def next_token(self) -> Token:
         """Returns the next token from provided sequence of tokens.
@@ -32,6 +36,12 @@ class LexerMock:
             "Unexpected call of `LexerMock.next_token()`: "
             "the provided sequence of tokens is already exhausted."
         )
+
+    def set_data(self, expected_tokens: Iterable[Token]) -> None:
+        """Sets mock token data to provided tokens.
+        All previously stored data is erased.
+        """
+        self.token_iter = self._create_token_iter(expected_tokens)
 
     def _create_token_iter(self, expected_tokens: Iterable[Token]) -> Iterator[Token]:
         for token in expected_tokens:

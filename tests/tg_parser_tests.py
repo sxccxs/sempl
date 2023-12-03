@@ -1,13 +1,13 @@
-from typing import Iterable
-
 import pytest
 from result import Ok
 
 from src.ast_ import ast_nodes
+from src.lexer.interfaces import ILexer
 from src.lexer.tokens import Keyword, Token, TokenType
 from src.parser.parser import Parser
 from tests.mock.lexer_mock import LexerMock
 from tests.utils.payloads import ExpectedLetStatement
+from tests.utils.types import YieldFixture
 
 VALID_LET_STATEMENT_TOKENS_AND_EXPECTED: list[
     tuple[list[Token], ExpectedLetStatement]
@@ -71,14 +71,44 @@ VALID_LET_STATEMENT_TOKENS_AND_EXPECTED: list[
     ),
 ]
 
+VALID_RETURN_STATEMENT_TOKENS_AND_EXPECTED: list[list[Token]] = [
+    [
+        Token(TokenType.RETURN, literal="return"),
+        Token(TokenType.INT, literal="10"),
+        Token(TokenType.ENDL, literal="\n"),
+    ],
+    [
+        Token(TokenType.RETURN, literal="return"),
+        Token(TokenType.IDENT, literal="a"),
+        Token(TokenType.PLUS, literal="+"),
+        Token(TokenType.IDENT, literal="b"),
+        Token(TokenType.ENDL, literal="\n"),
+    ],
+]
+
 
 class TestParser:
+    @pytest.fixture
+    def lexer(self, request: pytest.FixtureRequest) -> YieldFixture[ILexer]:
+        """Creates lexer mock object and provides data from request to it."""
+        lexer = LexerMock(strict=True)
+        lexer.set_data(request.param)
+        yield lexer
+
+    @pytest.fixture
+    def parser(self, lexer: ILexer) -> YieldFixture[Parser]:
+        """Creates parser from lexer fixture."""
+        yield Parser(lexer)
+
     @pytest.mark.parametrize(
-        ("lexer_tokens", "expected_result"),
+        ("lexer", "expected_result"),
         VALID_LET_STATEMENT_TOKENS_AND_EXPECTED,
+        indirect=["lexer"],
     )
     def test_single_correct_let_statement(
-        self, lexer_tokens: Iterable[Token], expected_result: ExpectedLetStatement
+        self,
+        parser: Parser,
+        expected_result: ExpectedLetStatement,
     ) -> None:
         """Tests parser parsing single valid let statement correctly.
 
@@ -94,16 +124,7 @@ class TestParser:
         Assert: Let statement var_type.value and var_type.token_literal equals to expected type.
         Assert: Let statement var_name.value and var_name.token_literal equals to expected name.
         """
-        lexer = LexerMock(lexer_tokens, strict=True)
-        parser = Parser(lexer)
-        program_result = parser.parse_program()
-        assert isinstance(
-            program_result, Ok
-        ), f"Unexpected error returned: `{repr(program_result.err())}`."
-
-        program = program_result.ok_value
-        assert len(program.statements) == 1, "Invalid program statement length."
-
+        program = parse_ok_program_and_assert(parser, 1)
         stmt = program.statements[0]
         assert (
             stmt.token_literal == Keyword.LET.value
@@ -125,3 +146,60 @@ class TestParser:
         ), "Invalid var_name token literal."
 
         # TODO: check for var_value
+
+    @pytest.mark.parametrize(
+        "lexer",
+        VALID_RETURN_STATEMENT_TOKENS_AND_EXPECTED,
+        indirect=True,
+    )
+    def test_single_correct_return_statement(self, parser: Parser) -> None:
+        """Tests parser parsing single valid return statement correctly.
+
+        Arrange: Provide tokens to Lexer Mock.
+        Arrange: Create Parser with Lexer Mock.
+
+        Act: Parse program.
+        Assert: No error returned.
+        Assert: Program contains only one statement.
+        Assert: Statement literal is `return`.
+        Assert: Statement is ReturnStatement.
+        """
+        program = parse_ok_program_and_assert(parser, 1)
+        stmt = program.statements[0]
+
+        assert (
+            stmt.token_literal == Keyword.RETURN.value
+        ), "Invalid return statement token literal."
+        assert isinstance(
+            stmt, ast_nodes.ReturnStatement
+        ), f"Unexpected statement of type `{type(stmt)}`."
+
+
+def parse_ok_program_and_assert(
+    parser: Parser, expected_stmts_len: int
+) -> ast_nodes.Program:
+    """Parses program with provided parser and checks the result.
+    The program is expected to be valid.
+
+    Act: Parse program.
+    Assert: No error returned.
+    Assert: Program contains only `expected_stmts_len` statement.
+
+    Args:
+        parser (Parser): Parser.
+        expected_stmts_len (int): Expected number of statements in result program.
+
+    Returns:
+        ast_nodes.Program: Parsed Program node.
+    """
+    program_result = parser.parse_program()
+    assert isinstance(
+        program_result, Ok
+    ), f"Unexpected error returned: `{repr(program_result.err())}`."
+
+    program = program_result.ok_value
+    assert (
+        len(program.statements) == expected_stmts_len
+    ), "Invalid number of statementes in program."
+
+    return program
