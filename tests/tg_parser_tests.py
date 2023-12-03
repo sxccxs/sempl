@@ -1,7 +1,7 @@
 import pytest
 from result import Ok
 
-from src.ast_ import ast_nodes
+from src.ast import ast_nodes
 from src.lexer.interfaces import ILexer
 from src.lexer.tokens import Keyword, Token, TokenType
 from src.parser.parser import Parser
@@ -182,6 +182,46 @@ class TestParser:
         assert isinstance(
             stmt, ast_nodes.ReturnStatement
         ), f"Unexpected statement of type `{type(stmt)}`."
+
+    @pytest.mark.parametrize(
+        ("lexer", "expected"),
+        [
+            ([Token(TokenType.IDENT, "abc_"), Token(TokenType.EOF, "\0")], "abc_"),
+            ([Token(TokenType.IDENT, "x_1a2"), Token(TokenType.EOF, "\0")], "x_1a2"),
+            ([Token(TokenType.IDENT, "q"), Token(TokenType.EOF, "\0")], "q"),
+        ],
+        indirect=["lexer"],
+    )
+    def test_single_identifier_expression(self, parser: Parser, expected: str) -> None:
+        """Tests parser parsing single identifier expression correctly.
+
+        Arrange: Provide tokens to Lexer Mock.
+        Arrange: Create Parser with Lexer Mock.
+
+        Act: Parse program.
+        Assert: No error returned.
+        Assert: Program contains only one statement.
+        Assert: Statement is ExpressionStatement.
+        Assert: Underlying expression is Identifier.
+        Assert: Indetifier value and token_literal are equal to the expected value.
+        Assert Statement token_literal is equal to Identifier token_literal.
+        """
+        program = parse_ok_program_and_assert(parser, 1)
+        stmt = program.statements[0]
+        assert isinstance(
+            stmt, ast_nodes.ExpressionStatement
+        ), f"Unexpected statement of type `{type(stmt)}`."
+        expr = stmt.expression
+        assert isinstance(
+            expr, ast_nodes.Identifier
+        ), f"Unexpected expression in ExpressionStatement of type `{type(expr)}`."
+
+        assert expr.value == expected, "Invalid Identifier value."
+        assert expr.token_literal == expected, "Invalid identifier token_literal."
+
+        assert (
+            expr.token_literal == stmt.token_literal
+        ), "Invalid ExpressionStatement token_literal."
 
 
 def parse_ok_program_and_assert(
