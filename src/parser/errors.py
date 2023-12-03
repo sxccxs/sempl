@@ -5,7 +5,15 @@ class ParsingError(Exception):
     """Base exception type for parsing."""
 
 
-class UnsupportedStatementError(ParsingError):
+class StatementValidationError(ParsingError):
+    ...
+
+
+class ExpressionValidationError(ParsingError):
+    ...
+
+
+class UnsupportedStatementError(StatementValidationError):
     def __init__(self, token_type: TokenType) -> None:
         """
         Args:
@@ -14,8 +22,13 @@ class UnsupportedStatementError(ParsingError):
         super().__init__(f"Statement from token of type={token_type} does not exist.")
 
 
-class StatementValidationError(ParsingError):
-    ...
+class UnsupportedExpressionError(ExpressionValidationError):
+    def __init__(self, token_type: TokenType) -> None:
+        """
+        Args:
+            token_type (TokenType): Token type with which no expression begins.
+        """
+        super().__init__(f"Expression from token of type={token_type} does not exist.")
 
 
 class InvalidTokenTypeInStatement(StatementValidationError):

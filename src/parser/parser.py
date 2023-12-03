@@ -1,13 +1,13 @@
 from result import Err, Ok, Result
 
-import src.parser.errors as parser_errors
 from src.ast import ast_nodes
 from src.ast.abstract import Statement
 from src.lexer.interfaces import ILexer
 from src.lexer.tokens import Token, TokenType
-from src.parser import stmt_sub_parsers
+from src.parser import expr_sub_parsers, stmt_sub_parsers
 from src.parser.errors import ParsingError
 from src.parser.interfaces import IParser
+from src.parser.types import InfixParserType, PrefixParserType
 
 
 class Parser(IParser):
@@ -19,6 +19,10 @@ class Parser(IParser):
         self.lexer = lexer
         self._current_token = self.lexer.next_token()
         self._peek_token = self.lexer.next_token()
+        self._prefix_parsers: dict[TokenType, PrefixParserType] = {}
+        self._infix_parsers: dict[TokenType, InfixParserType] = {}
+
+        self._register_prefix()
 
     @property
     def current_token(self) -> Token:
@@ -27,6 +31,14 @@ class Parser(IParser):
     @property
     def peek_token(self) -> Token:
         return self._peek_token
+
+    @property
+    def prefix_parsers(self) -> dict[TokenType, PrefixParserType]:
+        return self._prefix_parsers
+
+    @property
+    def infix_parsers(self) -> dict[TokenType, InfixParserType]:
+        return self._infix_parsers
 
     def next_token(self) -> None:
         """Moves parser to the next token."""
@@ -61,5 +73,16 @@ class Parser(IParser):
                 return stmt_sub_parsers.parse_return_statement(self)
             case TokenType.ENDL:
                 return Ok(None)
-            case tt:
-                return Err(parser_errors.UnsupportedStatementError(tt))
+            case _:
+                return stmt_sub_parsers.parse_expression_statement(self)
+
+    def register_prefix_parser(self, tt: TokenType, p: PrefixParserType) -> None:
+        """Registers a prefix parser."""
+        self._prefix_parsers[tt] = p
+
+    def register_infix_parser(self, tt: TokenType, p: InfixParserType) -> None:
+        """Registers an infix parser."""
+        self._infix_parsers[tt] = p
+
+    def _register_prefix(self) -> None:
+        self.register_prefix_parser(TokenType.IDENT, expr_sub_parsers.parse_identifier)

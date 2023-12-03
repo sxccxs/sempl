@@ -6,6 +6,7 @@ import src.parser.errors as p_errors
 from src.ast import ast_nodes
 from src.lexer.tokens import TokenType
 from src.parser.errors import StatementValidationError
+from src.parser.expr_sub_parsers import Precedence, parse_expression
 from src.parser.interfaces import IParser
 
 
@@ -14,6 +15,7 @@ def parse_let_statement(
 ) -> Result[ast_nodes.LetStatement, StatementValidationError]:
     """Parses Let statement from current position of provided parser.
     Expected, but not checked parser.current_token is `let`.
+    After the successful read, parser.current_token is the last token of the statement.
 
     Args:
         parser (IParser): Provided parser.
@@ -60,6 +62,7 @@ def parse_return_statement(
 ) -> Result[ast_nodes.ReturnStatement, StatementValidationError]:
     """Parses Return statement from current position of provided parser.
     Expected, but not checked parser.current_token is `return`.
+    After the successful read, parser.current_token is the last token of the statement.
 
     Args:
         parser (IParser): Provided parser.
@@ -75,6 +78,25 @@ def parse_return_statement(
         parser.next_token()
 
     return Ok(stmt)
+
+
+def parse_expression_statement(
+    parser: IParser,
+) -> Result[ast_nodes.ExpressionStatement, StatementValidationError]:
+    """Parses expression statement from current position of provided parser.
+    After the successful read, parser.current_token is the last token of the statement.
+
+    Args:
+        parser (IParser): Provided parser.
+
+    Returns:
+        Result[ast_nodes.ExpressionStatement, StatementValidationError]: Parsing result.
+    """
+    match parse_expression(parser, Precedence.LOWEST):
+        case Err(err):
+            return Err(StatementValidationError(err))
+        case Ok(expr):
+            return Ok(ast_nodes.ExpressionStatement(expression=expr))
 
 
 def _validate_parser_cur_and_peek(
