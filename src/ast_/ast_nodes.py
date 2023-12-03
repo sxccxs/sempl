@@ -32,3 +32,12 @@ class LetStatement(Statement):
     @property
     def token_literal(self) -> str:
         return Keyword.LET.value
+
+
+@dataclass(slots=True)
+class ReturnStatement(Statement):
+    return_value: Expression
+
+    @property
+    def token_literal(self) -> str:
+        return Keyword.RETURN.value
