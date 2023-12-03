@@ -1,4 +1,5 @@
 import logging
+from itertools import chain
 from typing import Iterable, Iterator
 
 from src.lexer.tokens import Token, TokenType
@@ -39,11 +40,10 @@ class LexerMock:
 
     def set_data(self, expected_tokens: Iterable[Token]) -> None:
         """Sets mock token data to provided tokens.
-        All previously stored data is erased.
+        All previously provided data is erased.
         """
-        self.token_iter = self._create_token_iter(expected_tokens)
+        self.token_iter = iter(expected_tokens)
 
-    def _create_token_iter(self, expected_tokens: Iterable[Token]) -> Iterator[Token]:
-        for token in expected_tokens:
-            yield token
-        yield Token(TokenType.EOF, "\0")
+    def add_data(self, extra_tokens: Iterable[Token]) -> None:
+        """Adds provided tokens after previously provided data."""
+        self.token_iter = chain(self.token_iter, extra_tokens)
