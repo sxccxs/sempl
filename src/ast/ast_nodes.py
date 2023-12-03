@@ -23,6 +23,15 @@ class Identifier(Expression):
 
 
 @dataclass(slots=True)
+class IntegerLiteral(Expression):
+    value: int
+
+    @property
+    def token_literal(self) -> str:
+        return str(self.value)
+
+
+@dataclass(slots=True)
 class LetStatement(Statement):
     is_mut: bool
     var_type: Identifier
