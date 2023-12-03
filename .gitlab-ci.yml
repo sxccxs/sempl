@@ -24,6 +24,7 @@ linting:
 test:
   stage: test
   script:
+    - mkdir -p ./reports
     - poetry run pytest tests/tg*.py -vvv --md-report --md-report-output=./reports/report.md 
   artifacts:
     paths:
