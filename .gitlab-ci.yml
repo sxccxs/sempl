@@ -3,8 +3,6 @@ image:
   entrypoint: [ '/bin/bash', '-c', 'ln -snf /bin/bash /bin/sh && /bin/bash -c $0' ]
 
 stages:
-  - format
-  - lint
   - test
 
 variables:
@@ -17,14 +15,16 @@ before_script:
   - poetry --version
   - poetry install
 
-test:
-  stage: test
-  script:
-    - chmod +x ./test
-    - ./test
-  
 linting:
-  stage: lint
+  stage: test
   allow_failure: true
   script:
     - poetry run pylint --rcfile=.pylintrc --recursive=y src tests
+
+test:
+  stage: test
+  script:
+    - poetry run pytest tests/tg*.py -vvv --md-report --md-report-output=./reports/report.md 
+  artifacts:
+    paths:
+      - ./reports
