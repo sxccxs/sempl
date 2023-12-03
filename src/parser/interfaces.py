@@ -1,7 +1,12 @@
 # pylint: disable=W2301
-from typing import Protocol
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Protocol
 
 from src.lexer.tokens import Token, TokenType
+
+if TYPE_CHECKING:
+    from src.parser.types import InfixParserType, PrefixParserType
 
 
 class IParser(Protocol):
@@ -13,6 +18,16 @@ class IParser(Protocol):
     @property
     def peek_token(self) -> Token:
         """Next parser token."""
+        ...
+
+    @property
+    def prefix_parsers(self) -> dict[TokenType, PrefixParserType]:
+        """Map of registered expression prefix parsers."""
+        ...
+
+    @property
+    def infix_parsers(self) -> dict[TokenType, InfixParserType]:
+        """Map of registered expression infix parsers."""
         ...
 
     def next_token(self) -> None:
