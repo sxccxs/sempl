@@ -74,8 +74,13 @@ VALID_LET_STATEMENT_TOKENS_AND_EXPECTED: list[
 VALID_RETURN_STATEMENT_TOKENS_AND_EXPECTED: list[list[Token]] = [
     [
         Token(TokenType.RETURN, literal="return"),
+        Token(TokenType.EOF, "\0"),
+    ],
+    [
+        Token(TokenType.RETURN, literal="return"),
         Token(TokenType.INT, literal="10"),
         Token(TokenType.ENDL, literal="\n"),
+        Token(TokenType.EOF, "\0"),
     ],
     [
         Token(TokenType.RETURN, literal="return"),
@@ -83,6 +88,7 @@ VALID_RETURN_STATEMENT_TOKENS_AND_EXPECTED: list[list[Token]] = [
         Token(TokenType.PLUS, literal="+"),
         Token(TokenType.IDENT, literal="b"),
         Token(TokenType.ENDL, literal="\n"),
+        Token(TokenType.EOF, "\0"),
     ],
 ]
 
@@ -93,6 +99,9 @@ class TestParser:
         """Creates lexer mock object and provides data from request to it."""
         lexer = LexerMock(strict=True)
         lexer.set_data(request.param)
+        lexer.add_data(
+            [Token(TokenType.EOF, "\0")]
+        )  # Add extra token as parser checks current token, not peek
         yield lexer
 
     @pytest.fixture
