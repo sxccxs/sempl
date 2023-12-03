@@ -3,7 +3,7 @@ from __future__ import annotations
 from result import Err, Ok, Result
 
 import src.parser.errors as p_errors
-from src.ast_ import ast_nodes
+from src.ast import ast_nodes
 from src.lexer.tokens import TokenType
 from src.parser.errors import StatementValidationError
 from src.parser.interfaces import IParser

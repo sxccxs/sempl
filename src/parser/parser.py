@@ -1,8 +1,8 @@
 from result import Err, Ok, Result
 
 import src.parser.errors as parser_errors
-from src.ast_ import ast_nodes
-from src.ast_.abstract import Statement
+from src.ast import ast_nodes
+from src.ast.abstract import Statement
 from src.lexer.interfaces import ILexer
 from src.lexer.tokens import Token, TokenType
 from src.parser import stmt_sub_parsers
