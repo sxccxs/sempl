@@ -13,8 +13,7 @@ def parse_let_statement(
     parser: IParser,
 ) -> Result[ast_nodes.LetStatement, StatementValidationError]:
     """Parses Let statement from current position of provided parser.
-    Expected, but not checked parser.current_token is Let.
-
+    Expected, but not checked parser.current_token is `let`.
 
     Args:
         parser (IParser): Provided parser.
@@ -47,6 +46,28 @@ def parse_let_statement(
     stmt = ast_nodes.LetStatement(
         is_mut=is_mut, var_type=var_type, var_name=var_name, var_value=None  # type: ignore
     )  # TODO: fix
+
+    while not parser.cur_token_is(TokenType.ENDL) and not parser.cur_token_is(
+        TokenType.EOF
+    ):
+        parser.next_token()
+
+    return Ok(stmt)
+
+
+def parse_return_statement(
+    parser: IParser,
+) -> Result[ast_nodes.ReturnStatement, StatementValidationError]:
+    """Parses Return statement from current position of provided parser.
+    Expected, but not checked parser.current_token is `return`.
+
+    Args:
+        parser (IParser): Provided parser.
+
+    Returns:
+        Result[ast_nodes.ReturnStatement, StatementValidationError]: parsing result.
+    """
+    stmt = ast_nodes.ReturnStatement(return_value=None)  # type: ignore  # TODO: fix
 
     while not parser.cur_token_is(TokenType.ENDL) and not parser.cur_token_is(
         TokenType.EOF

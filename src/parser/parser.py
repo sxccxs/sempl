@@ -57,6 +57,8 @@ class Parser(IParser):
         match self.current_token.type:
             case TokenType.LET:
                 return stmt_sub_parsers.parse_let_statement(self)
+            case TokenType.RETURN:
+                return stmt_sub_parsers.parse_return_statement(self)
             case TokenType.ENDL:
                 return Ok(None)
             case tt:
