@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 
-from src.ast_.abstract import ASTNode, Expression, Statement
+from src.ast.abstract import ASTNode, Expression, Statement
 from src.lexer.tokens import Keyword
 
 
@@ -14,7 +14,7 @@ class Program(ASTNode):
 
 
 @dataclass(slots=True)
-class Identifier(Statement):
+class Identifier(Expression):
     value: str
 
     @property
@@ -41,3 +41,12 @@ class ReturnStatement(Statement):
     @property
     def token_literal(self) -> str:
         return Keyword.RETURN.value
+
+
+@dataclass(slots=True)
+class ExpressionStatement(Statement):
+    expression: Expression
+
+    @property
+    def token_literal(self) -> str:
+        return self.expression.token_literal
