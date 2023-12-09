@@ -10,9 +10,7 @@ from tests.mock.lexer_mock import LexerMock
 from tests.utils.payloads import ExpectedLetStatement
 from tests.utils.types import YieldFixture
 
-VALID_LET_STATEMENT_TOKENS_AND_EXPECTED: list[
-    tuple[list[Token], ExpectedLetStatement]
-] = [
+VALID_LET_STATEMENT_TOKENS_AND_EXPECTED: list[tuple[list[Token], ExpectedLetStatement]] = [
     (
         [
             Token(TokenType.LET, "let"),
@@ -138,9 +136,7 @@ class TestParser:
         """
         program = parse_ok_program_and_assert(parser, 1)
         stmt = program.statements[0]
-        assert (
-            stmt.token_literal == Keyword.LET.value
-        ), "Invalid let statement token literal."
+        assert stmt.token_literal == Keyword.LET.value, "Invalid let statement token literal."
         assert isinstance(
             stmt, ast_nodes.LetStatement
         ), f"Unexpected statement of type `{type(stmt)}`."
@@ -179,9 +175,7 @@ class TestParser:
         program = parse_ok_program_and_assert(parser, 1)
         stmt = program.statements[0]
 
-        assert (
-            stmt.token_literal == Keyword.RETURN.value
-        ), "Invalid return statement token literal."
+        assert stmt.token_literal == Keyword.RETURN.value, "Invalid return statement token literal."
         assert isinstance(
             stmt, ast_nodes.ReturnStatement
         ), f"Unexpected statement of type `{type(stmt)}`."
@@ -190,7 +184,14 @@ class TestParser:
         ("lexer", "expected"),
         [
             ([Token(TokenType.IDENT, "abc_"), Token(TokenType.EOF, "\0")], "abc_"),
-            ([Token(TokenType.IDENT, "x_1a2"), Token(TokenType.EOF, "\0")], "x_1a2"),
+            (
+                [
+                    Token(TokenType.IDENT, "x_1a2"),
+                    Token(TokenType.ENDL, "\n"),
+                    Token(TokenType.EOF, "\0"),
+                ],
+                "x_1a2",
+            ),
             ([Token(TokenType.IDENT, "q"), Token(TokenType.EOF, "\0")], "q"),
         ],
         indirect=["lexer"],
@@ -229,14 +230,19 @@ class TestParser:
     @pytest.mark.parametrize(
         ("lexer", "expected"),
         [
-            ([Token(TokenType.INT, "5"), Token(TokenType.EOF, "\0")], 5),
+            (
+                [
+                    Token(TokenType.INT, "5"),
+                    Token(TokenType.ENDL, "\n"),
+                    Token(TokenType.EOF, "\0"),
+                ],
+                5,
+            ),
             ([Token(TokenType.INT, "10123"), Token(TokenType.EOF, "\0")], 10123),
         ],
         indirect=["lexer"],
     )
-    def test_single_integer_literal_expression(
-        self, parser: Parser, expected: int
-    ) -> None:
+    def test_single_integer_literal_expression(self, parser: Parser, expected: int) -> None:
         """Tests parser parsing single integer literal correctly.
 
         Arrange: Provide tokens to Lexer Mock.
@@ -262,18 +268,62 @@ class TestParser:
         ), f"Unexpected expression in ExpressionStatement of type `{type(expr)}`."
 
         assert expr.value == expected, "Invalid integer literal value."
-        assert expr.token_literal == str(
-            expected
-        ), "Invalid integer literal token_literal."
+        assert expr.token_literal == str(expected), "Invalid integer literal token_literal."
+
+        assert (
+            expr.token_literal == stmt.token_literal
+        ), "Invalid ExpressionStatement token_literal."
+
+    @pytest.mark.parametrize(
+        ("lexer", "expected"),
+        [
+            ([Token(TokenType.FLOAT, "5."), Token(TokenType.EOF, "\0")], 5.0),
+            ([Token(TokenType.FLOAT, "10.25"), Token(TokenType.EOF, "\0")], 10.25),
+            (
+                [
+                    Token(TokenType.FLOAT, "0.3"),
+                    Token(TokenType.ENDL, "\n"),
+                    Token(TokenType.EOF, "\0"),
+                ],
+                0.3,
+            ),
+        ],
+        indirect=["lexer"],
+    )
+    def test_single_float_literal_expression(self, parser: Parser, expected: float) -> None:
+        """Tests parser parsing single float literal correctly.
+
+        Arrange: Provide tokens to Lexer Mock.
+        Arrange: Create Parser with Lexer Mock.
+
+        Act: Parse program.
+        Assert: No error returned.
+        Assert: Program contains only one statement.
+        Assert: Statement is ExpressionStatement.
+        Assert: Underlying expression is FloatLiteral.
+        Assert: FloatLiteral value is equal to the expected value.
+        Assert: FloatLiteral token_literal is equal to str(expected value).
+        Assert: Statement token_literal is equal to FlaotLiteral token_literal.
+        """
+        program = parse_ok_program_and_assert(parser, 1)
+        stmt = program.statements[0]
+        assert isinstance(
+            stmt, ast_nodes.ExpressionStatement
+        ), f"Unexpected statement of type `{type(stmt)}`."
+        expr = stmt.expression
+        assert isinstance(
+            expr, ast_nodes.FloatLiteral
+        ), f"Unexpected expression in ExpressionStatement of type `{type(expr)}`."
+
+        assert expr.value == expected, "Invalid float literal value."
+        assert expr.token_literal == str(expected), "Invalid float literal token_literal."
 
         assert (
             expr.token_literal == stmt.token_literal
         ), "Invalid ExpressionStatement token_literal."
 
 
-def parse_ok_program_and_assert(
-    parser: Parser, expected_stmts_len: int
-) -> ast_nodes.Program:
+def parse_ok_program_and_assert(parser: Parser, expected_stmts_len: int) -> ast_nodes.Program:
     """Parses program with provided parser and checks the result.
     The program is expected to be valid.
 

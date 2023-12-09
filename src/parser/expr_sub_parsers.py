@@ -34,3 +34,10 @@ def parser_integer_literal(
 ) -> ast_nodes.IntegerLiteral:
     """Create an IntegerLiteral expression from current token of provided parser."""
     return ast_nodes.IntegerLiteral(int(parser.current_token.literal))
+
+
+def parser_float_literal(
+    parser: IParser,
+) -> ast_nodes.FloatLiteral:
+    """Create a FloatLiteral expression from current token of provided parser."""
+    return ast_nodes.FloatLiteral(float(parser.current_token.literal))
