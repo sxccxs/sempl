@@ -27,3 +27,10 @@ def parse_expression(
 def parse_identifier(parser: IParser) -> ast_nodes.Identifier:
     """Creates an Identifier expression from current token of provided parser."""
     return ast_nodes.Identifier(value=parser.current_token.literal)
+
+
+def parser_integer_literal(
+    parser: IParser,
+) -> ast_nodes.IntegerLiteral:
+    """Create an IntegerLiteral expression from current token of provided parser."""
+    return ast_nodes.IntegerLiteral(int(parser.current_token.literal))
