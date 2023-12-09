@@ -121,6 +121,125 @@ VALID_SINGLE_INFIX_OPERATIONS_AND_EXPECTED: list[tuple[list[Token], ExpectedInfi
     ),
 ]
 
+INFIX_OPERATIONS_PRECEDENCE_AND_EXPECTED: list[tuple[list[Token], str]] = [
+    (
+        [
+            Token(TokenType.MINUS, literal="-"),
+            Token(TokenType.MINUS, literal="-"),
+            Token(TokenType.IDENT, literal="a"),
+        ],
+        "(-(-a))",
+    ),
+    (
+        [
+            Token(TokenType.IDENT, literal="a"),
+            Token(TokenType.PLUS, literal="+"),
+            Token(TokenType.IDENT, literal="b"),
+            Token(TokenType.PLUS, literal="+"),
+            Token(TokenType.IDENT, literal="c"),
+        ],
+        "((a + b) + c)",
+    ),
+    (
+        [
+            Token(TokenType.IDENT, literal="a"),
+            Token(TokenType.PLUS, literal="+"),
+            Token(TokenType.IDENT, literal="b"),
+            Token(TokenType.MINUS, literal="-"),
+            Token(TokenType.IDENT, literal="c"),
+        ],
+        "((a + b) - c)",
+    ),
+    (
+        [
+            Token(TokenType.IDENT, literal="a"),
+            Token(TokenType.ASTERIX, literal="*"),
+            Token(TokenType.IDENT, literal="b"),
+            Token(TokenType.ASTERIX, literal="*"),
+            Token(TokenType.IDENT, literal="c"),
+        ],
+        "((a * b) * c)",
+    ),
+    (
+        [
+            Token(TokenType.IDENT, literal="a"),
+            Token(TokenType.ASTERIX, literal="*"),
+            Token(TokenType.IDENT, literal="b"),
+            Token(TokenType.SLASH, literal="/"),
+            Token(TokenType.IDENT, literal="c"),
+        ],
+        "((a * b) / c)",
+    ),
+    (
+        [
+            Token(TokenType.IDENT, literal="a"),
+            Token(TokenType.PLUS, literal="+"),
+            Token(TokenType.IDENT, literal="b"),
+            Token(TokenType.SLASH, literal="/"),
+            Token(TokenType.IDENT, literal="c"),
+        ],
+        "(a + (b / c))",
+    ),
+    (
+        [
+            Token(TokenType.IDENT, literal="a"),
+            Token(TokenType.PLUS, literal="+"),
+            Token(TokenType.IDENT, literal="b"),
+            Token(TokenType.ASTERIX, literal="*"),
+            Token(TokenType.IDENT, literal="c"),
+            Token(TokenType.PLUS, literal="+"),
+            Token(TokenType.IDENT, literal="d"),
+            Token(TokenType.SLASH, literal="/"),
+            Token(TokenType.IDENT, literal="e"),
+            Token(TokenType.MINUS, literal="-"),
+            Token(TokenType.IDENT, literal="f"),
+        ],
+        "(((a + (b * c)) + (d / e)) - f)",
+    ),
+    (
+        [
+            Token(TokenType.INT, literal="5"),
+            Token(TokenType.GT, literal=">"),
+            Token(TokenType.INT, literal="4"),
+            Token(TokenType.EQ, literal="=="),
+            Token(TokenType.INT, literal="3"),
+            Token(TokenType.LT, literal="<"),
+            Token(TokenType.INT, literal="4"),
+        ],
+        "((5 > 4) == (3 < 4))",
+    ),
+    (
+        [
+            Token(TokenType.INT, literal="5"),
+            Token(TokenType.LT, literal="<"),
+            Token(TokenType.INT, literal="4"),
+            Token(TokenType.NOT_EQ, literal="!="),
+            Token(TokenType.INT, literal="3"),
+            Token(TokenType.GT, literal=">"),
+            Token(TokenType.INT, literal="4"),
+        ],
+        "((5 < 4) != (3 > 4))",
+    ),
+    (
+        [
+            Token(TokenType.INT, literal="3"),
+            Token(TokenType.PLUS, literal="+"),
+            Token(TokenType.INT, literal="4"),
+            Token(TokenType.ASTERIX, literal="*"),
+            Token(TokenType.INT, literal="5"),
+            Token(TokenType.EQ, literal="=="),
+            Token(TokenType.INT, literal="3"),
+            Token(TokenType.ASTERIX, literal="*"),
+            Token(TokenType.INT, literal="1"),
+            Token(TokenType.PLUS, literal="+"),
+            Token(TokenType.INT, literal="4"),
+            Token(TokenType.ASTERIX, literal="*"),
+            Token(TokenType.INT, literal="5"),
+        ],
+        "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))",
+    ),
+]
+
 
 @pytest.fixture
 def lexer(request: pytest.FixtureRequest) -> YieldFixture[ILexer]:
@@ -463,6 +582,28 @@ class TestParser:
         assert (
             expr.token_literal == stmt.token_literal
         ), "Invalid ExpressionStatement token_literal."
+
+    @pytest.mark.parametrize(
+        ("lexer", "expected"), INFIX_OPERATIONS_PRECEDENCE_AND_EXPECTED, indirect=["lexer"]
+    )
+    def test_infix_operations_precedence(self, parser: Parser, expected: str) -> None:
+        """Tests parser parsing single prefix operation correctly.
+
+        Arrange: Provide tokens to Lexer Mock.
+        Arrange: Create Parser with Lexer Mock.
+
+        Act: Parse program.
+        Assert: No error returned.
+        Assert: str(program) equals expected.
+        """
+        program_result = parser.parse_program()
+        assert isinstance(
+            program_result, Ok
+        ), f"Unexpected error returned: `{repr(program_result.err())}`."
+
+        program = program_result.ok_value
+
+        assert str(program) == expected
 
 
 def parse_ok_program_and_assert(parser: Parser, expected_stmts_len: int) -> ast_nodes.Program:

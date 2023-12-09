@@ -80,7 +80,7 @@ class InfixOperation(Expression):
         return self.operator
 
     def __str__(self) -> str:
-        return f"({self.left}{self.operator}{self.right})"
+        return f"({self.left} {self.operator} {self.right})"
 
 
 @dataclass(slots=True)
