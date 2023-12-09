@@ -7,7 +7,11 @@ from src.lexer.interfaces import ILexer
 from src.lexer.tokens import Keyword, Token, TokenType
 from src.parser.parser import Parser
 from tests.mock.lexer_mock import LexerMock
-from tests.utils.payloads import ExpectedLetStatement, ExpectedPrefixOperation
+from tests.utils.payloads import (
+    ExpectedInfixOperation,
+    ExpectedLetStatement,
+    ExpectedPrefixOperation,
+)
 from tests.utils.types import YieldFixture
 
 VALID_LET_STATEMENT_TOKENS_AND_EXPECTED: list[tuple[list[Token], ExpectedLetStatement]] = [
@@ -66,22 +70,55 @@ VALID_LET_STATEMENT_TOKENS_AND_EXPECTED: list[tuple[list[Token], ExpectedLetStat
     ),
 ]
 
-VALID_RETURN_STATEMENT_TOKENS_AND_EXPECTED: list[list[Token]] = [
-    [
-        Token(TokenType.RETURN, literal="return"),
-    ],
-    [
-        Token(TokenType.RETURN, literal="return"),
-        Token(TokenType.INT, literal="10"),
-        Token(TokenType.ENDL, literal="\n"),
-    ],
-    [
-        Token(TokenType.RETURN, literal="return"),
-        Token(TokenType.IDENT, literal="a"),
-        Token(TokenType.PLUS, literal="+"),
-        Token(TokenType.IDENT, literal="b"),
-        Token(TokenType.ENDL, literal="\n"),
-    ],
+VALID_SINGLE_INFIX_OPERATIONS_AND_EXPECTED: list[tuple[list[Token], ExpectedInfixOperation]] = [
+    (
+        [Token(TokenType.INT, "5"), Token(TokenType.PLUS, "+"), Token(TokenType.INT, "5")],
+        ExpectedInfixOperation(ast_nodes.IntegerLiteral(5), "+", ast_nodes.IntegerLiteral(5)),
+    ),
+    (
+        [Token(TokenType.INT, "5"), Token(TokenType.MINUS, "-"), Token(TokenType.INT, "5")],
+        ExpectedInfixOperation(ast_nodes.IntegerLiteral(5), "-", ast_nodes.IntegerLiteral(5)),
+    ),
+    (
+        [
+            Token(TokenType.INT, "5"),
+            Token(TokenType.ASTERIX, "*"),
+            Token(TokenType.INT, "5"),
+        ],
+        ExpectedInfixOperation(ast_nodes.IntegerLiteral(5), "*", ast_nodes.IntegerLiteral(5)),
+    ),
+    (
+        [Token(TokenType.INT, "5"), Token(TokenType.SLASH, "/"), Token(TokenType.INT, "5")],
+        ExpectedInfixOperation(ast_nodes.IntegerLiteral(5), "/", ast_nodes.IntegerLiteral(5)),
+    ),
+    (
+        [Token(TokenType.INT, "5"), Token(TokenType.GT, ">"), Token(TokenType.INT, "5")],
+        ExpectedInfixOperation(ast_nodes.IntegerLiteral(5), ">", ast_nodes.IntegerLiteral(5)),
+    ),
+    (
+        [Token(TokenType.INT, "5"), Token(TokenType.GTEQ, ">="), Token(TokenType.INT, "5")],
+        ExpectedInfixOperation(ast_nodes.IntegerLiteral(5), ">=", ast_nodes.IntegerLiteral(5)),
+    ),
+    (
+        [Token(TokenType.INT, "5"), Token(TokenType.LT, "<"), Token(TokenType.INT, "5")],
+        ExpectedInfixOperation(ast_nodes.IntegerLiteral(5), "<", ast_nodes.IntegerLiteral(5)),
+    ),
+    (
+        [Token(TokenType.INT, "5"), Token(TokenType.LTEQ, "<="), Token(TokenType.INT, "5")],
+        ExpectedInfixOperation(ast_nodes.IntegerLiteral(5), "<=", ast_nodes.IntegerLiteral(5)),
+    ),
+    (
+        [Token(TokenType.INT, "5"), Token(TokenType.EQ, "=="), Token(TokenType.INT, "5")],
+        ExpectedInfixOperation(ast_nodes.IntegerLiteral(5), "==", ast_nodes.IntegerLiteral(5)),
+    ),
+    (
+        [
+            Token(TokenType.INT, "5"),
+            Token(TokenType.NOT_EQ, "!="),
+            Token(TokenType.INT, "5"),
+        ],
+        ExpectedInfixOperation(ast_nodes.IntegerLiteral(5), "!=", ast_nodes.IntegerLiteral(5)),
+    ),
 ]
 
 
@@ -150,7 +187,23 @@ class TestParser:
 
     @pytest.mark.parametrize(
         "lexer",
-        VALID_RETURN_STATEMENT_TOKENS_AND_EXPECTED,
+        [
+            [
+                Token(TokenType.RETURN, literal="return"),
+            ],
+            [
+                Token(TokenType.RETURN, literal="return"),
+                Token(TokenType.INT, literal="10"),
+                Token(TokenType.ENDL, literal="\n"),
+            ],
+            [
+                Token(TokenType.RETURN, literal="return"),
+                Token(TokenType.IDENT, literal="a"),
+                Token(TokenType.PLUS, literal="+"),
+                Token(TokenType.IDENT, literal="b"),
+                Token(TokenType.ENDL, literal="\n"),
+            ],
+        ],
         indirect=True,
     )
     def test_single_correct_return_statement(self, parser: Parser) -> None:
@@ -364,6 +417,48 @@ class TestParser:
         assert expr.operator == expected.operator, "Invalid Prefix operation operator."
         assert expr.right == expected.operand, "Invalid Prefix operation operand."
         assert expr.token_literal == expected.operator, "Invalid Prefix operation token_literal."
+
+        assert (
+            expr.token_literal == stmt.token_literal
+        ), "Invalid ExpressionStatement token_literal."
+
+    @pytest.mark.parametrize(
+        ("lexer", "expected"),
+        VALID_SINGLE_INFIX_OPERATIONS_AND_EXPECTED,
+        indirect=["lexer"],
+    )
+    def test_single_valid_infix_operation(
+        self, parser: Parser, expected: ExpectedInfixOperation
+    ) -> None:
+        """Tests parser parsing single prefix operation correctly.
+
+        Arrange: Provide tokens to Lexer Mock.
+        Arrange: Create Parser with Lexer Mock.
+
+        Act: Parse program.
+        Assert: No error returned.
+        Assert: Program contains only one statement.
+        Assert: Statement is ExpressionStatement.
+        Assert: Underlying expression is InfixOperation.
+        Assert: InfixOperation operator is equal to the expected.
+        Assert: InfixOperation left operand is equal to the expected.
+        Assert: InfixOperation right operand is equal to the expected.
+        Assert: InfixOperation token_literal is equal to expected operator.
+        Assert: Statement token_literal is equal to InfixOperation token_literal.
+        """
+        program = parse_ok_program_and_assert(parser, 1)
+        stmt = program.statements[0]
+        assert isinstance(
+            stmt, ast_nodes.ExpressionStatement
+        ), f"Unexpected statement of type `{type(stmt)}`."
+        expr = stmt.expression
+        assert isinstance(
+            expr, ast_nodes.InfixOperation
+        ), f"Unexpected expression in ExpressionStatement of type `{type(expr)}`."
+        assert expr.operator == expected.operator, "Invalid Infix operation operator."
+        assert expr.left == expected.left_operand, "Invalid Infix operation left operand."
+        assert expr.right == expected.right_operand, "Invalid Infix operation right operand."
+        assert expr.token_literal == expected.operator, "Invalid Infix operation token_literal."
 
         assert (
             expr.token_literal == stmt.token_literal

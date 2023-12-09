@@ -70,6 +70,20 @@ class PrefixOperation(Expression):
 
 
 @dataclass(slots=True)
+class InfixOperation(Expression):
+    left: Expression
+    operator: str
+    right: Expression
+
+    @property
+    def token_literal(self) -> str:
+        return self.operator
+
+    def __str__(self) -> str:
+        return f"({self.left}{self.operator}{self.right})"
+
+
+@dataclass(slots=True)
 class LetStatement(Statement):
     is_mut: bool
     var_type: Identifier

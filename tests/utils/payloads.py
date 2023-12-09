@@ -12,3 +12,9 @@ class ExpectedLetStatement(NamedTuple):
 class ExpectedPrefixOperation(NamedTuple):
     operator: str
     operand: Expression
+
+
+class ExpectedInfixOperation(NamedTuple):
+    left_operand: Expression
+    operator: str
+    right_operand: Expression
