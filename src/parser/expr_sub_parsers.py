@@ -19,25 +19,50 @@ def parse_expression(
     if prefix_parser is None:
         return Err(UnsupportedExpressionError(parser.current_token.type))
 
-    left_expr = prefix_parser(parser)
-
-    return Ok(left_expr)
+    return prefix_parser(parser)
 
 
-def parse_identifier(parser: IParser) -> ast_nodes.Identifier:
+def parse_identifier(parser: IParser) -> Ok[ast_nodes.Identifier]:
     """Creates an Identifier expression from current token of provided parser."""
-    return ast_nodes.Identifier(value=parser.current_token.literal)
+    return Ok(ast_nodes.Identifier(value=parser.current_token.literal))
 
 
-def parser_integer_literal(
+def parse_integer_literal(
     parser: IParser,
-) -> ast_nodes.IntegerLiteral:
-    """Create an IntegerLiteral expression from current token of provided parser."""
-    return ast_nodes.IntegerLiteral(int(parser.current_token.literal))
+) -> Result[ast_nodes.IntegerLiteral, ExpressionValidationError]:
+    """Create an IntegerLiteral expression from current token
+    of provided parser if possible.
+    """
+    try:
+        value = int(parser.current_token.literal)
+    except ValueError as err:
+        return Err(ExpressionValidationError(f"Unexpected error in integer literal: {err}"))
+    return Ok(ast_nodes.IntegerLiteral(value))
 
 
-def parser_float_literal(
+def parse_float_literal(
     parser: IParser,
-) -> ast_nodes.FloatLiteral:
-    """Create a FloatLiteral expression from current token of provided parser."""
-    return ast_nodes.FloatLiteral(float(parser.current_token.literal))
+) -> Result[ast_nodes.FloatLiteral, ExpressionValidationError]:
+    """Create an FloatLiteral expression from current token
+    of provided parser if possible.
+    """
+    try:
+        value = float(parser.current_token.literal)
+    except ValueError as err:
+        return Err(ExpressionValidationError(f"Unexpected error in float literal: {err}"))
+    return Ok(ast_nodes.FloatLiteral(value))
+
+
+def parse_prefix_operation(
+    parser: IParser,
+) -> Result[ast_nodes.PrefixOperation, ExpressionValidationError]:
+    """Create a PrefixOperation with operator from current token of provided parser
+    and operand from next token of provided parser, if possible.
+    """
+    operator = parser.current_token.literal
+    parser.next_token()
+    match parse_expression(parser, Precedence.PREFIX):
+        case Err() as err:
+            return err
+        case Ok(operand):
+            return Ok(ast_nodes.PrefixOperation(operator, operand))

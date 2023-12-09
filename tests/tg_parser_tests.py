@@ -7,7 +7,7 @@ from src.lexer.interfaces import ILexer
 from src.lexer.tokens import Keyword, Token, TokenType
 from src.parser.parser import Parser
 from tests.mock.lexer_mock import LexerMock
-from tests.utils.payloads import ExpectedLetStatement
+from tests.utils.payloads import ExpectedLetStatement, ExpectedPrefixOperation
 from tests.utils.types import YieldFixture
 
 VALID_LET_STATEMENT_TOKENS_AND_EXPECTED: list[tuple[list[Token], ExpectedLetStatement]] = [
@@ -19,7 +19,6 @@ VALID_LET_STATEMENT_TOKENS_AND_EXPECTED: list[tuple[list[Token], ExpectedLetStat
             Token(TokenType.ASSIGN, "="),
             Token(TokenType.INT, "10"),
             Token(TokenType.ENDL, "\n"),
-            Token(TokenType.EOF, "\0"),
         ],
         ExpectedLetStatement(False, "int", "x"),
     ),
@@ -33,7 +32,6 @@ VALID_LET_STATEMENT_TOKENS_AND_EXPECTED: list[tuple[list[Token], ExpectedLetStat
             Token(TokenType.ILLEGAL, '"'),
             Token(TokenType.ENDL, "\n"),
             Token(TokenType.ENDL, "\n"),
-            Token(TokenType.EOF, "\0"),
         ],
         ExpectedLetStatement(False, "str", "_abcdef11_"),
     ),
@@ -45,7 +43,6 @@ VALID_LET_STATEMENT_TOKENS_AND_EXPECTED: list[tuple[list[Token], ExpectedLetStat
             Token(TokenType.IDENT, "y"),
             Token(TokenType.ASSIGN, "="),
             Token(TokenType.FLOAT, "20."),
-            Token(TokenType.EOF, "\0"),
         ],
         ExpectedLetStatement(True, "int", "y"),
     ),
@@ -64,7 +61,6 @@ VALID_LET_STATEMENT_TOKENS_AND_EXPECTED: list[tuple[list[Token], ExpectedLetStat
             Token(TokenType.ENDL, "\n"),
             Token(TokenType.ENDL, "\n"),
             Token(TokenType.ENDL, "\n"),
-            Token(TokenType.EOF, "\0"),
         ],
         ExpectedLetStatement(True, "int", "word"),
     ),
@@ -73,13 +69,11 @@ VALID_LET_STATEMENT_TOKENS_AND_EXPECTED: list[tuple[list[Token], ExpectedLetStat
 VALID_RETURN_STATEMENT_TOKENS_AND_EXPECTED: list[list[Token]] = [
     [
         Token(TokenType.RETURN, literal="return"),
-        Token(TokenType.EOF, "\0"),
     ],
     [
         Token(TokenType.RETURN, literal="return"),
         Token(TokenType.INT, literal="10"),
         Token(TokenType.ENDL, literal="\n"),
-        Token(TokenType.EOF, "\0"),
     ],
     [
         Token(TokenType.RETURN, literal="return"),
@@ -87,18 +81,17 @@ VALID_RETURN_STATEMENT_TOKENS_AND_EXPECTED: list[list[Token]] = [
         Token(TokenType.PLUS, literal="+"),
         Token(TokenType.IDENT, literal="b"),
         Token(TokenType.ENDL, literal="\n"),
-        Token(TokenType.EOF, "\0"),
     ],
 ]
 
 
 @pytest.fixture
 def lexer(request: pytest.FixtureRequest) -> YieldFixture[ILexer]:
-    """Creates lexer mock object and provides tokens from request to it."""
+    """Creates lexer mock object and provides tokens from request to it + EOF tokens."""
     lexer = LexerMock(strict=True)
     lexer.set_data(request.param)
     lexer.add_data(
-        [Token(TokenType.EOF, "\0")]
+        [Token(TokenType.EOF, "\0"), Token(TokenType.EOF, "\0")]
     )  # Add extra token as parser ends on current token, not peek token.
     yield lexer
 
@@ -183,16 +176,15 @@ class TestParser:
     @pytest.mark.parametrize(
         ("lexer", "expected"),
         [
-            ([Token(TokenType.IDENT, "abc_"), Token(TokenType.EOF, "\0")], "abc_"),
+            ([Token(TokenType.IDENT, "abc_")], "abc_"),
             (
                 [
                     Token(TokenType.IDENT, "x_1a2"),
                     Token(TokenType.ENDL, "\n"),
-                    Token(TokenType.EOF, "\0"),
                 ],
                 "x_1a2",
             ),
-            ([Token(TokenType.IDENT, "q"), Token(TokenType.EOF, "\0")], "q"),
+            ([Token(TokenType.IDENT, "q")], "q"),
         ],
         indirect=["lexer"],
     )
@@ -234,11 +226,10 @@ class TestParser:
                 [
                     Token(TokenType.INT, "5"),
                     Token(TokenType.ENDL, "\n"),
-                    Token(TokenType.EOF, "\0"),
                 ],
                 5,
             ),
-            ([Token(TokenType.INT, "10123"), Token(TokenType.EOF, "\0")], 10123),
+            ([Token(TokenType.INT, "10123")], 10123),
         ],
         indirect=["lexer"],
     )
@@ -277,13 +268,12 @@ class TestParser:
     @pytest.mark.parametrize(
         ("lexer", "expected"),
         [
-            ([Token(TokenType.FLOAT, "5."), Token(TokenType.EOF, "\0")], 5.0),
-            ([Token(TokenType.FLOAT, "10.25"), Token(TokenType.EOF, "\0")], 10.25),
+            ([Token(TokenType.FLOAT, "5.")], 5.0),
+            ([Token(TokenType.FLOAT, "10.25")], 10.25),
             (
                 [
                     Token(TokenType.FLOAT, "0.3"),
                     Token(TokenType.ENDL, "\n"),
-                    Token(TokenType.EOF, "\0"),
                 ],
                 0.3,
             ),
@@ -303,7 +293,7 @@ class TestParser:
         Assert: Underlying expression is FloatLiteral.
         Assert: FloatLiteral value is equal to the expected value.
         Assert: FloatLiteral token_literal is equal to str(expected value).
-        Assert: Statement token_literal is equal to FlaotLiteral token_literal.
+        Assert: Statement token_literal is equal to FloatLiteral token_literal.
         """
         program = parse_ok_program_and_assert(parser, 1)
         stmt = program.statements[0]
@@ -317,6 +307,63 @@ class TestParser:
 
         assert expr.value == expected, "Invalid float literal value."
         assert expr.token_literal == str(expected), "Invalid float literal token_literal."
+
+        assert (
+            expr.token_literal == stmt.token_literal
+        ), "Invalid ExpressionStatement token_literal."
+
+    @pytest.mark.parametrize(
+        ("lexer", "expected"),
+        [
+            (
+                [Token(TokenType.MINUS, "-"), Token(TokenType.INT, "5")],
+                ExpectedPrefixOperation("-", ast_nodes.IntegerLiteral(5)),
+            ),
+            (
+                [Token(TokenType.MINUS, "+"), Token(TokenType.INT, "20")],
+                ExpectedPrefixOperation("+", ast_nodes.IntegerLiteral(20)),
+            ),
+            (
+                [Token(TokenType.MINUS, "-"), Token(TokenType.FLOAT, "5.2")],
+                ExpectedPrefixOperation("-", ast_nodes.FloatLiteral(5.2)),
+            ),
+            (
+                [Token(TokenType.MINUS, "+"), Token(TokenType.FLOAT, "0.3")],
+                ExpectedPrefixOperation("+", ast_nodes.FloatLiteral(0.3)),
+            ),
+        ],
+        indirect=["lexer"],
+    )
+    def test_single_valid_prefix_operation(
+        self, parser: Parser, expected: ExpectedPrefixOperation
+    ) -> None:
+        """Tests parser parsing single prefix operation correctly.
+
+        Arrange: Provide tokens to Lexer Mock.
+        Arrange: Create Parser with Lexer Mock.
+
+        Act: Parse program.
+        Assert: No error returned.
+        Assert: Program contains only one statement.
+        Assert: Statement is ExpressionStatement.
+        Assert: Underlying expression is PrefixOperation.
+        Assert: PrefixOperation operator is equal to the expected.
+        Assert: PrefixOperation operand is equal to the expected.
+        Assert: PrefixOperation token_literal is equal to expected operator.
+        Assert: Statement token_literal is equal to PrefixOperation token_literal.
+        """
+        program = parse_ok_program_and_assert(parser, 1)
+        stmt = program.statements[0]
+        assert isinstance(
+            stmt, ast_nodes.ExpressionStatement
+        ), f"Unexpected statement of type `{type(stmt)}`."
+        expr = stmt.expression
+        assert isinstance(
+            expr, ast_nodes.PrefixOperation
+        ), f"Unexpected expression in ExpressionStatement of type `{type(expr)}`."
+        assert expr.operator == expected.operator, "Invalid Prefix operation operator."
+        assert expr.right == expected.operand, "Invalid Prefix operation operand."
+        assert expr.token_literal == expected.operator, "Invalid Prefix operation token_literal."
 
         assert (
             expr.token_literal == stmt.token_literal

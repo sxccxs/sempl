@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from io import StringIO
 
 from src.ast.abstract import ASTNode, Expression, Statement
-from src.lexer.tokens import Keyword, Operator
+from src.lexer.tokens import Keyword
 
 
 @dataclass(slots=True)
@@ -58,7 +58,7 @@ class FloatLiteral(Expression):
 
 @dataclass(slots=True)
 class PrefixOperation(Expression):
-    operator: Operator
+    operator: str
     right: Expression
 
     @property

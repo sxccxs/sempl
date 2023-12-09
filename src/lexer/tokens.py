@@ -61,11 +61,11 @@ class Keyword(StrEnum):
 
 
 KEYWORDS: dict[str, TokenType] = {
-    Keyword.TRUE.value: TokenType.TRUE,
-    Keyword.FALSE.value: TokenType.FALSE,
-    Keyword.LET.value: TokenType.LET,
-    Keyword.IF.value: TokenType.IF,
-    Keyword.ELSE.value: TokenType.ELSE,
-    Keyword.MUT.value: TokenType.MUT,
-    Keyword.RETURN.value: TokenType.RETURN,
+    Keyword.TRUE: TokenType.TRUE,
+    Keyword.FALSE: TokenType.FALSE,
+    Keyword.LET: TokenType.LET,
+    Keyword.IF: TokenType.IF,
+    Keyword.ELSE: TokenType.ELSE,
+    Keyword.MUT: TokenType.MUT,
+    Keyword.RETURN: TokenType.RETURN,
 }

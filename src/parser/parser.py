@@ -87,5 +87,7 @@ class Parser(IParser):
     def _register_prefix(self) -> None:
         """Registers all prefix parsers."""
         self.register_prefix_parser(TokenType.IDENT, expr_sub_parsers.parse_identifier)
-        self.register_prefix_parser(TokenType.INT, expr_sub_parsers.parser_integer_literal)
-        self.register_prefix_parser(TokenType.FLOAT, expr_sub_parsers.parser_float_literal)
+        self.register_prefix_parser(TokenType.INT, expr_sub_parsers.parse_integer_literal)
+        self.register_prefix_parser(TokenType.FLOAT, expr_sub_parsers.parse_float_literal)
+        self.register_prefix_parser(TokenType.MINUS, expr_sub_parsers.parse_prefix_operation)
+        self.register_prefix_parser(TokenType.PLUS, expr_sub_parsers.parse_prefix_operation)
