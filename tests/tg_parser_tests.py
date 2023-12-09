@@ -1,3 +1,4 @@
+# pylint: disable=redefined-outer-name
 import pytest
 from result import Ok
 
@@ -93,22 +94,24 @@ VALID_RETURN_STATEMENT_TOKENS_AND_EXPECTED: list[list[Token]] = [
 ]
 
 
+@pytest.fixture
+def lexer(request: pytest.FixtureRequest) -> YieldFixture[ILexer]:
+    """Creates lexer mock object and provides tokens from request to it."""
+    lexer = LexerMock(strict=True)
+    lexer.set_data(request.param)
+    lexer.add_data(
+        [Token(TokenType.EOF, "\0")]
+    )  # Add extra token as parser ends on current token, not peek token.
+    yield lexer
+
+
+@pytest.fixture
+def parser(lexer: ILexer) -> YieldFixture[Parser]:
+    """Creates parser from lexer fixture."""
+    yield Parser(lexer)
+
+
 class TestParser:
-    @pytest.fixture
-    def lexer(self, request: pytest.FixtureRequest) -> YieldFixture[ILexer]:
-        """Creates lexer mock object and provides data from request to it."""
-        lexer = LexerMock(strict=True)
-        lexer.set_data(request.param)
-        lexer.add_data(
-            [Token(TokenType.EOF, "\0")]
-        )  # Add extra token as parser checks current token, not peek
-        yield lexer
-
-    @pytest.fixture
-    def parser(self, lexer: ILexer) -> YieldFixture[Parser]:
-        """Creates parser from lexer fixture."""
-        yield Parser(lexer)
-
     @pytest.mark.parametrize(
         ("lexer", "expected_result"),
         VALID_LET_STATEMENT_TOKENS_AND_EXPECTED,
