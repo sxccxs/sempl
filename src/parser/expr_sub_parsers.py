@@ -51,6 +51,11 @@ def parse_identifier(parser: IParser) -> Ok[ast_nodes.Identifier]:
     return Ok(ast_nodes.Identifier(value=parser.current_token.literal))
 
 
+def parse_boolean_literal(parser: IParser) -> Ok[ast_nodes.BooleanLiteral]:
+    """Creates an BooleanLiteral expression from current token of provided parser."""
+    return Ok(ast_nodes.BooleanLiteral(value=parser.cur_token_is(TokenType.TRUE)))
+
+
 def parse_integer_literal(
     parser: IParser,
 ) -> Result[ast_nodes.IntegerLiteral, ExpressionValidationError]:

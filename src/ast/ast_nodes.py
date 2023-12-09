@@ -33,6 +33,18 @@ class Identifier(Expression):
 
 
 @dataclass(slots=True)
+class BooleanLiteral(Expression):
+    value: bool
+
+    @property
+    def token_literal(self) -> str:
+        return str(self)
+
+    def __str__(self) -> str:
+        return Keyword.TRUE.value if self.value else Keyword.FALSE.value
+
+
+@dataclass(slots=True)
 class IntegerLiteral(Expression):
     value: int
 
@@ -92,14 +104,14 @@ class LetStatement(Statement):
 
     @property
     def token_literal(self) -> str:
-        return Keyword.LET
+        return Keyword.LET.value
 
     def __str__(self) -> str:
         ss = StringIO()
-        ss.write(Keyword.LET)
+        ss.write(Keyword.LET.value)
         ss.write(" ")
         if self.is_mut:
-            ss.write(Keyword.MUT)
+            ss.write(Keyword.MUT.value)
             ss.write(" ")
         ss.write(str(self.var_type))
         ss.write(" ")
@@ -116,7 +128,7 @@ class ReturnStatement(Statement):
 
     @property
     def token_literal(self) -> str:
-        return Keyword.RETURN
+        return Keyword.RETURN.value
 
     def __str__(self) -> str:
         return f"{Keyword.RETURN} {self.return_value}"
