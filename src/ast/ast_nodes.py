@@ -1,7 +1,8 @@
 from dataclasses import dataclass, field
+from io import StringIO
 
 from src.ast.abstract import ASTNode, Expression, Statement
-from src.lexer.tokens import Keyword
+from src.lexer.tokens import Keyword, Operator
 
 
 @dataclass(slots=True)
@@ -12,6 +13,12 @@ class Program(ASTNode):
     def token_literal(self) -> str:
         return self.statements[0].token_literal if self.statements else ""
 
+    def __str__(self) -> str:
+        ss = StringIO()
+        for stmt in self.statements:
+            ss.write(str(stmt))
+        return ss.getvalue()
+
 
 @dataclass(slots=True)
 class Identifier(Expression):
@@ -19,6 +26,9 @@ class Identifier(Expression):
 
     @property
     def token_literal(self) -> str:
+        return self.value
+
+    def __str__(self) -> str:
         return self.value
 
 
@@ -30,6 +40,9 @@ class IntegerLiteral(Expression):
     def token_literal(self) -> str:
         return str(self.value)
 
+    def __str__(self) -> str:
+        return str(self.value)
+
 
 @dataclass(slots=True)
 class FloatLiteral(Expression):
@@ -38,6 +51,22 @@ class FloatLiteral(Expression):
     @property
     def token_literal(self) -> str:
         return str(self.value)
+
+    def __str__(self) -> str:
+        return str(self.value)
+
+
+@dataclass(slots=True)
+class PrefixOperation(Expression):
+    operator: Operator
+    right: Expression
+
+    @property
+    def token_literal(self) -> str:
+        return self.operator
+
+    def __str__(self) -> str:
+        return f"({self.operator}{self.right})"
 
 
 @dataclass(slots=True)
@@ -49,7 +78,22 @@ class LetStatement(Statement):
 
     @property
     def token_literal(self) -> str:
-        return Keyword.LET.value
+        return Keyword.LET
+
+    def __str__(self) -> str:
+        ss = StringIO()
+        ss.write(Keyword.LET)
+        ss.write(" ")
+        if self.is_mut:
+            ss.write(Keyword.MUT)
+            ss.write(" ")
+        ss.write(str(self.var_type))
+        ss.write(" ")
+        ss.write(str(self.var_name))
+        ss.write(" = ")
+        ss.write(str(self.var_value))
+
+        return ss.getvalue()
 
 
 @dataclass(slots=True)
@@ -58,7 +102,10 @@ class ReturnStatement(Statement):
 
     @property
     def token_literal(self) -> str:
-        return Keyword.RETURN.value
+        return Keyword.RETURN
+
+    def __str__(self) -> str:
+        return f"{Keyword.RETURN} {self.return_value}"
 
 
 @dataclass(slots=True)
@@ -68,3 +115,6 @@ class ExpressionStatement(Statement):
     @property
     def token_literal(self) -> str:
         return self.expression.token_literal
+
+    def __str__(self) -> str:
+        return str(self.expression)
