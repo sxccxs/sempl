@@ -99,9 +99,7 @@ class TestLexer:
         lexer = Lexer(sio)
         for i, expected_token in enumerate(expected):
             token = lexer.next_token()
-            assert (
-                token == expected_token
-            ), f"Token #{i} is wrong. {token} != {expected_token}"
+            assert token == expected_token, f"Token #{i} is wrong. {token} != {expected_token}"
 
     @pytest.mark.parametrize(("literal", "expected_token"), LITERAL_TOKEN_MAP.items())
     def test_one_token(self, literal: str, expected_token: Token) -> None:
@@ -117,6 +115,4 @@ class TestLexer:
         sio = StringIO(literal)
         lexer = Lexer(sio)
         token = lexer.next_token()
-        assert (
-            token == expected_token
-        ), f"For {literal=} expected {expected_token}, got {token}."
+        assert token == expected_token, f"For {literal=} expected {expected_token}, got {token}."
