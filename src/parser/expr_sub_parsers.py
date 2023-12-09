@@ -1,25 +1,49 @@
-from enum import IntEnum
-
 from result import Err, Ok, Result
 
 from src.ast import ast_nodes
 from src.ast.abstract import Expression
+from src.lexer.tokens import TokenType
 from src.parser.errors import ExpressionValidationError, UnsupportedExpressionError
 from src.parser.interfaces import IParser
-
-
-class Precedence(IntEnum):
-    LOWEST, EQUALS, LESSGREATER, SUM, PRODUCT, PREFIX, CALL = range(7)
+from src.parser.types import Precedence
 
 
 def parse_expression(
     parser: IParser, precedence: Precedence
 ) -> Result[Expression, ExpressionValidationError]:
+    """Parses expression with given parser and its
+    registered subparsers and precedences.
+
+    Args:
+        parser (IParser): Parser
+        precedence (Precedence): Current expression precedence.
+
+    Returns:
+        Result[Expression, ExpressionValidationError]: Parsing result.
+    """
     prefix_parser = parser.prefix_parsers.get(parser.current_token.type)
     if prefix_parser is None:
         return Err(UnsupportedExpressionError(parser.current_token.type))
 
-    return prefix_parser(parser)
+    match prefix_parser(parser):
+        case Err() as err:
+            return err
+        case Ok(exp):
+            expr = exp
+
+    while not parser.peek_token_is(TokenType.ENDL) and precedence < parser.peek_token_precedence:
+        infix_parser = parser.infix_parsers.get(parser.peek_token.type)
+        if infix_parser is None:
+            return Ok(expr)
+
+        parser.next_token()
+        match infix_parser(parser, expr):  # type: ignore
+            case Err() as err:
+                return err
+            case Ok(exp):
+                expr = exp
+
+    return Ok(expr)
 
 
 def parse_identifier(parser: IParser) -> Ok[ast_nodes.Identifier]:
@@ -66,3 +90,20 @@ def parse_prefix_operation(
             return err
         case Ok(operand):
             return Ok(ast_nodes.PrefixOperation(operator, operand))
+
+
+def parse_inifix_operation(
+    parser: IParser, left: ast_nodes.Expression
+) -> Result[ast_nodes.InfixOperation, ExpressionValidationError]:
+    """Create a InfixOperation with provided left operand,
+    operator from current token of provided parser
+    and right operand from next token of provided parser, if possible.
+    """
+    operator = parser.current_token.literal
+    precedence = parser.cur_token_precedence
+    parser.next_token()
+    match parse_expression(parser, precedence):
+        case Err() as err:
+            return err
+        case Ok(right):
+            return Ok(ast_nodes.InfixOperation(left, operator, right))

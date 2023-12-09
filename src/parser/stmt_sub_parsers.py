@@ -6,8 +6,9 @@ import src.parser.errors as p_errors
 from src.ast import ast_nodes
 from src.lexer.tokens import TokenType
 from src.parser.errors import StatementValidationError
-from src.parser.expr_sub_parsers import Precedence, parse_expression
+from src.parser.expr_sub_parsers import parse_expression
 from src.parser.interfaces import IParser
+from src.parser.types import Precedence
 
 
 def parse_let_statement(
@@ -29,9 +30,7 @@ def parse_let_statement(
         is_mut = True
         parser.next_token()
 
-    if (
-        res := _validate_parser_cur_and_peek(parser, TokenType.IDENT, TokenType.IDENT)
-    ).is_err():
+    if (res := _validate_parser_cur_and_peek(parser, TokenType.IDENT, TokenType.IDENT)).is_err():
         return res  # type: ignore
 
     var_type = ast_nodes.Identifier(parser.current_token.literal)
@@ -40,18 +39,14 @@ def parse_let_statement(
     parser.next_token()
 
     if not parser.peek_token_is(TokenType.ASSIGN):
-        return Err(
-            p_errors.InvalidTokenTypeInStatement(TokenType.ASSIGN, parser.peek_token.type)
-        )
+        return Err(p_errors.InvalidTokenTypeInStatement(TokenType.ASSIGN, parser.peek_token.type))
     parser.next_token()
 
     stmt = ast_nodes.LetStatement(
         is_mut=is_mut, var_type=var_type, var_name=var_name, var_value=None  # type: ignore
     )  # TODO: fix
 
-    while not parser.cur_token_is(TokenType.ENDL) and not parser.cur_token_is(
-        TokenType.EOF
-    ):
+    while not parser.cur_token_is(TokenType.ENDL) and not parser.cur_token_is(TokenType.EOF):
         parser.next_token()
 
     return Ok(stmt)
@@ -72,9 +67,7 @@ def parse_return_statement(
     """
     stmt = ast_nodes.ReturnStatement(return_value=None)  # type: ignore  # TODO: fix
 
-    while not parser.cur_token_is(TokenType.ENDL) and not parser.cur_token_is(
-        TokenType.EOF
-    ):
+    while not parser.cur_token_is(TokenType.ENDL) and not parser.cur_token_is(TokenType.EOF):
         parser.next_token()
 
     return Ok(stmt)

@@ -19,7 +19,7 @@ class UnsupportedStatementError(StatementValidationError):
         Args:
             token_type (TokenType): Token type with which no statement begins.
         """
-        super().__init__(f"Statement from token of type={token_type} does not exist.")
+        super().__init__(f"Statement from token of type={repr(token_type)} does not exist.")
 
 
 class UnsupportedExpressionError(ExpressionValidationError):
@@ -28,7 +28,7 @@ class UnsupportedExpressionError(ExpressionValidationError):
         Args:
             token_type (TokenType): Token type with which no expression begins.
         """
-        super().__init__(f"Expression from token of type={token_type} does not exist.")
+        super().__init__(f"Expression from token of type={repr(token_type)} does not exist.")
 
 
 class InvalidTokenTypeInStatement(StatementValidationError):
@@ -39,6 +39,6 @@ class InvalidTokenTypeInStatement(StatementValidationError):
             received_tt (TokenType): Actual token type.
         """
         super().__init__(
-            f"Token in statement was expected to be {expected_tt}, "
-            f"but actually was {received_tt}."
+            f"Token in statement was expected to be {repr(expected_tt)}, "
+            f"but actually was {repr(received_tt)}."
         )

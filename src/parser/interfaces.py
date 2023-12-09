@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Protocol
 from src.lexer.tokens import Token, TokenType
 
 if TYPE_CHECKING:
-    from src.parser.types import InfixParserType, PrefixParserType
+    from src.parser.types import InfixParserType, Precedence, PrefixParserType
 
 
 class IParser(Protocol):
@@ -28,6 +28,16 @@ class IParser(Protocol):
     @property
     def infix_parsers(self) -> dict[TokenType, InfixParserType]:
         """Map of registered expression infix parsers."""
+        ...
+
+    @property
+    def cur_token_precedence(self) -> Precedence:
+        """Precedence of current token."""
+        ...
+
+    @property
+    def peek_token_precedence(self) -> Precedence:
+        """Precedence of peek token."""
         ...
 
     def next_token(self) -> None:
