@@ -11,7 +11,8 @@ from src.parser.types import Precedence
 def parse_expression(
     parser: IParser, precedence: Precedence
 ) -> Result[Expression, ExpressionValidationError]:
-    """Parses expression with given parser and its
+    """
+    Parses expression with given parser and its
     registered subparsers and precedences.
 
     Args:
@@ -59,7 +60,8 @@ def parse_boolean_literal(parser: IParser) -> Ok[ast_nodes.BooleanLiteral]:
 def parse_integer_literal(
     parser: IParser,
 ) -> Result[ast_nodes.IntegerLiteral, ExpressionValidationError]:
-    """Create an IntegerLiteral expression from current token
+    """
+    Create an IntegerLiteral expression from current token
     of provided parser if possible.
     """
     try:
@@ -72,7 +74,8 @@ def parse_integer_literal(
 def parse_float_literal(
     parser: IParser,
 ) -> Result[ast_nodes.FloatLiteral, ExpressionValidationError]:
-    """Create an FloatLiteral expression from current token
+    """
+    Create an FloatLiteral expression from current token
     of provided parser if possible.
     """
     try:
@@ -85,7 +88,8 @@ def parse_float_literal(
 def parse_prefix_operation(
     parser: IParser,
 ) -> Result[ast_nodes.PrefixOperation, ExpressionValidationError]:
-    """Create a PrefixOperation with operator from current token of provided parser
+    """
+    Create a PrefixOperation with operator from current token of provided parser
     and operand from next token of provided parser, if possible.
     """
     operator = parser.current_token.literal
@@ -100,7 +104,8 @@ def parse_prefix_operation(
 def parse_inifix_operation(
     parser: IParser, left: ast_nodes.Expression
 ) -> Result[ast_nodes.InfixOperation, ExpressionValidationError]:
-    """Create a InfixOperation with provided left operand,
+    """
+    Create a InfixOperation with provided left operand,
     operator from current token of provided parser
     and right operand from next token of provided parser, if possible.
     """

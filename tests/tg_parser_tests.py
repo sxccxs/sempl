@@ -38,7 +38,8 @@ def parser(lexer: ILexer) -> YieldFixture[Parser]:
 
 
 def parse_ok_program_and_assert(parser: Parser, expected_stmts_len: int) -> ast_nodes.Program:
-    """Parses program with provided parser and checks the result.
+    """
+    Parses program with provided parser and checks the result.
     The program is expected to be valid.
 
     Act: Parse program.
@@ -76,7 +77,8 @@ class TestParser:
         parser: Parser,
         expected_result: ExpectedLetStatement,
     ) -> None:
-        """Tests parser parsing single valid let statement correctly.
+        """
+        Tests parser parsing single valid let statement correctly.
 
         Arrange: Provide tokens to Lexer Mock.
         Arrange: Create Parser with Lexer Mock.
@@ -133,7 +135,8 @@ class TestParser:
         indirect=True,
     )
     def test_single_correct_return_statement(self, parser: Parser) -> None:
-        """Tests parser parsing single valid return statement correctly.
+        """
+        Tests parser parsing single valid return statement correctly.
 
         Arrange: Provide tokens to Lexer Mock.
         Arrange: Create Parser with Lexer Mock.
@@ -168,7 +171,8 @@ class TestParser:
         indirect=["lexer"],
     )
     def test_single_identifier_expression(self, parser: Parser, expected: str) -> None:
-        """Tests parser parsing single identifier expression correctly.
+        """
+        Tests parser parsing single identifier expression correctly.
 
         Arrange: Provide tokens to Lexer Mock.
         Arrange: Create Parser with Lexer Mock.
@@ -213,7 +217,8 @@ class TestParser:
         indirect=["lexer"],
     )
     def test_single_integer_literal_expression(self, parser: Parser, expected: int) -> None:
-        """Tests parser parsing single integer literal correctly.
+        """
+        Tests parser parsing single integer literal correctly.
 
         Arrange: Provide tokens to Lexer Mock.
         Arrange: Create Parser with Lexer Mock.
@@ -258,7 +263,8 @@ class TestParser:
         indirect=["lexer"],
     )
     def test_single_boolean_literal_expression(self, parser: Parser, expected: bool) -> None:
-        """Tests parser parsing single integer literal correctly.
+        """
+        Tests parser parsing single integer literal correctly.
 
         Arrange: Provide tokens to Lexer Mock.
         Arrange: Create Parser with Lexer Mock.
@@ -305,7 +311,8 @@ class TestParser:
         indirect=["lexer"],
     )
     def test_single_float_literal_expression(self, parser: Parser, expected: float) -> None:
-        """Tests parser parsing single float literal correctly.
+        """
+        Tests parser parsing single float literal correctly.
 
         Arrange: Provide tokens to Lexer Mock.
         Arrange: Create Parser with Lexer Mock.
@@ -361,7 +368,8 @@ class TestParser:
     def test_single_valid_prefix_operation(
         self, parser: Parser, expected: ExpectedPrefixOperation
     ) -> None:
-        """Tests parser parsing single prefix operation correctly.
+        """
+        Tests parser parsing single prefix operation correctly.
 
         Arrange: Provide tokens to Lexer Mock.
         Arrange: Create Parser with Lexer Mock.
@@ -401,7 +409,8 @@ class TestParser:
     def test_single_valid_infix_operation(
         self, parser: Parser, expected: ExpectedInfixOperation
     ) -> None:
-        """Tests parser parsing single prefix operation correctly.
+        """
+        Tests parser parsing single prefix operation correctly.
 
         Arrange: Provide tokens to Lexer Mock.
         Arrange: Create Parser with Lexer Mock.
@@ -439,7 +448,8 @@ class TestParser:
         ("lexer", "expected"), INFIX_OPERATIONS_PRECEDENCE_AND_EXPECTED, indirect=["lexer"]
     )
     def test_infix_operations_precedence(self, parser: Parser, expected: str) -> None:
-        """Tests parser parsing single prefix operation correctly.
+        """
+        Tests parser parsing single prefix operation correctly.
 
         Arrange: Provide tokens to Lexer Mock.
         Arrange: Create Parser with Lexer Mock.

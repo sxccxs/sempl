@@ -7,13 +7,17 @@ def is_identifier_char(char: str) -> bool:
 
 
 def is_number_char(char: str) -> bool:
-    """Returns True if char can be any (except first) character of a number else False.
-    Does not say anything if character can be a first symbol of a number."""
+    """
+    Returns True if char can be any (except first) character of a number else False.
+    Does not say anything if character can be a first symbol of a number.
+    """
     return char.isdigit() or char == "."
 
-def is_whitespace(char:str) -> bool:
+
+def is_whitespace(char: str) -> bool:
     """Returns true if char is a whitespace, but not new line, else False."""
     return char.isspace() and char != "\n"
+
 
 def is_valid_unsigned_float(num: str) -> bool:
     """Returns True if given string is a valid unsigned float number."""

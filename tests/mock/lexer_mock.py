@@ -16,7 +16,8 @@ class LexerMock:
         self.token_iter: Iterator[Token] = iter([])  # set initially to empty iterator
 
     def next_token(self) -> Token:
-        """Returns the next token from provided sequence of tokens.
+        """
+        Returns the next token from provided sequence of tokens.
         If the sequence is exhausted:
             - raises UnexpectedMockCallException if strict mode is on.
             - returns EOF token otherwise.
@@ -39,7 +40,8 @@ class LexerMock:
         )
 
     def set_data(self, expected_tokens: Iterable[Token]) -> None:
-        """Sets mock token data to provided tokens.
+        """
+        Sets mock token data to provided tokens.
         All previously provided data is erased.
         """
         self.token_iter = iter(expected_tokens)

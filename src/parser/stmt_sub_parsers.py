@@ -14,7 +14,8 @@ from src.parser.types import Precedence
 def parse_let_statement(
     parser: IParser,
 ) -> Result[ast_nodes.LetStatement, StatementValidationError]:
-    """Parses Let statement from current position of provided parser.
+    """
+    Parses Let statement from current position of provided parser.
     Expected, but not checked parser.current_token is `let`.
     After the successful read, parser.current_token is the last token of the statement.
 
@@ -55,7 +56,8 @@ def parse_let_statement(
 def parse_return_statement(
     parser: IParser,
 ) -> Result[ast_nodes.ReturnStatement, StatementValidationError]:
-    """Parses Return statement from current position of provided parser.
+    """
+    Parses Return statement from current position of provided parser.
     Expected, but not checked parser.current_token is `return`.
     After the successful read, parser.current_token is the last token of the statement.
 
@@ -76,7 +78,8 @@ def parse_return_statement(
 def parse_expression_statement(
     parser: IParser,
 ) -> Result[ast_nodes.ExpressionStatement, StatementValidationError]:
-    """Parses expression statement from current position of provided parser.
+    """
+    Parses expression statement from current position of provided parser.
     After the successful read, parser.current_token is the last token of the statement.
 
     Args:
@@ -95,7 +98,8 @@ def parse_expression_statement(
 def _validate_parser_cur_and_peek(
     parser: IParser, cur_tt: TokenType, peek_tt: TokenType
 ) -> Result[None, p_errors.InvalidTokenTypeInStatement]:
-    """Checks if current token of parser is `cur_tt`.
+    """
+    Checks if current token of parser is `cur_tt`.
     If not, returns corresponding error.
     If yes, makes the same check for peek token and `peek_tt`.
 

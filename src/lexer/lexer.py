@@ -27,14 +27,17 @@ class Lexer:
         self.after_char = self.in_stream.read(1)
 
     def _peek_char(self) -> str:
-        """Returns the next character, but does not move the lexer.
+        """
+        Returns the next character, but does not move the lexer.
         If there is no characters left, returns zero-terminator ("\\0").
         """
         return self.after_char if self.after_char != "" else "\0"
 
     def _read_identifier(self) -> str:
-        """Reads identifier from input stream.
-        After reading lexer points to the last symbol of the identifier."""
+        """
+        Reads identifier from input stream.
+        After reading lexer points to the last symbol of the identifier.
+        """
         if not matchers.is_identifier_char(self.current_char):
             return ""
         sio = StringIO()
@@ -45,8 +48,10 @@ class Lexer:
         return sio.getvalue()
 
     def _read_number_literal(self) -> str:
-        """Reads number from input stream.
-        After reading lexer points to the last symbol of the number."""
+        """
+        Reads number from input stream.
+        After reading lexer points to the last symbol of the number.
+        """
         if not self.current_char.isdigit():
             return ""
         sio = StringIO()
@@ -71,7 +76,8 @@ class Lexer:
         two_symbol_token_type: TokenType,
         one_symbol_token_type: TokenType,
     ) -> Token:
-        """Creates token with a 2-symbol or a 1-symbol literal depending on the next chararcter.
+        """
+        Creates token with a 2-symbol or a 1-symbol literal depending on the next chararcter.
 
         Args:
             expected_second_char (str): Value next character must equal for a 2-symbol token.
