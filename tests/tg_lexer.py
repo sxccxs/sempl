@@ -82,7 +82,7 @@ INPUT_AND_EXPECTED: dict[str, list[Token]] = {
 }
 
 
-class TestLexer:
+class TestLexerTg:
     @pytest.mark.parametrize(("input_", "expected"), list(INPUT_AND_EXPECTED.items()))
     def test_multiple_literals(self, input_: str, expected: list[Token]) -> None:
         """
