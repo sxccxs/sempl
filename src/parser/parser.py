@@ -107,6 +107,7 @@ class Parser(IParser):
         self.register_prefix_parser(TokenType.FLOAT, expr_sub_parsers.parse_float_literal)
         self.register_prefix_parser(TokenType.MINUS, expr_sub_parsers.parse_prefix_operation)
         self.register_prefix_parser(TokenType.PLUS, expr_sub_parsers.parse_prefix_operation)
+        self.register_prefix_parser(TokenType.LPAREN, expr_sub_parsers.parse_grouped_expression)
 
     def _register_infix(self) -> None:
         """Registers all infix parsers."""

@@ -26,11 +26,12 @@ def parse_expression(
     if prefix_parser is None:
         return Err(UnsupportedExpressionError(parser.current_token.type))
 
+    expr: Expression
     match prefix_parser(parser):
         case Err() as err:
             return err
-        case Ok(exp):
-            expr = exp
+        case Ok(value):
+            expr = value
 
     while not parser.peek_token_is(TokenType.ENDL) and precedence < parser.peek_token_precedence:
         infix_parser = parser.infix_parsers.get(parser.peek_token.type)
@@ -41,8 +42,8 @@ def parse_expression(
         match infix_parser(parser, expr):  # type: ignore
             case Err() as err:
                 return err
-            case Ok(exp):
-                expr = exp
+            case Ok(value):
+                expr = value
 
     return Ok(expr)
 
@@ -117,3 +118,19 @@ def parse_inifix_operation(
             return err
         case Ok(right):
             return Ok(ast_nodes.InfixOperation(left, operator, right))
+
+
+def parse_grouped_expression(parser: IParser) -> Result[Expression, ExpressionValidationError]:
+    """Parses grouped expression from current token of provided parser, if possible."""
+    parser.next_token()
+    match parse_expression(parser, Precedence.LOWEST):
+        case Err() as err:
+            return err
+        case Ok(value):
+            expr = value
+
+    if not parser.peek_token_is(TokenType.RPAREN):
+        return Err(ExpressionValidationError(f"Brace was not closed after expression={str(expr)}"))
+
+    parser.next_token()
+    return Ok(expr)

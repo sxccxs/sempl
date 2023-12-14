@@ -6,7 +6,6 @@ from tests.static.parser_expr_complex_tests_data import VALID_SINGLE_INFIX_OPERA
 from tests.utils.payloads import ExpectedInfixOperation, ExpectedPrefixOperation
 
 
-
 class TestParserComplexExpressionTg:
     @pytest.mark.parametrize(
         ("lexer_mock", "expected"),
