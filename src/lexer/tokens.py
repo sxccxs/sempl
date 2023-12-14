@@ -12,8 +12,8 @@ class TokenType(StrEnum):
     FLOAT = auto()
     IDENT = auto()
 
-    LBRACE = "{"
-    RBRACE = "}"
+    LCURLY = "{"
+    RCURLY = "}"
     LPAREN = "("
     RPAREN = ")"
     COLON = ":"

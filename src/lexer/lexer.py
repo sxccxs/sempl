@@ -117,9 +117,9 @@ class Lexer:
             case "\0":
                 token = self._token_from_current_char(TokenType.EOF)
             case "{":
-                token = self._token_from_current_char(TokenType.LBRACE)
+                token = self._token_from_current_char(TokenType.LCURLY)
             case "}":
-                token = self._token_from_current_char(TokenType.RBRACE)
+                token = self._token_from_current_char(TokenType.RCURLY)
             case "(":
                 token = self._token_from_current_char(TokenType.LPAREN)
             case ")":

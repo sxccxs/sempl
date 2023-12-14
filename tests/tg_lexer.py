@@ -8,8 +8,8 @@ from src.lexer.tokens import Token, TokenType
 LITERAL_TOKEN_MAP: dict[str, Token] = {
     tt.value: Token(tt, tt.value)
     for tt in [
-        TokenType.LBRACE,
-        TokenType.RBRACE,
+        TokenType.LCURLY,
+        TokenType.RCURLY,
         TokenType.LPAREN,
         TokenType.RPAREN,
         TokenType.COLON,
