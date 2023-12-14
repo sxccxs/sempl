@@ -2,7 +2,7 @@
 
 TEST_DIR=./tests
 
-poetry run pylint --rcfile=.pylintrc --recursive=y src tests
+poetry run pylint --rcfile=.pylintrc src tests
 
 mkdir -p ./reports
 
