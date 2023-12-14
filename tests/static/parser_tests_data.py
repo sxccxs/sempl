@@ -118,3 +118,72 @@ INFIX_OPERATIONS_PRECEDENCE_AND_EXPECTED: list[tuple[list[Token], str]] = [
         "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))",
     ),
 ]
+GROUPED_EXPRESSION_AND_EXPECTED: list[tuple[list[Token], str]] = [
+    (
+        [
+            Token(type=TokenType.INT, literal="1"),
+            Token(type=TokenType.PLUS, literal="+"),
+            Token(type=TokenType.LPAREN, literal="("),
+            Token(type=TokenType.INT, literal="2"),
+            Token(type=TokenType.PLUS, literal="+"),
+            Token(type=TokenType.INT, literal="3"),
+            Token(type=TokenType.RPAREN, literal=")"),
+            Token(type=TokenType.PLUS, literal="+"),
+            Token(type=TokenType.INT, literal="4"),
+        ],
+        "((1 + (2 + 3)) + 4)",
+    ),
+    (
+        [
+            Token(type=TokenType.LPAREN, literal="("),
+            Token(type=TokenType.INT, literal="5"),
+            Token(type=TokenType.PLUS, literal="+"),
+            Token(type=TokenType.INT, literal="5"),
+            Token(type=TokenType.RPAREN, literal=")"),
+            Token(type=TokenType.ASTERIX, literal="*"),
+            Token(type=TokenType.INT, literal="2"),
+        ],
+        "((5 + 5) * 2)",
+    ),
+    (
+        [
+            Token(type=TokenType.INT, literal="2"),
+            Token(type=TokenType.SLASH, literal="/"),
+            Token(type=TokenType.LPAREN, literal="("),
+            Token(type=TokenType.INT, literal="5"),
+            Token(type=TokenType.PLUS, literal="+"),
+            Token(type=TokenType.INT, literal="5"),
+            Token(type=TokenType.RPAREN, literal=")"),
+        ],
+        "(2 / (5 + 5))",
+    ),
+    (
+        [
+            Token(type=TokenType.MINUS, literal="-"),
+            Token(type=TokenType.LPAREN, literal="("),
+            Token(type=TokenType.INT, literal="5"),
+            Token(type=TokenType.PLUS, literal="+"),
+            Token(type=TokenType.INT, literal="5"),
+            Token(type=TokenType.RPAREN, literal=")"),
+        ],
+        "(-(5 + 5))",
+    ),
+    (
+        [
+            Token(type=TokenType.LPAREN, literal="("),
+            Token(type=TokenType.INT, literal="1"),
+            Token(type=TokenType.PLUS, literal="+"),
+            Token(type=TokenType.LPAREN, literal="("),
+            Token(type=TokenType.INT, literal="2"),
+            Token(type=TokenType.PLUS, literal="+"),
+            Token(type=TokenType.LPAREN, literal="("),
+            Token(type=TokenType.INT, literal="3"),
+            Token(type=TokenType.PLUS, literal="+"),
+            Token(type=TokenType.INT, literal="4"),
+            Token(type=TokenType.RPAREN, literal=")"),
+            Token(type=TokenType.RPAREN, literal=")"),
+            Token(type=TokenType.RPAREN, literal=")"),
+        ],
+        "(1 + (2 + (3 + 4)))",
+    ),
+]
