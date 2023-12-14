@@ -1,3 +1,4 @@
+# pylint: disable=redefined-outer-name
 import pytest
 from result import Ok
 
@@ -6,6 +7,7 @@ from src.lexer.interfaces import ILexer
 from src.lexer.tokens import Token, TokenType
 from src.parser.parser import Parser
 from tests.mock.lexer_mock import LexerMock
+from tests.utils.decorators import n_len_program
 from tests.utils.types import YieldFixture
 
 
@@ -34,8 +36,8 @@ def expected_stmts_len() -> YieldFixture[int | None]:
 
 @pytest.fixture(params=[None])
 def ok_len_program(
-    request: pytest.FixtureRequest,
     parser: Parser,
+    expected_stmts_len: int | None,
 ) -> YieldFixture[ast_nodes.Program]:
     """
     Parses program with provided parser and checks the result.
@@ -46,14 +48,9 @@ def ok_len_program(
     If `expected_stmts_len` is provided (not None)
         Assert: Program contains only `expected_stmts_len` statement.
 
-    Args:
-        parser (Parser): Parser.
-        expected_stmts_len (int): Expected number of statements in result program. Defaults to None.
-
     Returns:
         ast_nodes.Program: Parsed Program node.
     """
-    expected_stmts_len: int | None = request.param
     program_result = parser.parse_program()
     assert isinstance(
         program_result, Ok
@@ -66,3 +63,24 @@ def ok_len_program(
         ), "Invalid number of statementes in program."
 
     yield program
+
+
+@pytest.fixture
+@n_len_program(1)
+def expression_stmt(
+    ok_len_program: ast_nodes.Program,
+) -> YieldFixture[ast_nodes.ExpressionStatement]:
+    """
+    Checks if ok_program contains only one statement which is an expression statement.
+
+    Assert: ok_program contains 1 statement.
+    Assert: That 1 statement is an ExpressionStatement.
+
+    Returns:
+        ast_nodes.ExpressionStatement: That one ExpressionStatement from parsed program.
+    """
+    stmt = ok_len_program.statements[0]
+    assert isinstance(
+        stmt, ast_nodes.ExpressionStatement
+    ), f"Unexpected statement of type `{type(stmt)}`."
+    yield stmt

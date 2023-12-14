@@ -2,60 +2,9 @@ import pytest
 
 from src.ast import ast_nodes
 from src.lexer.tokens import Token, TokenType
-from tests.utils.payloads import (ExpectedInfixOperation,
-                                  ExpectedPrefixOperation)
-from tests.utils.decorators import n_len_program
+from tests.static.parser_expr_complex_tests_data import VALID_SINGLE_INFIX_OPERATIONS_AND_EXPECTED
+from tests.utils.payloads import ExpectedInfixOperation, ExpectedPrefixOperation
 
-VALID_SINGLE_INFIX_OPERATIONS_AND_EXPECTED: list[tuple[list[Token], ExpectedInfixOperation]] = [
-    (
-        [Token(TokenType.INT, "5"), Token(TokenType.PLUS, "+"), Token(TokenType.INT, "5")],
-        ExpectedInfixOperation(ast_nodes.IntegerLiteral(5), "+", ast_nodes.IntegerLiteral(5)),
-    ),
-    (
-        [Token(TokenType.INT, "5"), Token(TokenType.MINUS, "-"), Token(TokenType.INT, "5")],
-        ExpectedInfixOperation(ast_nodes.IntegerLiteral(5), "-", ast_nodes.IntegerLiteral(5)),
-    ),
-    (
-        [
-            Token(TokenType.INT, "5"),
-            Token(TokenType.ASTERIX, "*"),
-            Token(TokenType.INT, "5"),
-        ],
-        ExpectedInfixOperation(ast_nodes.IntegerLiteral(5), "*", ast_nodes.IntegerLiteral(5)),
-    ),
-    (
-        [Token(TokenType.INT, "5"), Token(TokenType.SLASH, "/"), Token(TokenType.INT, "5")],
-        ExpectedInfixOperation(ast_nodes.IntegerLiteral(5), "/", ast_nodes.IntegerLiteral(5)),
-    ),
-    (
-        [Token(TokenType.INT, "5"), Token(TokenType.GT, ">"), Token(TokenType.INT, "5")],
-        ExpectedInfixOperation(ast_nodes.IntegerLiteral(5), ">", ast_nodes.IntegerLiteral(5)),
-    ),
-    (
-        [Token(TokenType.INT, "5"), Token(TokenType.GTEQ, ">="), Token(TokenType.INT, "5")],
-        ExpectedInfixOperation(ast_nodes.IntegerLiteral(5), ">=", ast_nodes.IntegerLiteral(5)),
-    ),
-    (
-        [Token(TokenType.INT, "5"), Token(TokenType.LT, "<"), Token(TokenType.INT, "5")],
-        ExpectedInfixOperation(ast_nodes.IntegerLiteral(5), "<", ast_nodes.IntegerLiteral(5)),
-    ),
-    (
-        [Token(TokenType.INT, "5"), Token(TokenType.LTEQ, "<="), Token(TokenType.INT, "5")],
-        ExpectedInfixOperation(ast_nodes.IntegerLiteral(5), "<=", ast_nodes.IntegerLiteral(5)),
-    ),
-    (
-        [Token(TokenType.INT, "5"), Token(TokenType.EQ, "=="), Token(TokenType.INT, "5")],
-        ExpectedInfixOperation(ast_nodes.IntegerLiteral(5), "==", ast_nodes.IntegerLiteral(5)),
-    ),
-    (
-        [
-            Token(TokenType.INT, "5"),
-            Token(TokenType.NOT_EQ, "!="),
-            Token(TokenType.INT, "5"),
-        ],
-        ExpectedInfixOperation(ast_nodes.IntegerLiteral(5), "!=", ast_nodes.IntegerLiteral(5)),
-    ),
-]
 
 
 class TestParserComplexExpressionTg:
@@ -81,9 +30,8 @@ class TestParserComplexExpressionTg:
         ],
         indirect=["lexer_mock"],
     )
-    @n_len_program(1)
     def test_single_valid_prefix_operation(
-        self, ok_len_program: ast_nodes.Program, expected: ExpectedPrefixOperation
+        self, expression_stmt: ast_nodes.ExpressionStatement, expected: ExpectedPrefixOperation
     ) -> None:
         """
         Tests parser parsing single prefix operation correctly.
@@ -101,11 +49,7 @@ class TestParserComplexExpressionTg:
         Assert: PrefixOperation token_literal is equal to expected operator.
         Assert: Statement token_literal is equal to PrefixOperation token_literal.
         """
-        stmt = ok_len_program.statements[0]
-        assert isinstance(
-            stmt, ast_nodes.ExpressionStatement
-        ), f"Unexpected statement of type `{type(stmt)}`."
-        expr = stmt.expression
+        expr = expression_stmt.expression
         assert isinstance(
             expr, ast_nodes.PrefixOperation
         ), f"Unexpected expression in ExpressionStatement of type `{type(expr)}`."
@@ -114,7 +58,7 @@ class TestParserComplexExpressionTg:
         assert expr.token_literal == expected.operator, "Invalid Prefix operation token_literal."
 
         assert (
-            expr.token_literal == stmt.token_literal
+            expr.token_literal == expression_stmt.token_literal
         ), "Invalid ExpressionStatement token_literal."
 
     @pytest.mark.parametrize(
@@ -122,9 +66,8 @@ class TestParserComplexExpressionTg:
         VALID_SINGLE_INFIX_OPERATIONS_AND_EXPECTED,
         indirect=["lexer_mock"],
     )
-    @n_len_program(1)
     def test_single_valid_infix_operation(
-        self, ok_len_program: ast_nodes.Program, expected: ExpectedInfixOperation
+        self, expression_stmt: ast_nodes.ExpressionStatement, expected: ExpectedInfixOperation
     ) -> None:
         """
         Tests parser parsing single prefix operation correctly.
@@ -143,11 +86,7 @@ class TestParserComplexExpressionTg:
         Assert: InfixOperation token_literal is equal to expected operator.
         Assert: Statement token_literal is equal to InfixOperation token_literal.
         """
-        stmt = ok_len_program.statements[0]
-        assert isinstance(
-            stmt, ast_nodes.ExpressionStatement
-        ), f"Unexpected statement of type `{type(stmt)}`."
-        expr = stmt.expression
+        expr = expression_stmt.expression
         assert isinstance(
             expr, ast_nodes.InfixOperation
         ), f"Unexpected expression in ExpressionStatement of type `{type(expr)}`."
@@ -157,5 +96,5 @@ class TestParserComplexExpressionTg:
         assert expr.token_literal == expected.operator, "Invalid Infix operation token_literal."
 
         assert (
-            expr.token_literal == stmt.token_literal
+            expr.token_literal == expression_stmt.token_literal
         ), "Invalid ExpressionStatement token_literal."

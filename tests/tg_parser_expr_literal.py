@@ -2,7 +2,6 @@ import pytest
 
 from src.ast import ast_nodes
 from src.lexer.tokens import Token, TokenType
-from tests.utils.decorators import n_len_program
 
 
 class TestParserLiteralExpressionTg:
@@ -21,9 +20,8 @@ class TestParserLiteralExpressionTg:
         ],
         indirect=["lexer_mock"],
     )
-    @n_len_program(1)
     def test_single_identifier_expression(
-        self, ok_len_program: ast_nodes.Program, expected: str
+        self, expression_stmt: ast_nodes.ExpressionStatement, expected: str
     ) -> None:
         """
         Tests parser parsing single identifier expression correctly.
@@ -39,11 +37,7 @@ class TestParserLiteralExpressionTg:
         Assert: Indetifier value and token_literal are equal to the expected value.
         Assert: Statement token_literal is equal to Identifier token_literal.
         """
-        stmt = ok_len_program.statements[0]
-        assert isinstance(
-            stmt, ast_nodes.ExpressionStatement
-        ), f"Unexpected statement of type `{type(stmt)}`."
-        expr = stmt.expression
+        expr = expression_stmt.expression
         assert isinstance(
             expr, ast_nodes.Identifier
         ), f"Unexpected expression in ExpressionStatement of type `{type(expr)}`."
@@ -52,7 +46,7 @@ class TestParserLiteralExpressionTg:
         assert expr.token_literal == expected, "Invalid identifier token_literal."
 
         assert (
-            expr.token_literal == stmt.token_literal
+            expr.token_literal == expression_stmt.token_literal
         ), "Invalid ExpressionStatement token_literal."
 
     @pytest.mark.parametrize(
@@ -69,9 +63,8 @@ class TestParserLiteralExpressionTg:
         ],
         indirect=["lexer_mock"],
     )
-    @n_len_program(1)
     def test_single_integer_literal_expression(
-        self, ok_len_program: ast_nodes.Program, expected: int
+        self, expression_stmt: ast_nodes.ExpressionStatement, expected: int
     ) -> None:
         """
         Tests parser parsing single integer literal correctly.
@@ -88,11 +81,7 @@ class TestParserLiteralExpressionTg:
         Assert: IntegerLiteral token_literal is equal to str(expected value).
         Assert: Statement token_literal is equal to IntegerLiteral token_literal.
         """
-        stmt = ok_len_program.statements[0]
-        assert isinstance(
-            stmt, ast_nodes.ExpressionStatement
-        ), f"Unexpected statement of type `{type(stmt)}`."
-        expr = stmt.expression
+        expr = expression_stmt.expression
         assert isinstance(
             expr, ast_nodes.IntegerLiteral
         ), f"Unexpected expression in ExpressionStatement of type `{type(expr)}`."
@@ -101,7 +90,7 @@ class TestParserLiteralExpressionTg:
         assert expr.token_literal == str(expected), "Invalid integer literal token_literal."
 
         assert (
-            expr.token_literal == stmt.token_literal
+            expr.token_literal == expression_stmt.token_literal
         ), "Invalid ExpressionStatement token_literal."
 
     @pytest.mark.parametrize(
@@ -119,9 +108,8 @@ class TestParserLiteralExpressionTg:
         ],
         indirect=["lexer_mock"],
     )
-    @n_len_program(1)
     def test_single_float_literal_expression(
-        self, ok_len_program: ast_nodes.Program, expected: float
+        self, expression_stmt: ast_nodes.ExpressionStatement, expected: float
     ) -> None:
         """
         Tests parser parsing single float literal correctly.
@@ -138,11 +126,7 @@ class TestParserLiteralExpressionTg:
         Assert: FloatLiteral token_literal is equal to str(expected value).
         Assert: Statement token_literal is equal to FloatLiteral token_literal.
         """
-        stmt = ok_len_program.statements[0]
-        assert isinstance(
-            stmt, ast_nodes.ExpressionStatement
-        ), f"Unexpected statement of type `{type(stmt)}`."
-        expr = stmt.expression
+        expr = expression_stmt.expression
         assert isinstance(
             expr, ast_nodes.FloatLiteral
         ), f"Unexpected expression in ExpressionStatement of type `{type(expr)}`."
@@ -151,7 +135,7 @@ class TestParserLiteralExpressionTg:
         assert expr.token_literal == str(expected), "Invalid float literal token_literal."
 
         assert (
-            expr.token_literal == stmt.token_literal
+            expr.token_literal == expression_stmt.token_literal
         ), "Invalid ExpressionStatement token_literal."
 
     @pytest.mark.parametrize(
@@ -162,9 +146,8 @@ class TestParserLiteralExpressionTg:
         ],
         indirect=["lexer_mock"],
     )
-    @n_len_program(1)
     def test_single_boolean_literal_expression(
-        self, ok_len_program: ast_nodes.Program, expected: bool
+        self, expression_stmt: ast_nodes.ExpressionStatement, expected: bool
     ) -> None:
         """
         Tests parser parsing single integer literal correctly.
@@ -181,11 +164,7 @@ class TestParserLiteralExpressionTg:
         Assert: BooleanLiteral token_literal is equal to str(expected value).
         Assert: Statement token_literal is equal to BooleanLiteral token_literal.
         """
-        stmt = ok_len_program.statements[0]
-        assert isinstance(
-            stmt, ast_nodes.ExpressionStatement
-        ), f"Unexpected statement of type `{type(stmt)}`."
-        expr = stmt.expression
+        expr = expression_stmt.expression
         assert isinstance(
             expr, ast_nodes.BooleanLiteral
         ), f"Unexpected expression in ExpressionStatement of type `{type(expr)}`."
@@ -194,5 +173,5 @@ class TestParserLiteralExpressionTg:
         assert expr.token_literal == str(expected), "Invalid boolean literal token_literal."
 
         assert (
-            expr.token_literal == stmt.token_literal
+            expr.token_literal == expression_stmt.token_literal
         ), "Invalid ExpressionStatement token_literal."
