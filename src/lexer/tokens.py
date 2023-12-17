@@ -36,6 +36,7 @@ class TokenType(StrEnum):
     LTEQ = "<="
 
     # keywords
+    FN = auto()
     TRUE = auto()
     FALSE = auto()
     LET = auto()
@@ -58,6 +59,7 @@ class Keyword(StrEnum):
     ELSE = "else"
     MUT = "mut"
     RETURN = "return"
+    FN = "fn"
 
 
 KEYWORDS: dict[str, TokenType] = {
@@ -68,4 +70,5 @@ KEYWORDS: dict[str, TokenType] = {
     Keyword.ELSE.value: TokenType.ELSE,
     Keyword.MUT.value: TokenType.MUT,
     Keyword.RETURN.value: TokenType.RETURN,
+    Keyword.FN.value: TokenType.FN,
 }

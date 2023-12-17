@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from io import StringIO
 
 from src.ast.abstract import ASTNode, Expression, Statement
+from src.ast.to_str_helpers import sio_write_with_after_value, sio_write_with_sep
 from src.lexer.tokens import Keyword
 
 
@@ -15,9 +16,7 @@ class Program(ASTNode):
 
     def __str__(self) -> str:
         ss = StringIO()
-        for stmt in self.statements:
-            ss.write(str(stmt))
-            ss.write("\n")
+        ss.writelines(str(stmt) for stmt in self.statements)
         return ss.getvalue()
 
 
@@ -109,16 +108,11 @@ class LetStatement(Statement):
 
     def __str__(self) -> str:
         ss = StringIO()
-        ss.write(Keyword.LET.value)
-        ss.write(" ")
-        if self.is_mut:
-            ss.write(Keyword.MUT.value)
-            ss.write(" ")
-        ss.write(str(self.var_type))
-        ss.write(" ")
-        ss.write(str(self.var_name))
-        ss.write(" = ")
-        ss.write(str(self.var_value))
+        values = [Keyword.LET, Keyword.MUT, str(self.var_type), str(self.var_name)]
+        if not self.is_mut:
+            values.remove(Keyword.MUT)
+        sio_write_with_after_value(ss, after_value=" ", values=values)
+        sio_write_with_sep(ss, sep=" ", values=("=", str(self.var_value)))
 
         return ss.getvalue()
 
@@ -158,10 +152,7 @@ class BlockStatement(Statement):
     def __str__(self) -> str:
         ss = StringIO()
         ss.write("{\n")
-        for stmt in self.statements:
-            ss.write(" " * 4)
-            ss.write(str(stmt))
-            ss.write("\n")
+        ss.writelines(f"{4 * ' '}{stmt}" for stmt in self.statements)
         ss.write("}")
         return ss.getvalue()
 
@@ -177,6 +168,43 @@ class IfStatement(Statement):
         return Keyword.IF
 
     def __str__(self) -> str:
+        str_ = f"{Keyword.IF} {self.condition} {self.then}"
         if self.else_ is None:
-            return f"{Keyword.IF} {self.condition} {self.then}"
-        return f"{Keyword.IF} {self.condition} {self.then} {Keyword.ELSE} {self.else_}"
+            return str_
+        return f"{str_} {Keyword.ELSE} {self.else_}"
+
+
+@dataclass(slots=True)
+class FuncParameter(Statement):
+    name: Identifier
+    type: Identifier
+    default_value: Expression | None
+
+    @property
+    def token_literal(self) -> str:
+        return self.name.token_literal
+
+    def __str__(self) -> str:
+        str_ = f"{self.name}: {self.type}"
+        if self.default_value is None:
+            return str_
+        return f"{str_} = {self.default_value}"
+
+
+@dataclass(slots=True)
+class FuncStatement(Statement):
+    name: Identifier
+    parameters: list[FuncParameter]
+    return_type: Identifier
+    body: BlockStatement
+
+    @property
+    def token_literal(self) -> str:
+        return Keyword.FN
+
+    def __str__(self) -> str:
+        ss = StringIO()
+        sio_write_with_sep(ss, sep=" ", values=(Keyword.FN, str(self.name), "("))
+        sio_write_with_sep(ss, sep=", ", values=(str(param) for param in self.parameters))
+        sio_write_with_sep(ss, sep=" ", values=(")", "->", str(self.return_type), str(self.body)))
+        return ss.getvalue()
