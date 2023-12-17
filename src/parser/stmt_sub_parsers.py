@@ -107,6 +107,58 @@ def parse_block_statement(
     return Ok(ast_nodes.BlockStatement(statements))
 
 
+def parse_if_statement(
+    parser: IParser,
+) -> Result[ast_nodes.IfStatement, StatementValidationError]:
+    """
+    Parses If statement from current position of provided parser.
+    Expected, but not checked parser.current_token is `if`.
+    After the successful read, parser.current_token is the `}` - end of last block of if statement.
+
+    Args:
+        parser (IParser): Provided parser.
+
+    Returns:
+        Result[ast_nodes.IfStatement, StatementValidationError]: parsing result.
+    """
+    parser.next_token()
+    match parse_expression(parser, Precedence.LOWEST):
+        case Err(err):
+            return Err(StatementValidationError(err))
+        case Ok(expr):
+            condition = expr
+
+    if not parser.move_to_next_if_peek_is(TokenType.LCURLY):
+        return Err(p_errors.InvalidTokenTypeInStatement(TokenType.LCURLY, parser.peek_token.type))
+
+    match parse_block_statement(parser):
+        case Err() as err:
+            return err
+        case Ok(stmt):
+            then_clause = stmt
+
+    else_clause: ast_nodes.BlockStatement | None = None
+    if parser.move_to_next_if_peek_is(TokenType.ELSE):  # if there is else-clause
+        if parser.move_to_next_if_peek_is(TokenType.LCURLY):  # if there is `else {`
+            match parse_block_statement(parser):
+                case Err() as err:
+                    return err
+                case Ok(stmt):
+                    else_clause = stmt
+        else:  # if there is "else <smth>"
+            if not parser.move_to_next_if_peek_is(TokenType.IF):  # if <smth> is not "if"
+                return Err(
+                    p_errors.InvalidTokenTypeInStatement(TokenType.LCURLY, parser.peek_token.type)
+                )
+            match parse_if_statement(parser):  # if there is "else if"
+                case Err() as err:
+                    return err
+                case Ok(stmt):
+                    else_clause = ast_nodes.BlockStatement([stmt])
+
+    return Ok(ast_nodes.IfStatement(condition, then_clause, else_clause))
+
+
 def parse_expression_statement(
     parser: IParser,
 ) -> Result[ast_nodes.ExpressionStatement, StatementValidationError]:

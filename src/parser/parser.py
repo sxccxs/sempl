@@ -83,6 +83,8 @@ class Parser(IParser):
                 return stmt_sub_parsers.parse_return_statement(self)
             case TokenType.LCURLY:
                 return stmt_sub_parsers.parse_block_statement(self)
+            case TokenType.IF:
+                return stmt_sub_parsers.parse_if_statement(self)
             case TokenType.ENDL:
                 return Ok(None)
             case _:

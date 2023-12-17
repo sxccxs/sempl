@@ -1,6 +1,6 @@
 from src.ast import ast_nodes
 from src.ast.abstract import Statement
-from src.lexer.tokens import Keyword, Token, TokenType
+from src.lexer.tokens import Token, TokenType
 from tests.utils.payloads import ExpectedIfStatement, ExpectedLetStatement
 
 VALID_LET_STATEMENT_TOKENS_AND_EXPECTED: list[tuple[list[Token], ExpectedLetStatement]] = [
@@ -130,7 +130,7 @@ VALID_IF_STATEMENT_AND_EXPECTED: list[tuple[list[Token], ExpectedIfStatement]] =
             Token(TokenType.ENDL, literal="\n"),
         ],
         ExpectedIfStatement(
-            ast_nodes.Identifier(Keyword.TRUE),
+            ast_nodes.BooleanLiteral(True),
             [],
             None,
         ),
@@ -149,7 +149,7 @@ VALID_IF_STATEMENT_AND_EXPECTED: list[tuple[list[Token], ExpectedIfStatement]] =
             Token(TokenType.ENDL, literal="\n"),
         ],
         ExpectedIfStatement(
-            ast_nodes.Identifier(Keyword.TRUE),
+            ast_nodes.BooleanLiteral(True),
             [],
             [],
         ),
@@ -269,11 +269,11 @@ VALID_IF_STATEMENT_AND_EXPECTED: list[tuple[list[Token], ExpectedIfStatement]] =
             Token(TokenType.ENDL, literal="\n"),
         ],
         ExpectedIfStatement(
-            ast_nodes.Identifier(Keyword.TRUE),
+            ast_nodes.BooleanLiteral(True),
             [],
             [
                 ast_nodes.IfStatement(
-                    ast_nodes.Identifier(Keyword.FALSE), ast_nodes.BlockStatement([]), None
+                    ast_nodes.BooleanLiteral(False), ast_nodes.BlockStatement([]), None
                 )
             ],
         ),
@@ -298,11 +298,11 @@ VALID_IF_STATEMENT_AND_EXPECTED: list[tuple[list[Token], ExpectedIfStatement]] =
             Token(TokenType.ENDL, literal="\n"),
         ],
         ExpectedIfStatement(
-            ast_nodes.Identifier(Keyword.TRUE),
+            ast_nodes.BooleanLiteral(True),
             [],
             [
                 ast_nodes.IfStatement(
-                    ast_nodes.Identifier(Keyword.FALSE), ast_nodes.BlockStatement([]), None
+                    ast_nodes.BooleanLiteral(False), ast_nodes.BlockStatement([]), None
                 )
             ],
         ),
@@ -331,11 +331,11 @@ VALID_IF_STATEMENT_AND_EXPECTED: list[tuple[list[Token], ExpectedIfStatement]] =
             Token(TokenType.ENDL, literal="\n"),
         ],
         ExpectedIfStatement(
-            ast_nodes.Identifier(Keyword.TRUE),
+            ast_nodes.BooleanLiteral(True),
             [],
             [
                 ast_nodes.IfStatement(
-                    ast_nodes.Identifier(Keyword.FALSE),
+                    ast_nodes.BooleanLiteral(False),
                     ast_nodes.BlockStatement([]),
                     ast_nodes.BlockStatement([]),
                 )
