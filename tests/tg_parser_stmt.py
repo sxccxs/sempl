@@ -1,11 +1,14 @@
 import pytest
 
 from src.ast import ast_nodes
+from src.ast.abstract import Statement
 from src.lexer.tokens import Keyword, Token, TokenType
-from tests.static.parser_stmt_tests_data import VALID_LET_STATEMENT_TOKENS_AND_EXPECTED
-from tests.utils.payloads import ExpectedLetStatement
+from tests.static.parser_stmt_tests_data import (
+    VALID_BLOCK_STATEMENT_AND_EXPECTED,
+    VALID_LET_STATEMENT_TOKENS_AND_EXPECTED,
+)
 from tests.utils.decorators import n_len_program
-
+from tests.utils.payloads import ExpectedLetStatement
 
 
 class TestParserStatementsTg:
@@ -96,3 +99,38 @@ class TestParserStatementsTg:
         ), f"Unexpected statement of type `{type(stmt)}`."
 
         # TODO: check for expression
+
+    @pytest.mark.parametrize(
+        ("lexer_mock", "expected_stmts"),
+        VALID_BLOCK_STATEMENT_AND_EXPECTED,
+        indirect=True,
+    )
+    @n_len_program(1)
+    def test_single_valid_block_statement(
+        self, ok_len_program: ast_nodes.Program, expected_stmts: list[Statement]
+    ) -> None:
+        """
+        Tests parser parsing single valid block statement correctly.
+
+        Arrange: Provide tokens to Lexer Mock.
+        Arrange: Create Parser with Lexer Mock.
+
+        Act: Parse program.
+        Assert: No error returned.
+        Assert: Program contains only one statement.
+        Assert: Statement is BlockStatement.
+        Assert: BlockStatement contains correct statements.
+        Assert: BlockStatement token literal is it's first statement token_literal
+                or empty string if no statements present.
+        """
+        stmt = ok_len_program.statements[0]
+        assert isinstance(
+            stmt, ast_nodes.BlockStatement
+        ), f"Unexpected statement of type `{type(stmt)}`."
+        assert stmt.statements == expected_stmts
+        if expected_stmts:
+            assert (
+                stmt.token_literal == expected_stmts[0].token_literal
+            ), "Invalid block statement token literal."
+        else:
+            assert stmt.token_literal == "", "Invalid block statement token literal."

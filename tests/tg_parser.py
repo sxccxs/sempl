@@ -5,6 +5,7 @@ from tests.static.parser_tests_data import (
     GROUPED_EXPRESSION_AND_EXPECTED,
     INFIX_OPERATIONS_PRECEDENCE_AND_EXPECTED,
 )
+from tests.utils.decorators import n_len_program
 
 
 class TestParserTg:
@@ -13,6 +14,7 @@ class TestParserTg:
         INFIX_OPERATIONS_PRECEDENCE_AND_EXPECTED,
         indirect=["lexer_mock"],
     )
+    @n_len_program(1)
     def test_infix_operations_precedence(
         self, ok_len_program: ast_nodes.Program, expected: str
     ) -> None:
@@ -24,15 +26,18 @@ class TestParserTg:
 
         Act: Parse program.
         Assert: No error returned.
-        Assert: str(program) equals expected.
+        Assert: Program contains only one statement.
+        Assert: str(statement) equals expected.
         """
-        assert str(ok_len_program) == expected
+        stmt = ok_len_program.statements[0]
+        assert str(stmt) == expected
 
     @pytest.mark.parametrize(
         ("lexer_mock", "expected"),
         GROUPED_EXPRESSION_AND_EXPECTED,
         indirect=["lexer_mock"],
     )
+    @n_len_program(1)
     def test_grouped_expression(self, ok_len_program: ast_nodes.Program, expected: str) -> None:
         """Tests parser parsing grouped expressions (expressions in braces).
 
@@ -41,6 +46,8 @@ class TestParserTg:
 
         Act: Parse program.
         Assert: No error returned.
+        Assert: Program contains only one statement.
         Assert: str(program) equals expected.
         """
-        assert str(ok_len_program) == expected
+        stmt = ok_len_program.statements[0]
+        assert str(stmt) == expected

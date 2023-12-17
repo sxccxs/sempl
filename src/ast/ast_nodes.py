@@ -17,6 +17,7 @@ class Program(ASTNode):
         ss = StringIO()
         for stmt in self.statements:
             ss.write(str(stmt))
+            ss.write("\n")
         return ss.getvalue()
 
 
@@ -144,3 +145,23 @@ class ExpressionStatement(Statement):
 
     def __str__(self) -> str:
         return str(self.expression)
+
+
+@dataclass(slots=True)
+class BlockStatement(Statement):
+    statements: list[Statement]
+
+    @property
+    def token_literal(self) -> str:
+        return self.statements[0].token_literal if self.statements else ""
+
+    def __str__(self) -> str:
+        ss = StringIO()
+        ss.write("{\n")
+        for stmt in self.statements:
+            ss.write(" " * 4)
+            ss.write(str(stmt))
+            ss.write("\n")
+        ss.write("}")
+        return ss.getvalue()
+

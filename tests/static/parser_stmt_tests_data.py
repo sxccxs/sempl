@@ -1,3 +1,5 @@
+from src.ast import ast_nodes
+from src.ast.abstract import Statement
 from src.lexer.tokens import Token, TokenType
 from tests.utils.payloads import ExpectedLetStatement
 
@@ -54,5 +56,65 @@ VALID_LET_STATEMENT_TOKENS_AND_EXPECTED: list[tuple[list[Token], ExpectedLetStat
             Token(TokenType.ENDL, "\n"),
         ],
         ExpectedLetStatement(True, "int", "word"),
+    ),
+]
+
+VALID_BLOCK_STATEMENT_AND_EXPECTED: list[tuple[list[Token], list[Statement]]] = [
+    (
+        [
+            Token(TokenType.LCURLY, literal="{"),
+            Token(TokenType.ENDL, literal="\n"),
+            Token(TokenType.IDENT, literal="x"),
+            Token(TokenType.LT, literal="<"),
+            Token(TokenType.IDENT, literal="y"),
+            Token(TokenType.ENDL, literal="\n"),
+            Token(TokenType.RCURLY, literal="}"),
+            Token(TokenType.ENDL, literal="\n"),
+        ],
+        [
+            ast_nodes.ExpressionStatement(
+                ast_nodes.InfixOperation(ast_nodes.Identifier("x"), "<", ast_nodes.Identifier("y"))
+            )
+        ],
+    ),
+    (
+        [
+            Token(TokenType.LCURLY, literal="{"),
+            Token(TokenType.ENDL, literal="\n"),
+            Token(TokenType.IDENT, literal="x"),
+            Token(TokenType.PLUS, literal="+"),
+            Token(TokenType.IDENT, literal="y"),
+            Token(TokenType.ENDL, literal="\n"),
+            Token(TokenType.IDENT, literal="x"),
+            Token(TokenType.LT, literal="<"),
+            Token(TokenType.IDENT, literal="y"),
+            Token(TokenType.ENDL, literal="\n"),
+            Token(TokenType.RCURLY, literal="}"),
+            Token(TokenType.ENDL, literal="\n"),
+        ],
+        [
+            ast_nodes.ExpressionStatement(
+                ast_nodes.InfixOperation(ast_nodes.Identifier("x"), "+", ast_nodes.Identifier("y"))
+            ),
+            ast_nodes.ExpressionStatement(
+                ast_nodes.InfixOperation(ast_nodes.Identifier("x"), "<", ast_nodes.Identifier("y"))
+            ),
+        ],
+    ),
+    (
+        [
+            Token(TokenType.LCURLY, literal="{"),
+            Token(TokenType.ENDL, literal="\n"),
+            Token(TokenType.RCURLY, literal="}"),
+            Token(TokenType.ENDL, literal="\n"),
+        ],
+        [],
+    ),
+    (
+        [
+            Token(TokenType.LCURLY, literal="{"),
+            Token(TokenType.RCURLY, literal="}"),
+        ],
+        [],
     ),
 ]
