@@ -103,7 +103,7 @@ class TestParserStatementsTg:
     @pytest.mark.parametrize(
         ("lexer_mock", "expected_stmts"),
         VALID_BLOCK_STATEMENT_AND_EXPECTED,
-        indirect=True,
+        indirect=["lexer_mock"],
     )
     @n_len_program(1)
     def test_single_valid_block_statement(

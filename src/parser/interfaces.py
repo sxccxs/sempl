@@ -3,7 +3,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Protocol
 
+from result import Result
+from src.ast.abstract import Statement
+
 from src.lexer.tokens import Token, TokenType
+from src.parser.errors import StatementValidationError
 
 if TYPE_CHECKING:
     from src.parser.types import InfixParserType, Precedence, PrefixParserType
@@ -42,6 +46,10 @@ class IParser(Protocol):
 
     def next_token(self) -> None:
         """Moves parser to the next token."""
+        ...
+
+    def parse_statement(self) -> Result[Statement | None, StatementValidationError]:
+        """Parses one statement from current token if such is valid."""
         ...
 
     def cur_token_is(self, token_t: TokenType) -> bool:

@@ -4,6 +4,7 @@ from result import Err, Ok, Result
 
 import src.parser.errors as p_errors
 from src.ast import ast_nodes
+from src.ast.abstract import Statement
 from src.lexer.tokens import TokenType
 from src.parser.errors import StatementValidationError
 from src.parser.expr_sub_parsers import parse_expression
@@ -73,6 +74,37 @@ def parse_return_statement(
         parser.next_token()
 
     return Ok(stmt)
+
+
+def parse_block_statement(
+    parser: IParser,
+) -> Result[ast_nodes.BlockStatement, StatementValidationError]:
+    """
+    Parses Block statement from current position of provided parser.
+    Expected, but not checked parser.current_token is `{`.
+    After the successful read, parser.current_token is the `}`.
+
+    Args:
+        parser (IParser): Provided parser.
+
+    Returns:
+        Result[ast_nodes.BlockStatement, StatementValidationError]: parsing result.
+    """
+    statements: list[Statement] = []
+    parser.next_token()
+
+    while not parser.cur_token_is(TokenType.RCURLY):
+        if parser.cur_token_is(TokenType.EOF):
+            return Err(StatementValidationError("Unexpected EOF. Brace was not closed."))
+        match parser.parse_statement():
+            case Err(err):
+                return Err(StatementValidationError(err))
+            case Ok(stmt):
+                if stmt is not None:
+                    statements.append(stmt)
+        parser.next_token()
+
+    return Ok(ast_nodes.BlockStatement(statements))
 
 
 def parse_expression_statement(
