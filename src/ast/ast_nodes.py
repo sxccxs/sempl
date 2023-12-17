@@ -165,3 +165,18 @@ class BlockStatement(Statement):
         ss.write("}")
         return ss.getvalue()
 
+
+@dataclass(slots=True)
+class IfStatement(Statement):
+    condition: Expression
+    then: BlockStatement
+    else_: BlockStatement | None = None
+
+    @property
+    def token_literal(self) -> str:
+        return Keyword.IF
+
+    def __str__(self) -> str:
+        if self.else_ is None:
+            return f"{Keyword.IF} {self.condition} {self.then}"
+        return f"{Keyword.IF} {self.condition} {self.then} {Keyword.ELSE} {self.else_}"

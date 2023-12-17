@@ -5,10 +5,11 @@ from src.ast.abstract import Statement
 from src.lexer.tokens import Keyword, Token, TokenType
 from tests.static.parser_stmt_tests_data import (
     VALID_BLOCK_STATEMENT_AND_EXPECTED,
+    VALID_IF_STATEMENT_AND_EXPECTED,
     VALID_LET_STATEMENT_TOKENS_AND_EXPECTED,
 )
 from tests.utils.decorators import n_len_program
-from tests.utils.payloads import ExpectedLetStatement
+from tests.utils.payloads import ExpectedIfStatement, ExpectedLetStatement
 
 
 class TestParserStatementsTg:
@@ -134,3 +135,44 @@ class TestParserStatementsTg:
             ), "Invalid block statement token literal."
         else:
             assert stmt.token_literal == "", "Invalid block statement token literal."
+
+    @pytest.mark.parametrize(
+        ("lexer_mock", "expected"),
+        VALID_IF_STATEMENT_AND_EXPECTED,
+        indirect=["lexer_mock"],
+    )
+    @n_len_program(1)
+    def test_single_valid_if_statement(
+        self, ok_len_program: ast_nodes.Program, expected: ExpectedIfStatement
+    ) -> None:
+        """
+        Tests parser parsing single valid if statement correctly.
+
+        Arrange: Provide tokens to Lexer Mock.
+        Arrange: Create Parser with Lexer Mock.
+
+        Act: Parse program.
+        Assert: No error returned.
+        Assert: Program contains only one statement.
+        Assert: Statement is IfStatement.
+        Assert: IfStatement contains correct condition.
+        Assert: IfStatement contains correct then-clause.
+        Assert: If else-clause is present, IfStatement contains correct else-clause.
+        Assert: If statement literal is `if`.
+        """
+        stmt = ok_len_program.statements[0]
+        assert isinstance(
+            stmt, ast_nodes.IfStatement
+        ), f"Unexpected statement of type `{type(stmt)}`."
+        assert stmt.token_literal == Keyword.IF, "Invalid if statement token literal."
+        assert stmt.condition == expected.condition, "Invalid condition in if statement."
+        assert (
+            stmt.then.statements == expected.then_statements
+        ), "Invalid statements in then-clause."
+        if expected.else_statements is None:
+            assert stmt.else_ is None, "Unexpected else-clause."
+        else:
+            assert stmt.else_ is not None, "Else-clause is missing."
+            assert (
+                stmt.else_.statements == expected.else_statements
+            ), "Invalid statements in else-clause."
