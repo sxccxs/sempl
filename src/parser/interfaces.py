@@ -52,7 +52,7 @@ class IParser(Protocol):
         """True if parser's peek token equals to token_t else False."""
         return self.peek_token.type == token_t
 
-    def move_to_next_if_peek_is_expected(self, expected_t: TokenType) -> bool:
+    def move_to_next_if_peek_is(self, expected_t: TokenType) -> bool:
         """
         If parser's peek token equals to token_t, moves to next token and returns True.
         Otherwise just returns False.

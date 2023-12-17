@@ -130,7 +130,7 @@ def parse_grouped_expression(parser: IParser) -> Result[Expression, ExpressionVa
             expr = value
 
     if not parser.peek_token_is(TokenType.RPAREN):
-        return Err(ExpressionValidationError(f"Brace was not closed after expression={str(expr)}"))
+        return Err(ExpressionValidationError(f"Brace was not closed after expression=<{expr}>"))
 
     parser.next_token()
     return Ok(expr)
