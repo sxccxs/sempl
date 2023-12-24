@@ -21,6 +21,19 @@ class ExpectedIfStatement(NamedTuple):
     else_statements: list[Statement] | None
 
 
+class ExpectedParam(NamedTuple):
+    name: str
+    type: str
+    default_value: Expression | None
+
+
+class ExpectedFunc(NamedTuple):
+    name: str
+    return_type: str
+    parameters: list[ExpectedParam]
+    body: list[Statement]
+
+
 class ExpectedPrefixOperation(NamedTuple):
     operator: str
     operand: Expression

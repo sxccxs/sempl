@@ -5,11 +5,12 @@ from src.ast.abstract import Expression, Statement
 from src.lexer.tokens import Keyword, Token, TokenType
 from tests.static.parser_stmt_tests_data import (
     VALID_BLOCK_STATEMENT_AND_EXPECTED,
+    VALID_FUNC_AND_EXPECTED,
     VALID_IF_STATEMENT_AND_EXPECTED,
     VALID_LET_STATEMENT_TOKENS_AND_EXPECTED,
 )
 from tests.utils.decorators import n_len_program
-from tests.utils.payloads import ExpectedIfStatement, ExpectedLetStatement
+from tests.utils.payloads import ExpectedFunc, ExpectedIfStatement, ExpectedLetStatement
 
 
 class TestParserStatementsTg:
@@ -183,3 +184,39 @@ class TestParserStatementsTg:
             assert (
                 stmt.else_.statements == expected.else_statements
             ), "Invalid statements in else-clause."
+
+    @pytest.mark.parametrize(
+        ("lexer_mock", "expected"),
+        VALID_FUNC_AND_EXPECTED,
+        indirect=["lexer_mock"],
+    )
+    @n_len_program(1)
+    def test_single_valid_function(
+        self, ok_len_program: ast_nodes.Program, expected: ExpectedFunc
+    ) -> None:
+        """
+        Tests parser parsing single valid if statement correctly.
+
+        Arrange: Provide tokens to Lexer Mock.
+        Arrange: Create Parser with Lexer Mock.
+
+        Act: Parse program.
+        Assert: No error returned.
+        Assert: Program contains only one statement.
+        Assert: Statement is FuncStatement.
+        Assert: If statement literal is `fn`.
+        Assert: FuncStatement name is expected.
+        Assert: FuncStatement contains correct parameters.
+        Assert: FuncStatement contains correct body.
+        """
+        stmt = ok_len_program.statements[0]
+        assert isinstance(
+            stmt, ast_nodes.FuncStatement
+        ), f"Unexpected statement of type `{type(stmt)}`."
+        assert stmt.token_literal == Keyword.FN, "Invalid if statement token literal."
+        assert stmt.name.value == expected.name, "Invalid condition in if statement."
+        for param, expected_param in zip(stmt.parameters, expected.parameters):
+            assert param.name.value == expected_param.name, "Invalid parameter name."
+            assert param.type.value == expected_param.type, "Invalid parameter type."
+            assert param.default_value == expected_param.default_value, "Invalid default value."
+        assert stmt.body.statements == expected.body, "Invalid statements in function body."

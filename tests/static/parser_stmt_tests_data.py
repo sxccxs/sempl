@@ -1,12 +1,8 @@
 from src.ast import ast_nodes
 from src.ast.abstract import Statement
 from src.lexer.tokens import Token, TokenType
-from tests.utils.payloads import (
-    ExpectedFunc,
-    ExpectedIfStatement,
-    ExpectedLetStatement,
-    ExpectedParam,
-)
+from tests.utils.payloads import (ExpectedFunc, ExpectedIfStatement,
+                                  ExpectedLetStatement, ExpectedParam)
 
 VALID_LET_STATEMENT_TOKENS_AND_EXPECTED: list[tuple[list[Token], ExpectedLetStatement]] = [
     (
@@ -360,6 +356,94 @@ VALID_IF_STATEMENT_AND_EXPECTED: list[tuple[list[Token], ExpectedIfStatement]] =
                     ast_nodes.BlockStatement([]),
                     ast_nodes.BlockStatement([]),
                 )
+            ],
+        ),
+    ),
+]
+
+
+VALID_FUNC_AND_EXPECTED: list[tuple[list[Token], ExpectedFunc]] = [
+    (
+        [
+            Token(TokenType.FN, "fn"),
+            Token(TokenType.IDENT, "func"),
+            Token(TokenType.LPAREN, "("),
+            Token(TokenType.RPAREN, ")"),
+            Token(TokenType.ARROW, "->"),
+            Token(TokenType.IDENT, "int"),
+            Token(TokenType.LCURLY, "{"),
+            Token(TokenType.ENDL, "\n"),
+            Token(TokenType.RCURLY, "}"),
+            Token(TokenType.ENDL, "\n"),
+        ],
+        ExpectedFunc("func", "int", [], []),
+    ),
+    (
+        [
+            Token(TokenType.FN, "fn"),
+            Token(TokenType.IDENT, "func"),
+            Token(TokenType.LPAREN, "("),
+            Token(TokenType.IDENT, "a"),
+            Token(TokenType.COLON, ":"),
+            Token(TokenType.IDENT, "int"),
+            Token(TokenType.ILLEGAL, ","),
+            Token(TokenType.IDENT, "b"),
+            Token(TokenType.COLON, ":"),
+            Token(TokenType.IDENT, "str"),
+            Token(TokenType.RPAREN, ")"),
+            Token(TokenType.ARROW, "->"),
+            Token(TokenType.IDENT, "bool"),
+            Token(TokenType.LCURLY, "{"),
+            Token(TokenType.RCURLY, "}"),
+            Token(TokenType.ENDL, "\n"),
+        ],
+        ExpectedFunc(
+            "func", "bool", [ExpectedParam("a", "int", None), ExpectedParam("b", "str", None)], []
+        ),
+    ),
+    (
+        [
+            Token(TokenType.FN, "fn"),
+            Token(TokenType.IDENT, "f"),
+            Token(TokenType.LPAREN, "("),
+            Token(TokenType.IDENT, "a"),
+            Token(TokenType.COLON, ":"),
+            Token(TokenType.IDENT, "int"),
+            Token(TokenType.ASSIGN, "="),
+            Token(TokenType.INT, "5"),
+            Token(TokenType.RPAREN, ")"),
+            Token(TokenType.ARROW, "->"),
+            Token(TokenType.IDENT, "int"),
+            Token(TokenType.LCURLY, "{"),
+            Token(TokenType.ENDL, "\n"),
+            Token(TokenType.LET, "let"),
+            Token(TokenType.IDENT, "int"),
+            Token(TokenType.IDENT, "b"),
+            Token(TokenType.ASSIGN, "="),
+            Token(TokenType.FLOAT, "10."),
+            Token(TokenType.ASTERIX, "*"),
+            Token(TokenType.IDENT, "a"),
+            Token(TokenType.ENDL, "\n"),
+            Token(TokenType.RETURN, "return"),
+            Token(TokenType.IDENT, "b"),
+            Token(TokenType.ENDL, "\n"),
+            Token(TokenType.RCURLY, "}"),
+            Token(TokenType.ENDL, "\n"),
+        ],
+        ExpectedFunc(
+            "f",
+            "int",
+            [ExpectedParam("a", "int", ast_nodes.IntegerLiteral(5))],
+            [
+                ast_nodes.LetStatement(
+                    False,
+                    ast_nodes.Identifier("int"),
+                    ast_nodes.Identifier("b"),
+                    ast_nodes.InfixOperation(
+                        ast_nodes.IntegerLiteral(10), "*", ast_nodes.Identifier("a")
+                    ),
+                ),
+                ast_nodes.ReturnStatement(ast_nodes.Identifier("b")),
             ],
         ),
     ),
