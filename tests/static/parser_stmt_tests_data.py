@@ -1,7 +1,12 @@
 from src.ast import ast_nodes
 from src.ast.abstract import Statement
 from src.lexer.tokens import Token, TokenType
-from tests.utils.payloads import ExpectedIfStatement, ExpectedLetStatement
+from tests.utils.payloads import (
+    ExpectedFunc,
+    ExpectedIfStatement,
+    ExpectedLetStatement,
+    ExpectedParam,
+)
 
 VALID_LET_STATEMENT_TOKENS_AND_EXPECTED: list[tuple[list[Token], ExpectedLetStatement]] = [
     (
@@ -13,20 +18,25 @@ VALID_LET_STATEMENT_TOKENS_AND_EXPECTED: list[tuple[list[Token], ExpectedLetStat
             Token(TokenType.INT, "10"),
             Token(TokenType.ENDL, "\n"),
         ],
-        ExpectedLetStatement(False, "int", "x"),
+        ExpectedLetStatement(False, "int", "x", ast_nodes.IntegerLiteral(10)),
     ),
     (
         [
             Token(TokenType.LET, "let"),
-            Token(TokenType.IDENT, "str"),
+            Token(TokenType.IDENT, "int"),
             Token(TokenType.IDENT, "_abcdef11_"),
             Token(TokenType.ASSIGN, "="),
-            Token(TokenType.ILLEGAL, '"'),
-            Token(TokenType.ILLEGAL, '"'),
+            Token(TokenType.MINUS, "-"),
+            Token(TokenType.INT, "5000"),
             Token(TokenType.ENDL, "\n"),
             Token(TokenType.ENDL, "\n"),
         ],
-        ExpectedLetStatement(False, "str", "_abcdef11_"),
+        ExpectedLetStatement(
+            False,
+            "int",
+            "_abcdef11_",
+            ast_nodes.PrefixOperation("-", ast_nodes.IntegerLiteral(5000)),
+        ),
     ),
     (
         [
@@ -37,7 +47,7 @@ VALID_LET_STATEMENT_TOKENS_AND_EXPECTED: list[tuple[list[Token], ExpectedLetStat
             Token(TokenType.ASSIGN, "="),
             Token(TokenType.FLOAT, "20."),
         ],
-        ExpectedLetStatement(True, "int", "y"),
+        ExpectedLetStatement(True, "int", "y", ast_nodes.FloatLiteral(20.0)),
     ),
     (
         [
@@ -49,13 +59,24 @@ VALID_LET_STATEMENT_TOKENS_AND_EXPECTED: list[tuple[list[Token], ExpectedLetStat
             Token(TokenType.INT, "25"),
             Token(TokenType.PLUS, "+"),
             Token(TokenType.FLOAT, "34."),
-            Token(TokenType.ILLEGAL, "^"),
+            Token(TokenType.ASTERIX, "*"),
             Token(TokenType.INT, "2"),
             Token(TokenType.ENDL, "\n"),
             Token(TokenType.ENDL, "\n"),
             Token(TokenType.ENDL, "\n"),
         ],
-        ExpectedLetStatement(True, "int", "word"),
+        ExpectedLetStatement(
+            True,
+            "int",
+            "word",
+            ast_nodes.InfixOperation(
+                ast_nodes.IntegerLiteral(25),
+                "+",
+                ast_nodes.InfixOperation(
+                    ast_nodes.FloatLiteral(34.0), "*", ast_nodes.IntegerLiteral(2)
+                ),
+            ),
+        ),
     ),
 ]
 

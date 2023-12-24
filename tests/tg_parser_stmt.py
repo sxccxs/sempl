@@ -1,7 +1,7 @@
 import pytest
 
 from src.ast import ast_nodes
-from src.ast.abstract import Statement
+from src.ast.abstract import Expression, Statement
 from src.lexer.tokens import Keyword, Token, TokenType
 from tests.static.parser_stmt_tests_data import (
     VALID_BLOCK_STATEMENT_AND_EXPECTED,
@@ -36,6 +36,7 @@ class TestParserStatementsTg:
         Assert: Let statement mutability equals to expected.
         Assert: Let statement var_type.value and var_type.token_literal equals to expected type.
         Assert: Let statement var_name.value and var_name.token_literal equals to expected name.
+        Assert: Let statement var_value is correct.
         """
         stmt = ok_len_program.statements[0]
         assert stmt.token_literal == Keyword.LET.value, "Invalid let statement token literal."
@@ -55,31 +56,36 @@ class TestParserStatementsTg:
             stmt.var_name.token_literal == expected_result.name
         ), "Invalid var_name token literal."
 
-        # TODO: check for var_value
+        assert stmt.var_value == expected_result.value, "Invalid variable value."
 
     @pytest.mark.parametrize(
-        "lexer_mock",
+        ("lexer_mock", "expected"),
         [
-            [
-                Token(TokenType.RETURN, literal="return"),
-            ],
-            [
-                Token(TokenType.RETURN, literal="return"),
-                Token(TokenType.INT, literal="10"),
-                Token(TokenType.ENDL, literal="\n"),
-            ],
-            [
-                Token(TokenType.RETURN, literal="return"),
-                Token(TokenType.IDENT, literal="a"),
-                Token(TokenType.PLUS, literal="+"),
-                Token(TokenType.IDENT, literal="b"),
-                Token(TokenType.ENDL, literal="\n"),
-            ],
+            (
+                [
+                    Token(TokenType.RETURN, literal="return"),
+                    Token(TokenType.INT, literal="10"),
+                    Token(TokenType.ENDL, literal="\n"),
+                ],
+                ast_nodes.IntegerLiteral(10),
+            ),
+            (
+                [
+                    Token(TokenType.RETURN, literal="return"),
+                    Token(TokenType.IDENT, literal="a"),
+                    Token(TokenType.PLUS, literal="+"),
+                    Token(TokenType.IDENT, literal="b"),
+                    Token(TokenType.ENDL, literal="\n"),
+                ],
+                ast_nodes.InfixOperation(ast_nodes.Identifier("a"), "+", ast_nodes.Identifier("b")),
+            ),
         ],
-        indirect=True,
+        indirect=["lexer_mock"],
     )
     @n_len_program(1)
-    def test_single_correct_return_statement(self, ok_len_program: ast_nodes.Program) -> None:
+    def test_single_correct_return_statement(
+        self, ok_len_program: ast_nodes.Program, expected: Expression
+    ) -> None:
         """
         Tests parser parsing single valid return statement correctly.
 
@@ -91,6 +97,7 @@ class TestParserStatementsTg:
         Assert: Program contains only one statement.
         Assert: Statement literal is `return`.
         Assert: Statement is ReturnStatement.
+        Assert: ReturnStatement expression is correct.
         """
         stmt = ok_len_program.statements[0]
 
@@ -99,7 +106,7 @@ class TestParserStatementsTg:
             stmt, ast_nodes.ReturnStatement
         ), f"Unexpected statement of type `{type(stmt)}`."
 
-        # TODO: check for expression
+        assert stmt.return_value == expected, "Invalid return value."
 
     @pytest.mark.parametrize(
         ("lexer_mock", "expected_stmts"),
@@ -155,10 +162,10 @@ class TestParserStatementsTg:
         Assert: No error returned.
         Assert: Program contains only one statement.
         Assert: Statement is IfStatement.
+        Assert: If statement literal is `if`.
         Assert: IfStatement contains correct condition.
         Assert: IfStatement contains correct then-clause.
         Assert: If else-clause is present, IfStatement contains correct else-clause.
-        Assert: If statement literal is `if`.
         """
         stmt = ok_len_program.statements[0]
         assert isinstance(

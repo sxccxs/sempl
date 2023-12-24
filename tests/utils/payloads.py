@@ -7,6 +7,7 @@ class ExpectedLetStatement(NamedTuple):
     mut: bool
     type: str
     name: str
+    value: Expression
 
 
 class ExpectedIfStatement(NamedTuple):

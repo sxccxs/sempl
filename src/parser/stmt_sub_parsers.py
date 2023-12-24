@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from result import Err, Ok, Result
 
-import src.parser.errors as p_errors
 from src.ast import ast_nodes
 from src.ast.abstract import Statement
 from src.lexer.tokens import TokenType
+from src.parser import errors
 from src.parser.errors import StatementValidationError
 from src.parser.expr_sub_parsers import parse_expression
 from src.parser.interfaces import IParser
@@ -17,7 +17,7 @@ def parse_let_statement(
 ) -> Result[ast_nodes.LetStatement, StatementValidationError]:
     """
     Parses Let statement from current position of provided parser.
-    Expected, but not checked parser.current_token is `let`.
+    Expected and checked parser.current_token is `let`.
     After the successful read, parser.current_token is the last token of the statement.
 
     Args:
@@ -26,6 +26,8 @@ def parse_let_statement(
     Returns:
         Result[ast_nodes.LetStatement, StatementValidationError]: parsing result.
     """
+    if (err := _check_cur_token(parser, TokenType.LET)) is not None:
+        return err
     parser.next_token()
     is_mut = False
     if parser.cur_token_is(TokenType.MUT):
@@ -41,14 +43,22 @@ def parse_let_statement(
     parser.next_token()
 
     if not parser.peek_token_is(TokenType.ASSIGN):
-        return Err(p_errors.InvalidTokenTypeInStatement(TokenType.ASSIGN, parser.peek_token.type))
+        return Err(errors.InvalidTokenTypeInStatement(TokenType.ASSIGN, parser.peek_token.type))
+
+    parser.next_token()
     parser.next_token()
 
-    stmt = ast_nodes.LetStatement(
-        is_mut=is_mut, var_type=var_type, var_name=var_name, var_value=None  # type: ignore
-    )  # TODO: fix
+    match parse_expression(parser, Precedence.LOWEST):
+        case Err(err):
+            return Err(StatementValidationError(err))
+        case Ok(expr):
+            var_value = expr
 
-    while not parser.cur_token_is(TokenType.ENDL) and not parser.cur_token_is(TokenType.EOF):
+    stmt = ast_nodes.LetStatement(
+        is_mut=is_mut, var_type=var_type, var_name=var_name, var_value=var_value
+    )
+
+    if parser.peek_token_is(TokenType.ENDL):
         parser.next_token()
 
     return Ok(stmt)
@@ -59,7 +69,7 @@ def parse_return_statement(
 ) -> Result[ast_nodes.ReturnStatement, StatementValidationError]:
     """
     Parses Return statement from current position of provided parser.
-    Expected, but not checked parser.current_token is `return`.
+    Expected and checked parser.current_token is `return`.
     After the successful read, parser.current_token is the last token of the statement.
 
     Args:
@@ -68,9 +78,18 @@ def parse_return_statement(
     Returns:
         Result[ast_nodes.ReturnStatement, StatementValidationError]: parsing result.
     """
-    stmt = ast_nodes.ReturnStatement(return_value=None)  # type: ignore  # TODO: fix
+    if (err := _check_cur_token(parser, TokenType.RETURN)) is not None:
+        return err
+    parser.next_token()
+    match parse_expression(parser, Precedence.LOWEST):
+        case Err(err):
+            return Err(StatementValidationError(err))
+        case Ok(expr):
+            return_value = expr
 
-    while not parser.cur_token_is(TokenType.ENDL) and not parser.cur_token_is(TokenType.EOF):
+    stmt = ast_nodes.ReturnStatement(return_value=return_value)
+
+    if parser.peek_token_is(TokenType.ENDL):
         parser.next_token()
 
     return Ok(stmt)
@@ -81,7 +100,7 @@ def parse_block_statement(
 ) -> Result[ast_nodes.BlockStatement, StatementValidationError]:
     """
     Parses Block statement from current position of provided parser.
-    Expected, but not checked parser.current_token is `{`.
+    Expected and checked checked parser.current_token is `{`.
     After the successful read, parser.current_token is the `}`.
 
     Args:
@@ -90,6 +109,8 @@ def parse_block_statement(
     Returns:
         Result[ast_nodes.BlockStatement, StatementValidationError]: parsing result.
     """
+    if (err := _check_cur_token(parser, TokenType.LCURLY)) is not None:
+        return err
     statements: list[Statement] = []
     parser.next_token()
 
@@ -112,7 +133,7 @@ def parse_if_statement(
 ) -> Result[ast_nodes.IfStatement, StatementValidationError]:
     """
     Parses If statement from current position of provided parser.
-    Expected, but not checked parser.current_token is `if`.
+    Expected and checked parser.current_token is `if`.
     After the successful read, parser.current_token is the `}` - end of last block of if statement.
 
     Args:
@@ -121,6 +142,8 @@ def parse_if_statement(
     Returns:
         Result[ast_nodes.IfStatement, StatementValidationError]: parsing result.
     """
+    if (err := _check_cur_token(parser, TokenType.IF)) is not None:
+        return err
     parser.next_token()
     match parse_expression(parser, Precedence.LOWEST):
         case Err(err):
@@ -129,7 +152,7 @@ def parse_if_statement(
             condition = expr
 
     if not parser.move_to_next_if_peek_is(TokenType.LCURLY):
-        return Err(p_errors.InvalidTokenTypeInStatement(TokenType.LCURLY, parser.peek_token.type))
+        return Err(errors.InvalidTokenTypeInStatement(TokenType.LCURLY, parser.peek_token.type))
 
     match parse_block_statement(parser):
         case Err() as err:
@@ -148,7 +171,7 @@ def parse_if_statement(
         else:  # if there is "else <smth>"
             if not parser.move_to_next_if_peek_is(TokenType.IF):  # if <smth> is not "if"
                 return Err(
-                    p_errors.InvalidTokenTypeInStatement(TokenType.LCURLY, parser.peek_token.type)
+                    errors.InvalidTokenTypeInStatement(TokenType.LCURLY, parser.peek_token.type)
                 )
             match parse_if_statement(parser):  # if there is "else if"
                 case Err() as err:
@@ -181,7 +204,7 @@ def parse_expression_statement(
 
 def _validate_parser_cur_and_peek(
     parser: IParser, cur_tt: TokenType, peek_tt: TokenType
-) -> Result[None, p_errors.InvalidTokenTypeInStatement]:
+) -> Result[None, errors.InvalidTokenTypeInStatement]:
     """
     Checks if current token of parser is `cur_tt`.
     If not, returns corresponding error.
@@ -197,17 +220,29 @@ def _validate_parser_cur_and_peek(
     """
     if not parser.cur_token_is(cur_tt):
         return Err(
-            p_errors.InvalidTokenTypeInStatement(
+            errors.InvalidTokenTypeInStatement(
                 cur_tt,
                 parser.current_token.type,
             )
         )
     if not parser.peek_token_is(peek_tt):
         return Err(
-            p_errors.InvalidTokenTypeInStatement(
+            errors.InvalidTokenTypeInStatement(
                 peek_tt,
                 parser.peek_token.type,
             )
         )
 
     return Ok(None)
+
+
+def _check_cur_token(
+    parser: IParser, expected_tt: TokenType
+) -> None | Err[StatementValidationError]:
+    """
+    If parser current token is not of expected token type, constructs corresponding error,
+    else returns None.
+    """
+    if not parser.cur_token_is(expected_tt):
+        return Err(errors.InvalidTokenTypeInStatement(expected_tt, parser.current_token.type))
+    return None
