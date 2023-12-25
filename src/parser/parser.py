@@ -59,16 +59,14 @@ class Parser(IParser):
         """Parses the whole program."""
         program = ast_nodes.Program()
 
-        while self.current_token.type != TokenType.EOF:
+        while not self.cur_token_is(TokenType.EOF):
             match self.parse_statement():
                 case Ok(stmt):
                     if stmt is not None:
                         program.statements.append(stmt)
                 case Err() as err:
                     return err
-            if (
-                self.current_token.type == TokenType.EOF
-            ):  # pyright: ignore[reportUnnecessaryComparison]
+            if self.cur_token_is(TokenType.EOF):
                 break
             self.next_token()
 
