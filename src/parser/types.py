@@ -1,4 +1,4 @@
-from enum import IntEnum
+from enum import IntEnum, StrEnum
 from typing import Callable
 
 from result import Result
@@ -13,3 +13,16 @@ InfixParserType = Callable[[IParser, Expression], Result[Expression, ExpressionV
 
 class Precedence(IntEnum):
     LOWEST, EQUALS, LESSGREATER, SUM, PRODUCT, PREFIX, CALL = range(7)
+
+
+class Operator(StrEnum):
+    PLUS = "+"
+    MINUS = "-"
+    MULT = "*"
+    DIV = "/"
+    GT = ">"
+    LT = "<"
+    EQ = "=="
+    NOT_EQ = "!="
+    GTEQ = ">="
+    LTEQ = "<="

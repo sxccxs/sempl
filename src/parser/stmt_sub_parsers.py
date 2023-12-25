@@ -377,6 +377,6 @@ def _check_cur_token(
     If parser current token is not of expected token type, constructs corresponding error,
     else returns None.
     """
-    if not parser.cur_token_is(expected_tt):
-        return Err(errors.InvalidTokenTypeInStatement(expected_tt, parser.current_token.type))
-    return Ok(None)
+    if parser.cur_token_is(expected_tt):
+        return Ok(None)
+    return Err(errors.InvalidTokenTypeInStatement(expected_tt, parser.current_token.type))

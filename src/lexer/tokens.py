@@ -19,14 +19,14 @@ class TokenType(StrEnum):
     COLON = ":"
     ARROW = "->"
     COMA = ","
+    APOSTROPHE = "'"
+    ASSIGN = "="
 
     # operators
-    ASSIGN = "="
     PLUS = "+"
     MINUS = "-"
     ASTERIX = "*"
     SLASH = "/"
-    APOSTROPHE = "'"
 
     # comparison
     EQ = "=="

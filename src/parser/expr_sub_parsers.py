@@ -1,11 +1,16 @@
-from result import Err, Ok, Result
+from result import Err, Ok, Result, is_err
 
 from src.ast import ast_nodes
 from src.ast.abstract import Expression
+from src.helpers.enum_helpers import enum_contains
 from src.lexer.tokens import TokenType
-from src.parser.errors import ExpressionValidationError, UnsupportedExpressionError
+from src.parser.errors import (
+    ExpressionValidationError,
+    InvalidTokenTypeInExpression,
+    UnsupportedExpressionError,
+)
 from src.parser.interfaces import IParser
-from src.parser.types import Precedence
+from src.parser.types import Operator, Precedence
 
 
 def parse_expression(
@@ -48,13 +53,32 @@ def parse_expression(
     return Ok(expr)
 
 
-def parse_identifier(parser: IParser) -> Ok[ast_nodes.Identifier]:
-    """Creates an Identifier expression from current token of provided parser."""
+def parse_identifier(parser: IParser) -> Result[ast_nodes.Identifier, ExpressionValidationError]:
+    """
+    Creates an Identifier expression from current token of provided parser.
+    Expected and checked parser.current_token is an identifier.
+    After the successful read, parser.current_token does not change.
+    """
+    if is_err(res := _check_cur_token(parser, TokenType.IDENT)):
+        return res
     return Ok(ast_nodes.Identifier(value=parser.current_token.literal))
 
 
-def parse_boolean_literal(parser: IParser) -> Ok[ast_nodes.BooleanLiteral]:
-    """Creates an BooleanLiteral expression from current token of provided parser."""
+def parse_boolean_literal(
+    parser: IParser,
+) -> Result[ast_nodes.BooleanLiteral, ExpressionValidationError]:
+    """
+    Creates an BooleanLiteral expression from current token of provided parser.
+    Expected and checked parser.current_token is TRUE or FALSE.
+    After the successful read, parser.current_token does not change.
+    """
+    if not parser.cur_token_is(TokenType.FALSE) and not parser.cur_token_is(TokenType.TRUE):
+        return Err(
+            ExpressionValidationError(
+                f"Token in expressin was expected to be {repr(TokenType.TRUE)} "
+                f"or {repr(TokenType.FALSE)}, but actually was {parser.current_token.type}."
+            )
+        )
     return Ok(ast_nodes.BooleanLiteral(value=parser.cur_token_is(TokenType.TRUE)))
 
 
@@ -62,9 +86,12 @@ def parse_integer_literal(
     parser: IParser,
 ) -> Result[ast_nodes.IntegerLiteral, ExpressionValidationError]:
     """
-    Create an IntegerLiteral expression from current token
-    of provided parser if possible.
+    Create an IntegerLiteral expression from current token of provided parser if possible.
+    Expected and checked parser.current_token is an INT.
+    After the successful read, parser.current_token does not change.
     """
+    if is_err(res := _check_cur_token(parser, TokenType.INT)):
+        return res
     try:
         value = int(parser.current_token.literal)
     except ValueError as err:
@@ -76,9 +103,12 @@ def parse_float_literal(
     parser: IParser,
 ) -> Result[ast_nodes.FloatLiteral, ExpressionValidationError]:
     """
-    Create an FloatLiteral expression from current token
-    of provided parser if possible.
+    Create an FloatLiteral expression from current token of provided parser if possible.
+    Expected and checked parser.current_token is a FLOAT.
+    After the successful read, parser.current_token does not change.
     """
+    if is_err(res := _check_cur_token(parser, TokenType.FLOAT)):
+        return res
     try:
         value = float(parser.current_token.literal)
     except ValueError as err:
@@ -92,8 +122,13 @@ def parse_prefix_operation(
     """
     Create a PrefixOperation with operator from current token of provided parser
     and operand from next token of provided parser, if possible.
+    Expected and checked parser.current_token is an Operator.
+    After the successful read, parser.current_token is the last token of the operation.
     """
-    operator = parser.current_token.literal
+    if is_err(res := _check_cur_token_is_operator(parser)):
+        return res
+
+    operator = Operator(parser.current_token.literal)
     parser.next_token()
     match parse_expression(parser, Precedence.PREFIX):
         case Err() as err:
@@ -109,8 +144,13 @@ def parse_inifix_operation(
     Create a InfixOperation with provided left operand,
     operator from current token of provided parser
     and right operand from next token of provided parser, if possible.
+    Expected and checked parser.current_token is an Operator.
+    After the successful read, parser.current_token is the last token of the operation.
     """
-    operator = parser.current_token.literal
+    if is_err(res := _check_cur_token_is_operator(parser)):
+        return res
+
+    operator = Operator(parser.current_token.literal)
     precedence = parser.cur_token_precedence
     parser.next_token()
     match parse_expression(parser, precedence):
@@ -121,7 +161,14 @@ def parse_inifix_operation(
 
 
 def parse_grouped_expression(parser: IParser) -> Result[Expression, ExpressionValidationError]:
-    """Parses grouped expression from current token of provided parser, if possible."""
+    """
+    Parses grouped expression from current token of provided parser, if possible.
+    Expected and checked parser.current_token is a `(`.
+    After the successful read, parser.current_token is `)`.
+    """
+    if is_err(res := _check_cur_token(parser, TokenType.LPAREN)):
+        return res
+
     parser.next_token()
     match parse_expression(parser, Precedence.LOWEST):
         case Err() as err:
@@ -134,3 +181,26 @@ def parse_grouped_expression(parser: IParser) -> Result[Expression, ExpressionVa
 
     parser.next_token()
     return Ok(expr)
+
+
+def _check_cur_token(
+    parser: IParser, expected_tt: TokenType
+) -> Result[None, ExpressionValidationError]:
+    """
+    If parser current token is not of expected token type, constructs corresponding error,
+    else returns None.
+    """
+    if parser.cur_token_is(expected_tt):
+        return Ok(None)
+    return Err(InvalidTokenTypeInExpression(expected_tt, parser.current_token.type))
+
+
+def _check_cur_token_is_operator(parser: IParser) -> Result[None, ExpressionValidationError]:
+    if enum_contains(Operator, parser.current_token.literal):
+        return Ok(None)
+    return Err(
+        ExpressionValidationError(
+            f"Token in expressin was expected to be a valid Operator, "
+            f"but actually was {parser.current_token.type}."
+        )
+    )

@@ -4,6 +4,7 @@ from io import StringIO
 from src.ast.abstract import ASTNode, Expression, Statement
 from src.ast.to_str_helpers import sio_write_with_after_value, sio_write_with_sep
 from src.lexer.tokens import Keyword
+from src.parser.types import Operator
 
 
 @dataclass(slots=True)
@@ -70,12 +71,12 @@ class FloatLiteral(Expression):
 
 @dataclass(slots=True)
 class PrefixOperation(Expression):
-    operator: str
+    operator: Operator
     right: Expression
 
     @property
     def token_literal(self) -> str:
-        return self.operator
+        return self.operator.value
 
     def __str__(self) -> str:
         return f"({self.operator}{self.right})"
@@ -84,12 +85,12 @@ class PrefixOperation(Expression):
 @dataclass(slots=True)
 class InfixOperation(Expression):
     left: Expression
-    operator: str
+    operator: Operator
     right: Expression
 
     @property
     def token_literal(self) -> str:
-        return self.operator
+        return self.operator.value
 
     def __str__(self) -> str:
         return f"({self.left} {self.operator} {self.right})"

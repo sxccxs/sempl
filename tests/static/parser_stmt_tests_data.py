@@ -1,12 +1,9 @@
 from src.ast import ast_nodes
 from src.ast.abstract import Statement
 from src.lexer.tokens import Token, TokenType
-from tests.utils.payloads import (
-    ExpectedFunc,
-    ExpectedIfStatement,
-    ExpectedLetStatement,
-    ExpectedParam,
-)
+from src.parser.types import Operator
+from tests.utils.payloads import (ExpectedFunc, ExpectedIfStatement,
+                                  ExpectedLetStatement, ExpectedParam)
 
 VALID_LET_STATEMENT_TOKENS_AND_EXPECTED: list[tuple[list[Token], ExpectedLetStatement]] = [
     (
@@ -35,7 +32,7 @@ VALID_LET_STATEMENT_TOKENS_AND_EXPECTED: list[tuple[list[Token], ExpectedLetStat
             False,
             "int",
             "_abcdef11_",
-            ast_nodes.PrefixOperation("-", ast_nodes.IntegerLiteral(5000)),
+            ast_nodes.PrefixOperation(Operator.MINUS, ast_nodes.IntegerLiteral(5000)),
         ),
     ),
     (
@@ -71,9 +68,9 @@ VALID_LET_STATEMENT_TOKENS_AND_EXPECTED: list[tuple[list[Token], ExpectedLetStat
             "word",
             ast_nodes.InfixOperation(
                 ast_nodes.IntegerLiteral(25),
-                "+",
+                Operator.PLUS,
                 ast_nodes.InfixOperation(
-                    ast_nodes.FloatLiteral(34.0), "*", ast_nodes.IntegerLiteral(2)
+                    ast_nodes.FloatLiteral(34.0), Operator.MULT, ast_nodes.IntegerLiteral(2)
                 ),
             ),
         ),
@@ -94,7 +91,9 @@ VALID_BLOCK_STATEMENT_AND_EXPECTED: list[tuple[list[Token], list[Statement]]] = 
         ],
         [
             ast_nodes.ExpressionStatement(
-                ast_nodes.InfixOperation(ast_nodes.Identifier("x"), "<", ast_nodes.Identifier("y"))
+                ast_nodes.InfixOperation(
+                    ast_nodes.Identifier("x"), Operator.LT, ast_nodes.Identifier("y")
+                )
             )
         ],
     ),
@@ -115,10 +114,14 @@ VALID_BLOCK_STATEMENT_AND_EXPECTED: list[tuple[list[Token], list[Statement]]] = 
         ],
         [
             ast_nodes.ExpressionStatement(
-                ast_nodes.InfixOperation(ast_nodes.Identifier("x"), "+", ast_nodes.Identifier("y"))
+                ast_nodes.InfixOperation(
+                    ast_nodes.Identifier("x"), Operator.PLUS, ast_nodes.Identifier("y")
+                )
             ),
             ast_nodes.ExpressionStatement(
-                ast_nodes.InfixOperation(ast_nodes.Identifier("x"), "<", ast_nodes.Identifier("y"))
+                ast_nodes.InfixOperation(
+                    ast_nodes.Identifier("x"), Operator.LT, ast_nodes.Identifier("y")
+                )
             ),
         ],
     ),
@@ -191,11 +194,13 @@ VALID_IF_STATEMENT_AND_EXPECTED: list[tuple[list[Token], ExpectedIfStatement]] =
             Token(TokenType.ENDL, literal="\n"),
         ],
         ExpectedIfStatement(
-            ast_nodes.InfixOperation(ast_nodes.Identifier("x"), ">", ast_nodes.Identifier("y")),
+            ast_nodes.InfixOperation(
+                ast_nodes.Identifier("x"), Operator.GT, ast_nodes.Identifier("y")
+            ),
             [
                 ast_nodes.ExpressionStatement(
                     ast_nodes.InfixOperation(
-                        ast_nodes.Identifier("x"), "+", ast_nodes.Identifier("y")
+                        ast_nodes.Identifier("x"), Operator.PLUS, ast_nodes.Identifier("y")
                     )
                 )
             ],
@@ -222,11 +227,13 @@ VALID_IF_STATEMENT_AND_EXPECTED: list[tuple[list[Token], ExpectedIfStatement]] =
             Token(TokenType.ENDL, literal="\n"),
         ],
         ExpectedIfStatement(
-            ast_nodes.InfixOperation(ast_nodes.Identifier("x"), ">", ast_nodes.Identifier("y")),
+            ast_nodes.InfixOperation(
+                ast_nodes.Identifier("x"), Operator.GT, ast_nodes.Identifier("y")
+            ),
             [
                 ast_nodes.ExpressionStatement(
                     ast_nodes.InfixOperation(
-                        ast_nodes.Identifier("x"), "+", ast_nodes.Identifier("y")
+                        ast_nodes.Identifier("x"), Operator.PLUS, ast_nodes.Identifier("y")
                     )
                 )
             ],
@@ -257,18 +264,20 @@ VALID_IF_STATEMENT_AND_EXPECTED: list[tuple[list[Token], ExpectedIfStatement]] =
             Token(TokenType.ENDL, literal="\n"),
         ],
         ExpectedIfStatement(
-            ast_nodes.InfixOperation(ast_nodes.Identifier("x"), ">", ast_nodes.Identifier("y")),
+            ast_nodes.InfixOperation(
+                ast_nodes.Identifier("x"), Operator.GT, ast_nodes.Identifier("y")
+            ),
             [
                 ast_nodes.ExpressionStatement(
                     ast_nodes.InfixOperation(
-                        ast_nodes.Identifier("x"), "+", ast_nodes.Identifier("y")
+                        ast_nodes.Identifier("x"), Operator.PLUS, ast_nodes.Identifier("y")
                     )
                 )
             ],
             [
                 ast_nodes.ExpressionStatement(
                     ast_nodes.InfixOperation(
-                        ast_nodes.Identifier("x"), "-", ast_nodes.Identifier("y")
+                        ast_nodes.Identifier("x"), Operator.MINUS, ast_nodes.Identifier("y")
                     )
                 )
             ],
@@ -444,7 +453,7 @@ VALID_FUNC_AND_EXPECTED: list[tuple[list[Token], ExpectedFunc]] = [
                     ast_nodes.Identifier("int"),
                     ast_nodes.Identifier("b"),
                     ast_nodes.InfixOperation(
-                        ast_nodes.FloatLiteral(10.0), "*", ast_nodes.Identifier("a")
+                        ast_nodes.FloatLiteral(10.0), Operator.MULT, ast_nodes.Identifier("a")
                     ),
                 ),
                 ast_nodes.ReturnStatement(ast_nodes.Identifier("b")),

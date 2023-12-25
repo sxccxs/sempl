@@ -3,6 +3,7 @@ import pytest
 from src.ast import ast_nodes
 from src.ast.abstract import Expression, Statement
 from src.lexer.tokens import Keyword, Token, TokenType
+from src.parser.types import Operator
 from tests.static.parser_stmt_tests_data import (
     VALID_BLOCK_STATEMENT_AND_EXPECTED,
     VALID_FUNC_AND_EXPECTED,
@@ -78,7 +79,9 @@ class TestParserStatementsTg:
                     Token(TokenType.IDENT, literal="b"),
                     Token(TokenType.ENDL, literal="\n"),
                 ],
-                ast_nodes.InfixOperation(ast_nodes.Identifier("a"), "+", ast_nodes.Identifier("b")),
+                ast_nodes.InfixOperation(
+                    ast_nodes.Identifier("a"), Operator.PLUS, ast_nodes.Identifier("b")
+                ),
             ),
         ],
         indirect=["lexer_mock"],

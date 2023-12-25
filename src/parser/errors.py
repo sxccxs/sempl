@@ -42,3 +42,16 @@ class InvalidTokenTypeInStatement(StatementValidationError):
             f"Token in statement was expected to be {repr(expected_tt)}, "
             f"but actually was {repr(received_tt)}."
         )
+
+
+class InvalidTokenTypeInExpression(ExpressionValidationError):
+    def __init__(self, expected_tt: TokenType, received_tt: TokenType) -> None:
+        """
+        Args:
+            expected_tt (TokenType): Expected token type.
+            received_tt (TokenType): Actual token type.
+        """
+        super().__init__(
+            f"Token in expressin was expected to be {repr(expected_tt)}, "
+            f"but actually was {repr(received_tt)}."
+        )
