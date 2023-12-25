@@ -11,10 +11,6 @@ from src.parser.types import Operator
 class Program(ASTNode):
     statements: list[Statement] = field(default_factory=list)
 
-    @property
-    def token_literal(self) -> str:
-        return self.statements[0].token_literal if self.statements else ""
-
     def __str__(self) -> str:
         ss = StringIO()
         ss.writelines(str(stmt) for stmt in self.statements)
@@ -25,10 +21,6 @@ class Program(ASTNode):
 class Identifier(Expression):
     value: str
 
-    @property
-    def token_literal(self) -> str:
-        return self.value
-
     def __str__(self) -> str:
         return self.value
 
@@ -36,10 +28,6 @@ class Identifier(Expression):
 @dataclass(slots=True)
 class BooleanLiteral(Expression):
     value: bool
-
-    @property
-    def token_literal(self) -> str:
-        return str(self)
 
     def __str__(self) -> str:
         return Keyword.TRUE.value if self.value else Keyword.FALSE.value
@@ -49,10 +37,6 @@ class BooleanLiteral(Expression):
 class IntegerLiteral(Expression):
     value: int
 
-    @property
-    def token_literal(self) -> str:
-        return str(self.value)
-
     def __str__(self) -> str:
         return str(self.value)
 
@@ -60,10 +44,6 @@ class IntegerLiteral(Expression):
 @dataclass(slots=True)
 class FloatLiteral(Expression):
     value: float
-
-    @property
-    def token_literal(self) -> str:
-        return str(self.value)
 
     def __str__(self) -> str:
         return str(self.value)
@@ -73,10 +53,6 @@ class FloatLiteral(Expression):
 class PrefixOperation(Expression):
     operator: Operator
     right: Expression
-
-    @property
-    def token_literal(self) -> str:
-        return self.operator.value
 
     def __str__(self) -> str:
         return f"({self.operator}{self.right})"
@@ -88,10 +64,6 @@ class InfixOperation(Expression):
     operator: Operator
     right: Expression
 
-    @property
-    def token_literal(self) -> str:
-        return self.operator.value
-
     def __str__(self) -> str:
         return f"({self.left} {self.operator} {self.right})"
 
@@ -102,10 +74,6 @@ class LetStatement(Statement):
     var_type: Identifier
     var_name: Identifier
     var_value: Expression
-
-    @property
-    def token_literal(self) -> str:
-        return Keyword.LET.value
 
     def __str__(self) -> str:
         ss = StringIO()
@@ -122,10 +90,6 @@ class LetStatement(Statement):
 class ReturnStatement(Statement):
     return_value: Expression
 
-    @property
-    def token_literal(self) -> str:
-        return Keyword.RETURN.value
-
     def __str__(self) -> str:
         return f"{Keyword.RETURN} {self.return_value}"
 
@@ -134,10 +98,6 @@ class ReturnStatement(Statement):
 class ExpressionStatement(Statement):
     expression: Expression
 
-    @property
-    def token_literal(self) -> str:
-        return self.expression.token_literal
-
     def __str__(self) -> str:
         return str(self.expression)
 
@@ -145,10 +105,6 @@ class ExpressionStatement(Statement):
 @dataclass(slots=True)
 class BlockStatement(Statement):
     statements: list[Statement]
-
-    @property
-    def token_literal(self) -> str:
-        return self.statements[0].token_literal if self.statements else ""
 
     def __str__(self) -> str:
         ss = StringIO()
@@ -164,10 +120,6 @@ class IfStatement(Statement):
     then: BlockStatement
     else_: BlockStatement | None = None
 
-    @property
-    def token_literal(self) -> str:
-        return Keyword.IF
-
     def __str__(self) -> str:
         str_ = f"{Keyword.IF} {self.condition} {self.then}"
         if self.else_ is None:
@@ -180,10 +132,6 @@ class FuncParameter(Statement):
     name: Identifier
     type: Identifier
     default_value: Expression | None
-
-    @property
-    def token_literal(self) -> str:
-        return self.name.token_literal
 
     def __str__(self) -> str:
         str_ = f"{self.name}: {self.type}"
@@ -198,10 +146,6 @@ class FuncStatement(Statement):
     parameters: list[FuncParameter]
     return_type: Identifier
     body: BlockStatement
-
-    @property
-    def token_literal(self) -> str:
-        return Keyword.FN
 
     def __str__(self) -> str:
         ss = StringIO()

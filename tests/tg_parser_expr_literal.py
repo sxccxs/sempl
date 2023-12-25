@@ -34,8 +34,7 @@ class TestParserLiteralExpressionTg:
         Assert: Program contains only one statement.
         Assert: Statement is ExpressionStatement.
         Assert: Underlying expression is Identifier.
-        Assert: Indetifier value and token_literal are equal to the expected value.
-        Assert: Statement token_literal is equal to Identifier token_literal.
+        Assert: Indetifier value is equal to the expected value.
         """
         expr = expression_stmt.expression
         assert isinstance(
@@ -43,11 +42,6 @@ class TestParserLiteralExpressionTg:
         ), f"Unexpected expression in ExpressionStatement of type `{type(expr)}`."
 
         assert expr.value == expected, "Invalid identifier value."
-        assert expr.token_literal == expected, "Invalid identifier token_literal."
-
-        assert (
-            expr.token_literal == expression_stmt.token_literal
-        ), "Invalid ExpressionStatement token_literal."
 
     @pytest.mark.parametrize(
         ("lexer_mock", "expected"),
@@ -78,8 +72,6 @@ class TestParserLiteralExpressionTg:
         Assert: Statement is ExpressionStatement.
         Assert: Underlying expression is IntegerLiteral.
         Assert: IntegerLiteral value is equal to the expected value.
-        Assert: IntegerLiteral token_literal is equal to str(expected value).
-        Assert: Statement token_literal is equal to IntegerLiteral token_literal.
         """
         expr = expression_stmt.expression
         assert isinstance(
@@ -87,11 +79,6 @@ class TestParserLiteralExpressionTg:
         ), f"Unexpected expression in ExpressionStatement of type `{type(expr)}`."
 
         assert expr.value == expected, "Invalid integer literal value."
-        assert expr.token_literal == str(expected), "Invalid integer literal token_literal."
-
-        assert (
-            expr.token_literal == expression_stmt.token_literal
-        ), "Invalid ExpressionStatement token_literal."
 
     @pytest.mark.parametrize(
         ("lexer_mock", "expected"),
@@ -123,8 +110,6 @@ class TestParserLiteralExpressionTg:
         Assert: Statement is ExpressionStatement.
         Assert: Underlying expression is FloatLiteral.
         Assert: FloatLiteral value is equal to the expected value.
-        Assert: FloatLiteral token_literal is equal to str(expected value).
-        Assert: Statement token_literal is equal to FloatLiteral token_literal.
         """
         expr = expression_stmt.expression
         assert isinstance(
@@ -132,11 +117,6 @@ class TestParserLiteralExpressionTg:
         ), f"Unexpected expression in ExpressionStatement of type `{type(expr)}`."
 
         assert expr.value == expected, "Invalid float literal value."
-        assert expr.token_literal == str(expected), "Invalid float literal token_literal."
-
-        assert (
-            expr.token_literal == expression_stmt.token_literal
-        ), "Invalid ExpressionStatement token_literal."
 
     @pytest.mark.parametrize(
         ("lexer_mock", "expected"),
@@ -161,8 +141,6 @@ class TestParserLiteralExpressionTg:
         Assert: Statement is ExpressionStatement.
         Assert: Underlying expression is BooleanLiteral.
         Assert: BooleanLiteral value is equal to the expected value.
-        Assert: BooleanLiteral token_literal is equal to str(expected value).
-        Assert: Statement token_literal is equal to BooleanLiteral token_literal.
         """
         expr = expression_stmt.expression
         assert isinstance(
@@ -170,8 +148,3 @@ class TestParserLiteralExpressionTg:
         ), f"Unexpected expression in ExpressionStatement of type `{type(expr)}`."
 
         assert expr.value == expected, "Invalid boolean literal value."
-        assert expr.token_literal == str(expected), "Invalid boolean literal token_literal."
-
-        assert (
-            expr.token_literal == expression_stmt.token_literal
-        ), "Invalid ExpressionStatement token_literal."

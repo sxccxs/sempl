@@ -2,7 +2,7 @@ import pytest
 
 from src.ast import ast_nodes
 from src.ast.abstract import Expression, Statement
-from src.lexer.tokens import Keyword, Token, TokenType
+from src.lexer.tokens import Token, TokenType
 from src.parser.types import Operator
 from tests.static.parser_stmt_tests_data import (
     VALID_BLOCK_STATEMENT_AND_EXPECTED,
@@ -33,31 +33,19 @@ class TestParserStatementsTg:
         Act: Parse program.
         Assert: No error returned.
         Assert: Program contains only one statement.
-        Assert: Statement literal is `let`.
         Assert: Statement is LetStatement.
         Assert: Let statement mutability equals to expected.
-        Assert: Let statement var_type.value and var_type.token_literal equals to expected type.
-        Assert: Let statement var_name.value and var_name.token_literal equals to expected name.
+        Assert: Let statement var_type.value equals to expected type.
+        Assert: Let statement var_name.value equals to expected name.
         Assert: Let statement var_value is correct.
         """
         stmt = ok_len_program.statements[0]
-        assert stmt.token_literal == Keyword.LET.value, "Invalid let statement token literal."
         assert isinstance(
             stmt, ast_nodes.LetStatement
         ), f"Unexpected statement of type `{type(stmt)}`."
-
         assert stmt.is_mut == expected_result.mut, "Invalid mutability."
-
         assert stmt.var_type.value == expected_result.type, "Invalid var_type value."
-        assert (
-            stmt.var_type.token_literal == expected_result.type
-        ), "Invalid var_type token literal."
-
         assert stmt.var_name.value == expected_result.name, "Invalid var_name value."
-        assert (
-            stmt.var_name.token_literal == expected_result.name
-        ), "Invalid var_name token literal."
-
         assert stmt.var_value == expected_result.value, "Invalid variable value."
 
     @pytest.mark.parametrize(
@@ -99,17 +87,13 @@ class TestParserStatementsTg:
         Act: Parse program.
         Assert: No error returned.
         Assert: Program contains only one statement.
-        Assert: Statement literal is `return`.
         Assert: Statement is ReturnStatement.
         Assert: ReturnStatement expression is correct.
         """
         stmt = ok_len_program.statements[0]
-
-        assert stmt.token_literal == Keyword.RETURN.value, "Invalid return statement token literal."
         assert isinstance(
             stmt, ast_nodes.ReturnStatement
         ), f"Unexpected statement of type `{type(stmt)}`."
-
         assert stmt.return_value == expected, "Invalid return value."
 
     @pytest.mark.parametrize(
@@ -132,20 +116,12 @@ class TestParserStatementsTg:
         Assert: Program contains only one statement.
         Assert: Statement is BlockStatement.
         Assert: BlockStatement contains correct statements.
-        Assert: BlockStatement token literal is it's first statement token_literal
-                or empty string if no statements present.
         """
         stmt = ok_len_program.statements[0]
         assert isinstance(
             stmt, ast_nodes.BlockStatement
         ), f"Unexpected statement of type `{type(stmt)}`."
         assert stmt.statements == expected_stmts
-        if expected_stmts:
-            assert (
-                stmt.token_literal == expected_stmts[0].token_literal
-            ), "Invalid block statement token literal."
-        else:
-            assert stmt.token_literal == "", "Invalid block statement token literal."
 
     @pytest.mark.parametrize(
         ("lexer_mock", "expected"),
@@ -166,7 +142,6 @@ class TestParserStatementsTg:
         Assert: No error returned.
         Assert: Program contains only one statement.
         Assert: Statement is IfStatement.
-        Assert: If statement literal is `if`.
         Assert: IfStatement contains correct condition.
         Assert: IfStatement contains correct then-clause.
         Assert: If else-clause is present, IfStatement contains correct else-clause.
@@ -175,7 +150,6 @@ class TestParserStatementsTg:
         assert isinstance(
             stmt, ast_nodes.IfStatement
         ), f"Unexpected statement of type `{type(stmt)}`."
-        assert stmt.token_literal == Keyword.IF, "Invalid if statement token literal."
         assert stmt.condition == expected.condition, "Invalid condition in if statement."
         assert (
             stmt.then.statements == expected.then_statements
@@ -207,7 +181,6 @@ class TestParserStatementsTg:
         Assert: No error returned.
         Assert: Program contains only one statement.
         Assert: Statement is FuncStatement.
-        Assert: If statement literal is `fn`.
         Assert: FuncStatement name is expected.
         Assert: FuncStatement contains correct parameters.
         Assert: FuncStatement contains correct body.
@@ -216,7 +189,6 @@ class TestParserStatementsTg:
         assert isinstance(
             stmt, ast_nodes.FuncStatement
         ), f"Unexpected statement of type `{type(stmt)}`."
-        assert stmt.token_literal == Keyword.FN, "Invalid if statement token literal."
         assert stmt.name.value == expected.name, "Invalid condition in if statement."
         for param, expected_param in zip(stmt.parameters, expected.parameters):
             assert param.name.value == expected_param.name, "Invalid parameter name."
