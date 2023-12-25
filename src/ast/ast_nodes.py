@@ -69,6 +69,19 @@ class InfixOperation(Expression):
 
 
 @dataclass(slots=True)
+class CallExpression:
+    func_name: Identifier
+    arguments: list[Expression]
+
+    def __str__(self) -> str:
+        ss = StringIO()
+        ss.write(f"{self.func_name}(")
+        sio_write_with_sep(ss, sep=", ", values=(str(arg) for arg in self.arguments))
+        ss.write(")")
+        return ss.getvalue()
+
+
+@dataclass(slots=True)
 class LetStatement(Statement):
     is_mut: bool
     var_type: Identifier

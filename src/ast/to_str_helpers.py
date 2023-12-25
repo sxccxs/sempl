@@ -24,7 +24,4 @@ def sio_write_with_sep(io: StringIO, *, sep: str, values: Iterable[str]) -> None
         sep (str): Separator value
         values (Iterable[str]): Values to write.
     """
-    *other, last = values
-    for value in other:
-        io.write(f"{value}{sep}")
-    io.write(last)
+    io.write(sep.join(str(value) for value in values))
