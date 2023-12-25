@@ -85,6 +85,8 @@ class Parser(IParser):
                 return stmt_sub_parsers.parse_block_statement(self)
             case TokenType.IF:
                 return stmt_sub_parsers.parse_if_statement(self)
+            case TokenType.FN:
+                return stmt_sub_parsers.parse_func_statement(self)
             case TokenType.ENDL:
                 return Ok(None)
             case _:

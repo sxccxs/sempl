@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from result import Err, Ok, Result
+from result import Err, Ok, Result, is_err
 
 from src.ast import ast_nodes
 from src.ast.abstract import Statement
@@ -26,16 +26,16 @@ def parse_let_statement(
     Returns:
         Result[ast_nodes.LetStatement, StatementValidationError]: parsing result.
     """
-    if (err := _check_cur_token(parser, TokenType.LET)) is not None:
-        return err
+    if is_err(res := _check_cur_token(parser, TokenType.LET)):
+        return res
     parser.next_token()
     is_mut = False
     if parser.cur_token_is(TokenType.MUT):
         is_mut = True
         parser.next_token()
 
-    if (res := _validate_parser_cur_and_peek(parser, TokenType.IDENT, TokenType.IDENT)).is_err():
-        return res  # type: ignore
+    if is_err(res := _check_cur_and_peek_tokens(parser, TokenType.IDENT, TokenType.IDENT)):
+        return res
 
     var_type = ast_nodes.Identifier(parser.current_token.literal)
     var_name = ast_nodes.Identifier(parser.peek_token.literal)
@@ -78,8 +78,8 @@ def parse_return_statement(
     Returns:
         Result[ast_nodes.ReturnStatement, StatementValidationError]: parsing result.
     """
-    if (err := _check_cur_token(parser, TokenType.RETURN)) is not None:
-        return err
+    if is_err(res := _check_cur_token(parser, TokenType.RETURN)):
+        return res
     parser.next_token()
     match parse_expression(parser, Precedence.LOWEST):
         case Err(err):
@@ -109,8 +109,8 @@ def parse_block_statement(
     Returns:
         Result[ast_nodes.BlockStatement, StatementValidationError]: parsing result.
     """
-    if (err := _check_cur_token(parser, TokenType.LCURLY)) is not None:
-        return err
+    if is_err(res := _check_cur_token(parser, TokenType.LCURLY)):
+        return res
     statements: list[Statement] = []
     parser.next_token()
 
@@ -142,8 +142,8 @@ def parse_if_statement(
     Returns:
         Result[ast_nodes.IfStatement, StatementValidationError]: parsing result.
     """
-    if (err := _check_cur_token(parser, TokenType.IF)) is not None:
-        return err
+    if is_err(res := _check_cur_token(parser, TokenType.IF)):
+        return res
     parser.next_token()
     match parse_expression(parser, Precedence.LOWEST):
         case Err(err):
@@ -182,6 +182,140 @@ def parse_if_statement(
     return Ok(ast_nodes.IfStatement(condition, then_clause, else_clause))
 
 
+def parse_func_statement(
+    parser: IParser,
+) -> Result[ast_nodes.FuncStatement, StatementValidationError]:
+    """
+    Parses function statement from current position of provided parser.
+    Expected and checked parser.current_token is `fn`.
+    After the successful read, parser.current_token is the `}` - end of function body.
+
+    Args:
+        parser (IParser): Provided parser.
+
+    Returns:
+        Result[ast_nodes.FuncStatement, StatementValidationError]: parsing result.
+    """
+    if is_err(res := _check_cur_token(parser, TokenType.FN)):
+        return res
+
+    parser.next_token()
+    if is_err(res := _check_cur_and_peek_tokens(parser, TokenType.IDENT, TokenType.LPAREN)):
+        return res
+
+    func_name = ast_nodes.Identifier(parser.current_token.literal)
+    parser.next_token()
+
+    if is_err(res := _check_cur_token(parser, TokenType.LPAREN)):
+        return res
+
+    print(parser.current_token, parser.peek_token)
+    match parse_func_parameters(parser):
+        case Err() as err:
+            return err
+        case Ok(params):
+            func_params = params
+
+    if is_err(res := _check_cur_token(parser, TokenType.RPAREN)):
+        return res
+
+    parser.next_token()
+    if is_err(res := _check_cur_and_peek_tokens(parser, TokenType.ARROW, TokenType.IDENT)):
+        return res
+
+    parser.next_token()
+    func_ret_type = ast_nodes.Identifier(parser.current_token.literal)
+    parser.next_token()
+
+    if is_err(res := _check_cur_token(parser, TokenType.LCURLY)):
+        return res
+
+    match parse_block_statement(parser):
+        case Err() as err:
+            return err
+        case Ok(block):
+            func_body = block
+
+    return Ok(ast_nodes.FuncStatement(func_name, func_params, func_ret_type, func_body))
+
+
+def parse_func_parameters(
+    parser: IParser,
+) -> Result[list[ast_nodes.FuncParameter], StatementValidationError]:
+    """
+    Parses all function parameters from current position of provided parser.
+    Expected and checked parser.current_token is `(`.
+    After the successful read, parser.current_token is `)`.
+
+    Args:
+        parser (IParser): Provided parser.
+
+    Returns:
+        Result[list[ast_nodes.FuncParameter], StatementValidationError]: parsing result.
+    """
+    if is_err(res := _check_cur_token(parser, TokenType.LPAREN)):
+        return res
+
+    if parser.peek_token_is(TokenType.RPAREN):
+        parser.next_token()
+        return Ok([])
+
+    params: list[ast_nodes.FuncParameter] = []
+    while not parser.cur_token_is(TokenType.RPAREN):
+        parser.next_token()
+        match parse_func_parameter(parser):
+            case Err() as err:
+                return err
+            case Ok(param):
+                params.append(param)
+        if not parser.cur_token_is(TokenType.RPAREN) and is_err(
+            res := _check_cur_token(parser, TokenType.COMA)
+        ):
+            return res
+
+    return Ok(params)
+
+
+def parse_func_parameter(
+    parser: IParser,
+) -> Result[ast_nodes.FuncParameter, StatementValidationError]:
+    """
+    Parses one function parameter from current position of provided parser.
+    Expected and checked parser.current_token is parameter name.
+    After the successful read, parser.current_token is
+    the token after parameter (usually `,` or `)`).
+
+    Args:
+        parser (IParser): Provided parser.
+
+    Returns:
+        Result[ast_nodes.FuncParameter, StatementValidationError]: parsing result.
+    """
+    if is_err(res := _check_cur_token(parser, TokenType.IDENT)):
+        return res
+
+    param_name = ast_nodes.Identifier(parser.current_token.literal)
+    parser.next_token()
+
+    if is_err(res := _check_cur_and_peek_tokens(parser, TokenType.COLON, TokenType.IDENT)):
+        return res
+    parser.next_token()
+    param_type = ast_nodes.Identifier(parser.current_token.literal)
+    parser.next_token()
+    if not parser.cur_token_is(TokenType.ASSIGN):
+        return Ok(ast_nodes.FuncParameter(param_name, param_type, None))
+
+    parser.next_token()
+    match parse_expression(parser, Precedence.LOWEST):
+        case Err(err):
+            return Err(StatementValidationError(err))
+        case Ok(expr):
+            default_value = expr
+    parser.next_token()
+
+    return Ok(ast_nodes.FuncParameter(param_name, param_type, default_value))
+
+
 def parse_expression_statement(
     parser: IParser,
 ) -> Result[ast_nodes.ExpressionStatement, StatementValidationError]:
@@ -202,7 +336,7 @@ def parse_expression_statement(
             return Ok(ast_nodes.ExpressionStatement(expression=expr))
 
 
-def _validate_parser_cur_and_peek(
+def _check_cur_and_peek_tokens(
     parser: IParser, cur_tt: TokenType, peek_tt: TokenType
 ) -> Result[None, errors.InvalidTokenTypeInStatement]:
     """
@@ -238,11 +372,11 @@ def _validate_parser_cur_and_peek(
 
 def _check_cur_token(
     parser: IParser, expected_tt: TokenType
-) -> None | Err[StatementValidationError]:
+) -> Result[None, StatementValidationError]:
     """
     If parser current token is not of expected token type, constructs corresponding error,
     else returns None.
     """
     if not parser.cur_token_is(expected_tt):
         return Err(errors.InvalidTokenTypeInStatement(expected_tt, parser.current_token.type))
-    return None
+    return Ok(None)

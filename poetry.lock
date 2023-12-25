@@ -601,13 +601,13 @@ files = [
 
 [[package]]
 name = "result"
-version = "0.14.0"
+version = "0.16.0"
 description = "A Rust-like result type for Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "result-0.14.0-py3-none-any.whl", hash = "sha256:d043d606eb86e24099900712aa4c51907867857dc9f30264370398c4a5d3bd08"},
-    {file = "result-0.14.0.tar.gz", hash = "sha256:10c7bd9f2d0ac0efec4ac48483513565117a8ba1d466b9e260eaf41e15d8e1a3"},
+    {file = "result-0.16.0-py3-none-any.whl", hash = "sha256:10e412a320b3aab7dd88e716802b0bf41de380f868aab30c5b5305a9dfd49dc5"},
+    {file = "result-0.16.0.tar.gz", hash = "sha256:9eb4a2c74f28722bf4bdcd5c0fdf35afaa1042b58f638204d0291873c8db7131"},
 ]
 
 [[package]]
@@ -750,4 +750,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "171327f87b40b203f485eacefd29a16171a93e88a6e97e469fcc203ba139f79f"
+content-hash = "47032866fdd8faa3147fa8ba9ff2e69bd902948a33ddd553540ec51fefae18e4"

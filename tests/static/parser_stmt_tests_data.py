@@ -1,8 +1,12 @@
 from src.ast import ast_nodes
 from src.ast.abstract import Statement
 from src.lexer.tokens import Token, TokenType
-from tests.utils.payloads import (ExpectedFunc, ExpectedIfStatement,
-                                  ExpectedLetStatement, ExpectedParam)
+from tests.utils.payloads import (
+    ExpectedFunc,
+    ExpectedIfStatement,
+    ExpectedLetStatement,
+    ExpectedParam,
+)
 
 VALID_LET_STATEMENT_TOKENS_AND_EXPECTED: list[tuple[list[Token], ExpectedLetStatement]] = [
     (
@@ -386,7 +390,7 @@ VALID_FUNC_AND_EXPECTED: list[tuple[list[Token], ExpectedFunc]] = [
             Token(TokenType.IDENT, "a"),
             Token(TokenType.COLON, ":"),
             Token(TokenType.IDENT, "int"),
-            Token(TokenType.ILLEGAL, ","),
+            Token(TokenType.COMA, ","),
             Token(TokenType.IDENT, "b"),
             Token(TokenType.COLON, ":"),
             Token(TokenType.IDENT, "str"),
@@ -440,7 +444,7 @@ VALID_FUNC_AND_EXPECTED: list[tuple[list[Token], ExpectedFunc]] = [
                     ast_nodes.Identifier("int"),
                     ast_nodes.Identifier("b"),
                     ast_nodes.InfixOperation(
-                        ast_nodes.IntegerLiteral(10), "*", ast_nodes.Identifier("a")
+                        ast_nodes.FloatLiteral(10.0), "*", ast_nodes.Identifier("a")
                     ),
                 ),
                 ast_nodes.ReturnStatement(ast_nodes.Identifier("b")),
