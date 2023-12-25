@@ -126,6 +126,8 @@ class Lexer:
                 token = self._token_from_current_char(TokenType.RPAREN)
             case ":":
                 token = self._token_from_current_char(TokenType.COLON)
+            case ",":
+                token = self._token_from_current_char(TokenType.COMA)
             case "+":
                 token = self._token_from_current_char(TokenType.PLUS)
             case "*":

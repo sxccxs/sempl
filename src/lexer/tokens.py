@@ -18,6 +18,7 @@ class TokenType(StrEnum):
     RPAREN = ")"
     COLON = ":"
     ARROW = "->"
+    COMA = ","
 
     # operators
     ASSIGN = "="
