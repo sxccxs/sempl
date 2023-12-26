@@ -3,6 +3,7 @@ from result import Err, Ok, Result, is_err
 from src.ast import ast_nodes
 from src.ast.abstract import Expression
 from src.helpers.enum_helpers import enum_contains
+from src.helpers.result_helpers import results_gather
 from src.lexer.tokens import TokenType
 from src.parser.errors import (
     ExpressionValidationError,
@@ -55,7 +56,7 @@ def parse_expression(
 
 def parse_identifier(parser: IParser) -> Result[ast_nodes.Identifier, ExpressionValidationError]:
     """
-    Creates an Identifier expression from current token of provided parser.
+    Parses an Identifier expression from current token of provided parser.
     Expected and checked parser.current_token is an identifier.
     After the successful read, parser.current_token does not change.
     """
@@ -68,7 +69,7 @@ def parse_boolean_literal(
     parser: IParser,
 ) -> Result[ast_nodes.BooleanLiteral, ExpressionValidationError]:
     """
-    Creates an BooleanLiteral expression from current token of provided parser.
+    Parses an BooleanLiteral expression from current token of provided parser.
     Expected and checked parser.current_token is TRUE or FALSE.
     After the successful read, parser.current_token does not change.
     """
@@ -86,7 +87,7 @@ def parse_integer_literal(
     parser: IParser,
 ) -> Result[ast_nodes.IntegerLiteral, ExpressionValidationError]:
     """
-    Create an IntegerLiteral expression from current token of provided parser if possible.
+    Parses an IntegerLiteral expression from current token of provided parser if possible.
     Expected and checked parser.current_token is an INT.
     After the successful read, parser.current_token does not change.
     """
@@ -103,7 +104,7 @@ def parse_float_literal(
     parser: IParser,
 ) -> Result[ast_nodes.FloatLiteral, ExpressionValidationError]:
     """
-    Create an FloatLiteral expression from current token of provided parser if possible.
+    Parses an FloatLiteral expression from current token of provided parser if possible.
     Expected and checked parser.current_token is a FLOAT.
     After the successful read, parser.current_token does not change.
     """
@@ -120,7 +121,7 @@ def parse_prefix_operation(
     parser: IParser,
 ) -> Result[ast_nodes.PrefixOperation, ExpressionValidationError]:
     """
-    Create a PrefixOperation with operator from current token of provided parser
+    Parses a PrefixOperation with operator from current token of provided parser
     and operand from next token of provided parser, if possible.
     Expected and checked parser.current_token is an Operator.
     After the successful read, parser.current_token is the last token of the operation.
@@ -141,7 +142,7 @@ def parse_inifix_operation(
     parser: IParser, left: ast_nodes.Expression
 ) -> Result[ast_nodes.InfixOperation, ExpressionValidationError]:
     """
-    Create a InfixOperation with provided left operand,
+    Parses an InfixOperation with provided left operand,
     operator from current token of provided parser
     and right operand from next token of provided parser, if possible.
     Expected and checked parser.current_token is an Operator.
@@ -181,6 +182,65 @@ def parse_grouped_expression(parser: IParser) -> Result[Expression, ExpressionVa
 
     parser.next_token()
     return Ok(expr)
+
+
+def parse_call_expression(
+    parser: IParser, callable_: Expression
+) -> Result[ast_nodes.CallExpression, ExpressionValidationError]:
+    """
+    Parses a Call Expression with provided callable
+    from current token of provided parser, if possible.
+    Expected and checked parser.current_token is a `(`.
+    After the successful read, parser.current_token is `)`.
+    """
+    if is_err(res := _check_cur_token(parser, TokenType.LPAREN)):
+        return res
+
+    match parse_call_argument(parser):
+        case Err() as err:
+            return err
+        case Ok(args):
+            call_args = args
+
+    if is_err(res := _check_cur_token(parser, TokenType.RPAREN)):
+        return res
+
+    return Ok(ast_nodes.CallExpression(callable_, call_args))
+
+
+def parse_call_argument(parser: IParser) -> Result[list[Expression], ExpressionValidationError]:
+    """
+    Parses all call arguments from current token of provided parser, if possible.
+    Expected and checked parser.current_token is a `(`.
+    After the successful read, parser.current_token is `)`.
+    """
+    if is_err(res := _check_cur_token(parser, TokenType.LPAREN)):
+        return res
+
+    if parser.peek_token_is(TokenType.RPAREN):
+        parser.next_token()
+        return Ok([])
+
+    results: list[Result[Expression, ExpressionValidationError]] = []
+    parser.next_token()
+    results.append(parse_expression(parser, Precedence.LOWEST))
+
+    while parser.peek_token_is(TokenType.COMA):
+        parser.next_token()
+        parser.next_token()
+        results.append(parse_expression(parser, Precedence.LOWEST))
+
+    match results_gather(results):
+        case Err() as err:
+            return err
+        case Ok(value):
+            args = value
+
+    parser.next_token()
+    if is_err(res := _check_cur_token(parser, TokenType.RPAREN)):
+        return res
+
+    return Ok(args)
 
 
 def _check_cur_token(

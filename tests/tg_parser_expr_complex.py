@@ -99,7 +99,7 @@ class TestParserComplexExpressionTg:
                     Token(TokenType.RPAREN, ")"),
                     Token(TokenType.ENDL, "\n"),
                 ],
-                ExpectedCallExpression("func", []),
+                ExpectedCallExpression(ast_nodes.Identifier("func"), []),
             ),
             (
                 [
@@ -111,7 +111,8 @@ class TestParserComplexExpressionTg:
                     Token(TokenType.ENDL, "\n"),
                 ],
                 ExpectedCallExpression(
-                    "abs", [ast_nodes.PrefixOperation(Operator.MINUS, ast_nodes.IntegerLiteral(10))]
+                    ast_nodes.Identifier("abs"),
+                    [ast_nodes.PrefixOperation(Operator.MINUS, ast_nodes.IntegerLiteral(10))],
                 ),
             ),
             (
@@ -130,7 +131,7 @@ class TestParserComplexExpressionTg:
                     Token(TokenType.ENDL, "\n"),
                 ],
                 ExpectedCallExpression(
-                    "sum",
+                    ast_nodes.Identifier("sum"),
                     [
                         ast_nodes.FloatLiteral(10.5),
                         ast_nodes.PrefixOperation(Operator.MINUS, ast_nodes.IntegerLiteral(1)),
@@ -157,7 +158,7 @@ class TestParserComplexExpressionTg:
         Assert: Program contains only one statement.
         Assert: Statement is ExpressionStatement.
         Assert: Underlying expression is CallExpression.
-        Assert: CallExpression function name is equal to the expected.
+        Assert: CallExpression callable is equal to the expected.
         Assert: Number of arguments in CallExpression is equal to the expected.
         For: Each argument in CallExpression.
             Assert: Argument is equal to the expected.
@@ -166,7 +167,7 @@ class TestParserComplexExpressionTg:
         assert isinstance(
             expr, ast_nodes.CallExpression
         ), f"Unexpected expression in ExpressionStatement of type `{type(expr)}`."
-        assert expr.func_name == expected.func_name, "Invalid function name in call expression."
+        assert expr.callable == expected.callable, "Invalid callable in call expression."
         assert len(expr.arguments) == len(
             expected.args
         ), "Invalid number of parameters if call expression."

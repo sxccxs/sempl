@@ -125,6 +125,7 @@ class Parser(IParser):
         self.register_infix_parser(TokenType.GTEQ, expr_sub_parsers.parse_inifix_operation)
         self.register_infix_parser(TokenType.LT, expr_sub_parsers.parse_inifix_operation)
         self.register_infix_parser(TokenType.LTEQ, expr_sub_parsers.parse_inifix_operation)
+        self.register_infix_parser(TokenType.LPAREN, expr_sub_parsers.parse_call_expression)
 
     def _set_precedences(self) -> None:
         """Sets all precedences."""
@@ -138,3 +139,4 @@ class Parser(IParser):
         self.set_precedence(TokenType.MINUS, Precedence.SUM)
         self.set_precedence(TokenType.ASTERIX, Precedence.PRODUCT)
         self.set_precedence(TokenType.SLASH, Precedence.PRODUCT)
+        self.set_precedence(TokenType.LPAREN, Precedence.CALL)

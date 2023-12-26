@@ -18,7 +18,7 @@ def lexer_mock(request: pytest.FixtureRequest) -> YieldFixture[ILexer]:
     lexer.set_data(request.param)
     lexer.add_data(
         [Token(TokenType.EOF, "\0"), Token(TokenType.EOF, "\0")]
-    )  # Add extra token as parser ends on current token, not peek token.
+    )  # Add EOF and extra token as parser ends on current token, not peek token.
     yield lexer
 
 

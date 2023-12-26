@@ -69,13 +69,13 @@ class InfixOperation(Expression):
 
 
 @dataclass(slots=True)
-class CallExpression:
-    func_name: Identifier
+class CallExpression(Expression):
+    callable: Expression
     arguments: list[Expression]
 
     def __str__(self) -> str:
         ss = StringIO()
-        ss.write(f"{self.func_name}(")
+        ss.write(f"{self.callable}(")
         sio_write_with_sep(ss, sep=", ", values=(str(arg) for arg in self.arguments))
         ss.write(")")
         return ss.getvalue()

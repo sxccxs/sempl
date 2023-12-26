@@ -44,6 +44,7 @@ class ExpectedInfixOperation(NamedTuple):
     operator: str
     right_operand: Expression
 
+
 class ExpectedCallExpression(NamedTuple):
-    func_name: str
+    callable: Expression
     args: list[Expression]

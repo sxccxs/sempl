@@ -4,6 +4,7 @@ from result import Err, Ok, Result, is_err
 
 from src.ast import ast_nodes
 from src.ast.abstract import Statement
+from src.helpers.result_helpers import results_gather
 from src.lexer.tokens import TokenType
 from src.parser import errors
 from src.parser.errors import StatementValidationError
@@ -260,18 +261,24 @@ def parse_func_parameters(
         parser.next_token()
         return Ok([])
 
-    params: list[ast_nodes.FuncParameter] = []
-    while not parser.cur_token_is(TokenType.RPAREN):
+    results: list[Result[ast_nodes.FuncParameter, StatementValidationError]] = []
+    parser.next_token()
+    results.append(parse_func_parameter(parser))
+
+    while parser.peek_token_is(TokenType.COMA):
         parser.next_token()
-        match parse_func_parameter(parser):
-            case Err() as err:
-                return err
-            case Ok(param):
-                params.append(param)
-        if not parser.cur_token_is(TokenType.RPAREN) and is_err(
-            res := _check_cur_token(parser, TokenType.COMA)
-        ):
-            return res
+        parser.next_token()
+        results.append(parse_func_parameter(parser))
+
+    match results_gather(results):
+        case Err() as err:
+            return err
+        case Ok(value):
+            params = value
+
+    parser.next_token()
+    if is_err(res := _check_cur_token(parser, TokenType.RPAREN)):
+        return res
 
     return Ok(params)
 
@@ -283,7 +290,7 @@ def parse_func_parameter(
     Parses one function parameter from current position of provided parser.
     Expected and checked parser.current_token is parameter name.
     After the successful read, parser.current_token is
-    the token after parameter (usually `,` or `)`).
+    the last token of the parameter (of the type or default value expression).
 
     Args:
         parser (IParser): Provided parser.
@@ -301,17 +308,16 @@ def parse_func_parameter(
         return res
     parser.next_token()
     param_type = ast_nodes.Identifier(parser.current_token.literal)
-    parser.next_token()
-    if not parser.cur_token_is(TokenType.ASSIGN):
+    if not parser.peek_token_is(TokenType.ASSIGN):
         return Ok(ast_nodes.FuncParameter(param_name, param_type, None))
 
+    parser.next_token()
     parser.next_token()
     match parse_expression(parser, Precedence.LOWEST):
         case Err(err):
             return Err(StatementValidationError(err))
         case Ok(expr):
             default_value = expr
-    parser.next_token()
 
     return Ok(ast_nodes.FuncParameter(param_name, param_type, default_value))
 
