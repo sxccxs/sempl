@@ -43,3 +43,7 @@ class ExpectedInfixOperation(NamedTuple):
     left_operand: Expression
     operator: str
     right_operand: Expression
+
+class ExpectedCallExpression(NamedTuple):
+    func_name: str
+    args: list[Expression]
