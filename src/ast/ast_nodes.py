@@ -122,8 +122,8 @@ class BlockStatement(Statement):
     def __str__(self) -> str:
         ss = StringIO()
         ss.write("{\n")
-        ss.writelines(f"{4 * ' '}{stmt}" for stmt in self.statements)
-        ss.write("}")
+        ss.writelines(f"{stmt}" for stmt in self.statements)
+        ss.write("\n}")
         return ss.getvalue()
 
 

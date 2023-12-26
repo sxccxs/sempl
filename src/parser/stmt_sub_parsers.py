@@ -210,7 +210,6 @@ def parse_func_statement(
     if is_err(res := _check_cur_token(parser, TokenType.LPAREN)):
         return res
 
-    print(parser.current_token, parser.peek_token)
     match parse_func_parameters(parser):
         case Err() as err:
             return err

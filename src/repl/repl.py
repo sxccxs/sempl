@@ -3,14 +3,18 @@ from io import StringIO
 from types import TracebackType
 from typing import Self, TextIO
 
+from result import Err, Ok
+
+from src.ast.ast_nodes import Program
 from src.lexer.lexer import Lexer
-from src.lexer.tokens import TokenType
+from src.parser.parser import Parser
+from src.repl.structures.payloads import BracesStorage
 
 
 class REPL:
     """Implements basic read-evaluate-print loop."""
 
-    __slots__ = ("in_stream", "out_stream", "prompt_in", "prompt_out")
+    __slots__ = ("in_stream", "out_stream", "prompt_in", "prompt_out", "prompt_block")
 
     def __init__(
         self,
@@ -19,6 +23,7 @@ class REPL:
         *,
         prompt_in: str = ">>>",
         prompt_out: str = "<<<",
+        prompt_block: str = "...",
     ) -> None:
         """
         Args:
@@ -26,36 +31,53 @@ class REPL:
             out_stream (TextIO, optional): Output stram. Defaults to stdout.
             prompt_in (str, optional): Input prefix. Defaults to ">>>".
             prompt_out (str, optional): Output prefix. Defaults to "<<<".
+            prompt_block (str, optional): Intput prefix in the multiline code block.
+            Defaults to "<<<".
         """
         self.in_stream = in_stream
         self.out_stream = out_stream
         self.prompt_in = prompt_in
         self.prompt_out = prompt_out
+        self.prompt_block = prompt_block
 
-    def write(self, text: str) -> None:
+    def write(self, text: str = "", *, prefix: str | None = None) -> None:
         """Writes text with output prefix to output stream.
 
         Args:
             text (str): text to write.
+            prefix (str, optional): Prefix to write before the text.
+            If None `prompt_out` is used. Defaults to None.
         """
-        self.out_stream.write(f"{self.prompt_out} {text}")
+        if prefix is None:
+            prefix = self.prompt_out
+        self.out_stream.write(f"{prefix} {text}")
 
-    def writeln(self, text: str) -> None:
+    def writeln(self, text: str = "", *, prefix: str | None = None) -> None:
         """Writes text with output prefix and a new line after to output stream.
 
         Args:
             text (str): text to write.
+            prefix (str, optional): Prefix to write before the text.
+            If None `prompt_out` is used. Defaults to None.
         """
-        self.write(text)
+        self.write(text, prefix=prefix)
         self.out_stream.write("\n")
 
     def flush(self) -> None:
         """Flushes output stream."""
         self.out_stream.flush()
 
-    def readline(self) -> str:
-        """Writes input prefix to output stream and reads line from input stream."""
-        self.out_stream.write(self.prompt_in)
+    def readline(self, *, prefix: str | None = None) -> str:
+        """
+        Writes input prefix to output stream and reads line from input stream.
+
+        Args:
+            prefix (str, optional): Prefix to write before the read.
+            If None `prompt_in` is used. Defaults to None.
+        """
+        if prefix is None:
+            prefix = self.prompt_in
+        self.out_stream.write(prefix)
         self.out_stream.write(" ")
         self.out_stream.flush()
         return self.in_stream.readline()
@@ -64,10 +86,14 @@ class REPL:
         """Starts read-evaluate-print loop."""
         self.writeln("REPL started.")
         while True:
-            line_stream = StringIO(self.readline())
+            line_stream = StringIO(self._read_valid_code_block())
             lexer = Lexer(line_stream)
-            while (token := lexer.next_token()).type != TokenType.EOF:
-                self.writeln(str(token))
+            parser = Parser(lexer)
+            match parser.parse_program():
+                case Err(err):
+                    self.writeln(f"Unexpected error while parsing: {err}")
+                case Ok(program):
+                    self._write_program(program)
 
     def __enter__(self) -> Self:
         return self
@@ -87,3 +113,25 @@ class REPL:
         self.out_stream.write("\n")
         self.out_stream.flush()
         sys.exit(0)
+
+    def _read_valid_code_block(self) -> str:
+        """Reads a block of code, such that all braces are closed."""
+        ss = StringIO()
+        storage = BracesStorage()
+        line = self.readline()
+        storage.add_line(line)
+        ss.write(line)
+
+        while not storage.all_closed():
+            line = self.readline(prefix=self.prompt_block)
+            storage.add_line(line)
+            ss.write(line)
+
+        return ss.getvalue()
+
+    def _write_program(self, program: Program) -> None:
+        self.writeln(f"{'-'*5}Parsed result{'-'*5}")
+        for line in str(program).split("\n"):
+            self.writeln(line)
+        self.writeln()
+        self.writeln(f"{'-'*5}Parsed result end{'-'*5}")
