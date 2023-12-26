@@ -11,6 +11,7 @@ from src.parser.parser import Parser
 from src.repl.structures.payloads import BracesStorage
 
 
+# pylint: disable=too-many-arguments
 class REPL:
     """Implements basic read-evaluate-print loop."""
 
