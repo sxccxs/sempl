@@ -20,7 +20,7 @@ class TestParserLiteralExpressionTg:
         ],
         indirect=["lexer_mock"],
     )
-    def test_single_identifier_expression(
+    def test_single_valid_identifier_expression(
         self, expression_stmt: ast_nodes.ExpressionStatement, expected: str
     ) -> None:
         """
@@ -57,7 +57,7 @@ class TestParserLiteralExpressionTg:
         ],
         indirect=["lexer_mock"],
     )
-    def test_single_integer_literal_expression(
+    def test_single_valid_integer_literal_expression(
         self, expression_stmt: ast_nodes.ExpressionStatement, expected: int
     ) -> None:
         """
@@ -95,7 +95,7 @@ class TestParserLiteralExpressionTg:
         ],
         indirect=["lexer_mock"],
     )
-    def test_single_float_literal_expression(
+    def test_single_valid_float_literal_expression(
         self, expression_stmt: ast_nodes.ExpressionStatement, expected: float
     ) -> None:
         """
@@ -126,7 +126,7 @@ class TestParserLiteralExpressionTg:
         ],
         indirect=["lexer_mock"],
     )
-    def test_single_boolean_literal_expression(
+    def test_single_valid_boolean_literal_expression(
         self, expression_stmt: ast_nodes.ExpressionStatement, expected: bool
     ) -> None:
         """

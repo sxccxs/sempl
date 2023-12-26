@@ -21,7 +21,7 @@ class TestParserStatementsTg:
         indirect=["lexer_mock"],
     )
     @n_len_program(1)
-    def test_single_correct_let_statement(
+    def test_single_valid_let_statement(
         self, ok_len_program: ast_nodes.Program, expected_result: ExpectedLetStatement
     ) -> None:
         """
@@ -35,9 +35,9 @@ class TestParserStatementsTg:
         Assert: Program contains only one statement.
         Assert: Statement is LetStatement.
         Assert: Let statement mutability equals to expected.
-        Assert: Let statement var_type.value equals to expected type.
-        Assert: Let statement var_name.value equals to expected name.
-        Assert: Let statement var_value is correct.
+        Assert: Let statement var_type.value equals to the expected type.
+        Assert: Let statement var_name.value equals to the expected name.
+        Assert: Let statement var_value is equal to the expected value.
         """
         stmt = ok_len_program.statements[0]
         assert isinstance(
@@ -75,7 +75,7 @@ class TestParserStatementsTg:
         indirect=["lexer_mock"],
     )
     @n_len_program(1)
-    def test_single_correct_return_statement(
+    def test_single_valid_return_statement(
         self, ok_len_program: ast_nodes.Program, expected: Expression
     ) -> None:
         """
@@ -88,7 +88,7 @@ class TestParserStatementsTg:
         Assert: No error returned.
         Assert: Program contains only one statement.
         Assert: Statement is ReturnStatement.
-        Assert: ReturnStatement expression is correct.
+        Assert: ReturnStatement expression is equal to the expected.
         """
         stmt = ok_len_program.statements[0]
         assert isinstance(
@@ -115,13 +115,19 @@ class TestParserStatementsTg:
         Assert: No error returned.
         Assert: Program contains only one statement.
         Assert: Statement is BlockStatement.
-        Assert: BlockStatement contains correct statements.
+        Assert: BlockStatement contains the expected number of statements.
+        For: each statement in BlockStatement:
+            Assert: Statement is equal to the expected.
         """
         stmt = ok_len_program.statements[0]
         assert isinstance(
             stmt, ast_nodes.BlockStatement
         ), f"Unexpected statement of type `{type(stmt)}`."
-        assert stmt.statements == expected_stmts
+        assert len(stmt.statements) == len(
+            expected_stmts
+        ), "Invalid number of parameters if block statement."
+        for i, (st, exp) in enumerate(zip(stmt.statements, expected_stmts, strict=True)):
+            assert st == exp, f"Invalid statement #{i} in a block statement."
 
     @pytest.mark.parametrize(
         ("lexer_mock", "expected"),
@@ -142,9 +148,9 @@ class TestParserStatementsTg:
         Assert: No error returned.
         Assert: Program contains only one statement.
         Assert: Statement is IfStatement.
-        Assert: IfStatement contains correct condition.
-        Assert: IfStatement contains correct then-clause.
-        Assert: If else-clause is present, IfStatement contains correct else-clause.
+        Assert: IfStatement condition is equal to the expected.
+        Assert: IfStatement then-clause is equal to the expected.
+        Assert: If else-clause is present, IfStatement else-clause is equal to the expected.
         """
         stmt = ok_len_program.statements[0]
         assert isinstance(
@@ -181,17 +187,28 @@ class TestParserStatementsTg:
         Assert: No error returned.
         Assert: Program contains only one statement.
         Assert: Statement is FuncStatement.
-        Assert: FuncStatement name is expected.
-        Assert: FuncStatement contains correct parameters.
-        Assert: FuncStatement contains correct body.
+        Assert: FuncStatement name is is equal to the expected.
+        Assert: FuncStatement contains expected number of parameters.
+        For: each parameter in FuncStatement:
+            Assert: Parameter name is equal to the expected.
+            Assert: Parameter type is equal to the expected.
+            Assert: Parameter default value is equal to the expected.
+        Assert: FuncStatement body is equal to the expected.
         """
         stmt = ok_len_program.statements[0]
         assert isinstance(
             stmt, ast_nodes.FuncStatement
         ), f"Unexpected statement of type `{type(stmt)}`."
-        assert stmt.name.value == expected.name, "Invalid condition in if statement."
-        for param, expected_param in zip(stmt.parameters, expected.parameters):
-            assert param.name.value == expected_param.name, "Invalid parameter name."
-            assert param.type.value == expected_param.type, "Invalid parameter type."
-            assert param.default_value == expected_param.default_value, "Invalid default value."
+        assert stmt.name.value == expected.name, "Invalid condition in function statement."
+        assert len(stmt.parameters) == len(
+            expected.parameters
+        ), "Invalid number of parameters if function."
+        for i, (param, expected_param) in enumerate(
+            zip(stmt.parameters, expected.parameters, strict=True)
+        ):
+            assert param.name.value == expected_param.name, f"Invalid name of parameter #{i}."
+            assert param.type.value == expected_param.type, f"Invalid type of parameter #{i}."
+            assert (
+                param.default_value == expected_param.default_value
+            ), f"Invalid default value of parameter #{i}."
         assert stmt.body.statements == expected.body, "Invalid statements in function body."
