@@ -2,11 +2,12 @@ import logging
 from itertools import chain
 from typing import Iterable, Iterator
 
+from src.lexer.interfaces import ILexer
 from src.lexer.tokens import Token, TokenType
 from tests.mock.exceptions import UnexpectedMockCallException
 
 
-class LexerMock:
+class LexerMock(ILexer):
     def __init__(self, *, strict: bool = False) -> None:
         """
         Args:

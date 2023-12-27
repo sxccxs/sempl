@@ -9,12 +9,31 @@ from src.lexer.tokens import TokenType
 from src.parser import errors
 from src.parser.errors import StatementValidationError
 from src.parser.expr_sub_parsers import parse_expression
-from src.parser.interfaces import IParser
+from src.parser.parser_base import BaseParser
 from src.parser.types import Precedence
 
 
+def parse_statement(parser: BaseParser) -> Result[Statement | None, StatementValidationError]:
+    """Parses one statement from parser current token if such is valid."""
+    match parser.current_token.type:
+        case TokenType.LET:
+            return parse_let_statement(parser)
+        case TokenType.RETURN:
+            return parse_return_statement(parser)
+        case TokenType.LCURLY:
+            return parse_block_statement(parser)
+        case TokenType.IF:
+            return parse_if_statement(parser)
+        case TokenType.FN:
+            return parse_func_statement(parser)
+        case TokenType.ENDL:
+            return Ok(None)
+        case _:
+            return parse_expression_statement(parser)
+
+
 def parse_let_statement(
-    parser: IParser,
+    parser: BaseParser,
 ) -> Result[ast_nodes.LetStatement, StatementValidationError]:
     """
     Parses Let statement from current position of provided parser.
@@ -22,7 +41,7 @@ def parse_let_statement(
     After the successful read, parser.current_token is the last token of the statement.
 
     Args:
-        parser (IParser): Provided parser.
+        parser (BaseParser): Provided parser.
 
     Returns:
         Result[ast_nodes.LetStatement, StatementValidationError]: parsing result.
@@ -66,7 +85,7 @@ def parse_let_statement(
 
 
 def parse_return_statement(
-    parser: IParser,
+    parser: BaseParser,
 ) -> Result[ast_nodes.ReturnStatement, StatementValidationError]:
     """
     Parses Return statement from current position of provided parser.
@@ -74,7 +93,7 @@ def parse_return_statement(
     After the successful read, parser.current_token is the last token of the statement.
 
     Args:
-        parser (IParser): Provided parser.
+        parser (BaseParser): Provided parser.
 
     Returns:
         Result[ast_nodes.ReturnStatement, StatementValidationError]: parsing result.
@@ -97,7 +116,7 @@ def parse_return_statement(
 
 
 def parse_block_statement(
-    parser: IParser,
+    parser: BaseParser,
 ) -> Result[ast_nodes.BlockStatement, StatementValidationError]:
     """
     Parses Block statement from current position of provided parser.
@@ -105,7 +124,7 @@ def parse_block_statement(
     After the successful read, parser.current_token is the `}`.
 
     Args:
-        parser (IParser): Provided parser.
+        parser (BaseParser): Provided parser.
 
     Returns:
         Result[ast_nodes.BlockStatement, StatementValidationError]: parsing result.
@@ -118,7 +137,7 @@ def parse_block_statement(
     while not parser.cur_token_is(TokenType.RCURLY):
         if parser.cur_token_is(TokenType.EOF):
             return Err(StatementValidationError("Unexpected EOF. Brace was not closed."))
-        match parser.parse_statement():
+        match parse_statement(parser):
             case Err(err):
                 return Err(StatementValidationError(err))
             case Ok(stmt):
@@ -130,7 +149,7 @@ def parse_block_statement(
 
 
 def parse_if_statement(
-    parser: IParser,
+    parser: BaseParser,
 ) -> Result[ast_nodes.IfStatement, StatementValidationError]:
     """
     Parses If statement from current position of provided parser.
@@ -138,7 +157,7 @@ def parse_if_statement(
     After the successful read, parser.current_token is the `}` - end of last block of if statement.
 
     Args:
-        parser (IParser): Provided parser.
+        parser (BaseParser): Provided parser.
 
     Returns:
         Result[ast_nodes.IfStatement, StatementValidationError]: parsing result.
@@ -184,7 +203,7 @@ def parse_if_statement(
 
 
 def parse_func_statement(
-    parser: IParser,
+    parser: BaseParser,
 ) -> Result[ast_nodes.FuncStatement, StatementValidationError]:
     """
     Parses function statement from current position of provided parser.
@@ -192,7 +211,7 @@ def parse_func_statement(
     After the successful read, parser.current_token is the `}` - end of function body.
 
     Args:
-        parser (IParser): Provided parser.
+        parser (BaseParser): Provided parser.
 
     Returns:
         Result[ast_nodes.FuncStatement, StatementValidationError]: parsing result.
@@ -240,7 +259,7 @@ def parse_func_statement(
 
 
 def parse_func_parameters(
-    parser: IParser,
+    parser: BaseParser,
 ) -> Result[list[ast_nodes.FuncParameter], StatementValidationError]:
     """
     Parses all function parameters from current position of provided parser.
@@ -248,7 +267,7 @@ def parse_func_parameters(
     After the successful read, parser.current_token is `)`.
 
     Args:
-        parser (IParser): Provided parser.
+        parser (BaseParser): Provided parser.
 
     Returns:
         Result[list[ast_nodes.FuncParameter], StatementValidationError]: parsing result.
@@ -283,7 +302,7 @@ def parse_func_parameters(
 
 
 def parse_func_parameter(
-    parser: IParser,
+    parser: BaseParser,
 ) -> Result[ast_nodes.FuncParameter, StatementValidationError]:
     """
     Parses one function parameter from current position of provided parser.
@@ -292,7 +311,7 @@ def parse_func_parameter(
     the last token of the parameter (of the type or default value expression).
 
     Args:
-        parser (IParser): Provided parser.
+        parser (BaseParser): Provided parser.
 
     Returns:
         Result[ast_nodes.FuncParameter, StatementValidationError]: parsing result.
@@ -322,14 +341,14 @@ def parse_func_parameter(
 
 
 def parse_expression_statement(
-    parser: IParser,
+    parser: BaseParser,
 ) -> Result[ast_nodes.ExpressionStatement, StatementValidationError]:
     """
     Parses expression statement from current position of provided parser.
     After the successful read, parser.current_token is the last token of the statement.
 
     Args:
-        parser (IParser): Provided parser.
+        parser (BaseParser): Provided parser.
 
     Returns:
         Result[ast_nodes.ExpressionStatement, StatementValidationError]: Parsing result.
@@ -342,7 +361,7 @@ def parse_expression_statement(
 
 
 def _check_cur_and_peek_tokens(
-    parser: IParser, cur_tt: TokenType, peek_tt: TokenType
+    parser: BaseParser, cur_tt: TokenType, peek_tt: TokenType
 ) -> Result[None, errors.InvalidTokenTypeInStatement]:
     """
     Checks if current token of parser is `cur_tt`.
@@ -350,7 +369,7 @@ def _check_cur_and_peek_tokens(
     If yes, makes the same check for peek token and `peek_tt`.
 
     Args:
-        parser (IParser): Provided parser
+        parser (BaseParser): Provided parser
         cur_tt (TokenType): Expected current token type.
         peek_tt (TokenType): Expected peek token type.
 
@@ -376,7 +395,7 @@ def _check_cur_and_peek_tokens(
 
 
 def _check_cur_token(
-    parser: IParser, expected_tt: TokenType
+    parser: BaseParser, expected_tt: TokenType
 ) -> Result[None, StatementValidationError]:
     """
     If parser current token is not of expected token type, constructs corresponding error,

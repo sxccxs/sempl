@@ -10,19 +10,19 @@ from src.parser.errors import (
     InvalidTokenTypeInExpression,
     UnsupportedExpressionError,
 )
-from src.parser.interfaces import IParser
+from src.parser.parser_base import BaseParser
 from src.parser.types import Operator, Precedence
 
 
 def parse_expression(
-    parser: IParser, precedence: Precedence
+    parser: BaseParser, precedence: Precedence
 ) -> Result[Expression, ExpressionValidationError]:
     """
     Parses expression with given parser and its
     registered subparsers and precedences.
 
     Args:
-        parser (IParser): Parser
+        parser (BaseParser): Parser
         precedence (Precedence): Current expression precedence.
 
     Returns:
@@ -54,7 +54,7 @@ def parse_expression(
     return Ok(expr)
 
 
-def parse_identifier(parser: IParser) -> Result[ast_nodes.Identifier, ExpressionValidationError]:
+def parse_identifier(parser: BaseParser) -> Result[ast_nodes.Identifier, ExpressionValidationError]:
     """
     Parses an Identifier expression from current token of provided parser.
     Expected and checked parser.current_token is an identifier.
@@ -66,7 +66,7 @@ def parse_identifier(parser: IParser) -> Result[ast_nodes.Identifier, Expression
 
 
 def parse_boolean_literal(
-    parser: IParser,
+    parser: BaseParser,
 ) -> Result[ast_nodes.BooleanLiteral, ExpressionValidationError]:
     """
     Parses an BooleanLiteral expression from current token of provided parser.
@@ -84,7 +84,7 @@ def parse_boolean_literal(
 
 
 def parse_integer_literal(
-    parser: IParser,
+    parser: BaseParser,
 ) -> Result[ast_nodes.IntegerLiteral, ExpressionValidationError]:
     """
     Parses an IntegerLiteral expression from current token of provided parser if possible.
@@ -101,7 +101,7 @@ def parse_integer_literal(
 
 
 def parse_float_literal(
-    parser: IParser,
+    parser: BaseParser,
 ) -> Result[ast_nodes.FloatLiteral, ExpressionValidationError]:
     """
     Parses an FloatLiteral expression from current token of provided parser if possible.
@@ -118,7 +118,7 @@ def parse_float_literal(
 
 
 def parse_prefix_operation(
-    parser: IParser,
+    parser: BaseParser,
 ) -> Result[ast_nodes.PrefixOperation, ExpressionValidationError]:
     """
     Parses a PrefixOperation with operator from current token of provided parser
@@ -139,7 +139,7 @@ def parse_prefix_operation(
 
 
 def parse_inifix_operation(
-    parser: IParser, left: ast_nodes.Expression
+    parser: BaseParser, left: ast_nodes.Expression
 ) -> Result[ast_nodes.InfixOperation, ExpressionValidationError]:
     """
     Parses an InfixOperation with provided left operand,
@@ -161,7 +161,7 @@ def parse_inifix_operation(
             return Ok(ast_nodes.InfixOperation(left, operator, right))
 
 
-def parse_grouped_expression(parser: IParser) -> Result[Expression, ExpressionValidationError]:
+def parse_grouped_expression(parser: BaseParser) -> Result[Expression, ExpressionValidationError]:
     """
     Parses grouped expression from current token of provided parser, if possible.
     Expected and checked parser.current_token is a `(`.
@@ -185,7 +185,7 @@ def parse_grouped_expression(parser: IParser) -> Result[Expression, ExpressionVa
 
 
 def parse_call_expression(
-    parser: IParser, callable_: Expression
+    parser: BaseParser, callable_: Expression
 ) -> Result[ast_nodes.CallExpression, ExpressionValidationError]:
     """
     Parses a Call Expression with provided callable
@@ -208,7 +208,7 @@ def parse_call_expression(
     return Ok(ast_nodes.CallExpression(callable_, call_args))
 
 
-def parse_call_argument(parser: IParser) -> Result[list[Expression], ExpressionValidationError]:
+def parse_call_argument(parser: BaseParser) -> Result[list[Expression], ExpressionValidationError]:
     """
     Parses all call arguments from current token of provided parser, if possible.
     Expected and checked parser.current_token is a `(`.
@@ -244,7 +244,7 @@ def parse_call_argument(parser: IParser) -> Result[list[Expression], ExpressionV
 
 
 def _check_cur_token(
-    parser: IParser, expected_tt: TokenType
+    parser: BaseParser, expected_tt: TokenType
 ) -> Result[None, ExpressionValidationError]:
     """
     If parser current token is not of expected token type, constructs corresponding error,
@@ -255,7 +255,7 @@ def _check_cur_token(
     return Err(InvalidTokenTypeInExpression(expected_tt, parser.current_token.type))
 
 
-def _check_cur_token_is_operator(parser: IParser) -> Result[None, ExpressionValidationError]:
+def _check_cur_token_is_operator(parser: BaseParser) -> Result[None, ExpressionValidationError]:
     if enum_contains(Operator, parser.current_token.literal):
         return Ok(None)
     return Err(

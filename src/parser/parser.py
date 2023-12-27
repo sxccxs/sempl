@@ -1,16 +1,15 @@
 from result import Err, Ok, Result
 
 from src.ast import ast_nodes
-from src.ast.abstract import Statement
 from src.lexer.interfaces import ILexer
 from src.lexer.tokens import Token, TokenType
 from src.parser import expr_sub_parsers, stmt_sub_parsers
-from src.parser.errors import ParsingError, StatementValidationError
-from src.parser.interfaces import IParser
+from src.parser.errors import ParsingError
+from src.parser.parser_base import BaseParser
 from src.parser.types import InfixParserType, Precedence, PrefixParserType
 
 
-class Parser(IParser):
+class Parser(BaseParser):
     def __init__(self, lexer: ILexer) -> None:
         """
         Args:
@@ -60,7 +59,7 @@ class Parser(IParser):
         program = ast_nodes.Program()
 
         while not self.cur_token_is(TokenType.EOF):
-            match self.parse_statement():
+            match stmt_sub_parsers.parse_statement(self):
                 case Ok(stmt):
                     if stmt is not None:
                         program.statements.append(stmt)
@@ -71,24 +70,6 @@ class Parser(IParser):
             self.next_token()
 
         return Ok(program)
-
-    def parse_statement(self) -> Result[Statement | None, StatementValidationError]:
-        """Parses one statement from current token if such is valid."""
-        match self.current_token.type:
-            case TokenType.LET:
-                return stmt_sub_parsers.parse_let_statement(self)
-            case TokenType.RETURN:
-                return stmt_sub_parsers.parse_return_statement(self)
-            case TokenType.LCURLY:
-                return stmt_sub_parsers.parse_block_statement(self)
-            case TokenType.IF:
-                return stmt_sub_parsers.parse_if_statement(self)
-            case TokenType.FN:
-                return stmt_sub_parsers.parse_func_statement(self)
-            case TokenType.ENDL:
-                return Ok(None)
-            case _:
-                return stmt_sub_parsers.parse_expression_statement(self)
 
     def register_prefix_parser(self, tt: TokenType, p: PrefixParserType) -> None:
         """Registers a prefix parser."""

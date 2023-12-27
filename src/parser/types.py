@@ -5,10 +5,10 @@ from result import Result
 
 from src.ast.abstract import Expression
 from src.parser.errors import ExpressionValidationError
-from src.parser.interfaces import IParser
+from src.parser.parser_base import BaseParser
 
-PrefixParserType = Callable[[IParser], Result[Expression, ExpressionValidationError]]
-InfixParserType = Callable[[IParser, Expression], Result[Expression, ExpressionValidationError]]
+PrefixParserType = Callable[[BaseParser], Result[Expression, ExpressionValidationError]]
+InfixParserType = Callable[[BaseParser, Expression], Result[Expression, ExpressionValidationError]]
 
 
 class Precedence(IntEnum):
