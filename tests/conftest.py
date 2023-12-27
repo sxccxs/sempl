@@ -4,7 +4,7 @@ from result import Ok, is_ok
 
 from src.ast import ast_nodes
 from src.evaluation.evaluator import evaluate
-from src.evaluation.values.values_base import Value
+from src.evaluation.values.value_base import Value
 from src.lexer.interfaces import ILexer
 from src.lexer.tokens import Token, TokenType
 from src.parser.interfaces import IParser

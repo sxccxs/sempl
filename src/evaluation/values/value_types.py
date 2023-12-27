@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from src.evaluation.values.values_base import Value, ValueType
+from src.evaluation.values.value_base import Value, ValueType
 
 
 @dataclass(frozen=True)

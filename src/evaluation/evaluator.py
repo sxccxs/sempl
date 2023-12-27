@@ -8,8 +8,8 @@ from src.ast import ast_nodes
 from src.ast.abstract import Statement
 from src.evaluation import consts, errors
 from src.evaluation.errors import EvaluationError
-from src.evaluation.values import values_types
-from src.evaluation.values.values_base import Value
+from src.evaluation.values import value_types
+from src.evaluation.values.value_base import Value
 from src.helpers.result_helpers import results_gather
 from src.parser.types import Operator
 
@@ -26,9 +26,9 @@ def evaluate(node: ast_nodes.ASTNode) -> Result[Value, EvaluationError]:
     """
     match node:
         case ast_nodes.IntegerLiteral() as int_lit:
-            return Ok(values_types.Integer(int_lit.value))
+            return Ok(value_types.Integer(int_lit.value))
         case ast_nodes.FloatLiteral() as fl_lit:
-            return Ok(values_types.Float(fl_lit.value))
+            return Ok(value_types.Float(fl_lit.value))
         case ast_nodes.BooleanLiteral() as bool_lit:
             return Ok(consts.TrueFalse.from_bool(bool_lit.value).value)
         case ast_nodes.Program() as prog:
@@ -40,6 +40,13 @@ def evaluate(node: ast_nodes.ASTNode) -> Result[Value, EvaluationError]:
                 Ok(val)
                 for operand in evaluate(pre_op.right)
                 for val in evaluate_prefix_expression(pre_op.operator, operand)
+            )
+        case ast_nodes.InfixOperation() as in_op:
+            return do(
+                Ok(val)
+                for left in evaluate(in_op.left)
+                for right in evaluate(in_op.right)
+                for val in evaluate_infix_expression(left, in_op.operator, right)
             )
         case _:
             return Err(errors.UnsuportedNodeError(node))
@@ -79,10 +86,10 @@ def evaluate_prefix_expression(
 def evaluate_prefix_minus_expression(operand: Value) -> Result[Value, EvaluationError]:
     """Applies unary minus on given operand if possible."""
     match operand:
-        case values_types.Integer() as i:
-            return Ok(values_types.Integer(-1 * i.value))
-        case values_types.Float() as f:
-            return Ok(values_types.Float(-1 * f.value))
+        case value_types.Integer() as i:
+            return Ok(value_types.Integer(-1 * i.value))
+        case value_types.Float() as f:
+            return Ok(value_types.Float(-1 * f.value))
         case _:
             return Err(errors.UnsuportedPrefixOperation(Operator.MINUS, operand))
 
@@ -90,9 +97,71 @@ def evaluate_prefix_minus_expression(operand: Value) -> Result[Value, Evaluation
 def evaluate_prefix_plus_expression(operand: Value) -> Result[Value, EvaluationError]:
     """Applies unary plus on given operand if possible."""
     match operand:
-        case values_types.Integer() as i:
+        case value_types.Integer() as i:
             return Ok(i)
-        case values_types.Float() as f:
+        case value_types.Float() as f:
             return Ok(f)
         case _:
             return Err(errors.UnsuportedPrefixOperation(Operator.PLUS, operand))
+
+
+def evaluate_infix_expression(
+    left_operand: Value, operator: Operator, right_operand: Value
+) -> Result[Value, EvaluationError]:
+    """Applies given binary operator on given operands if possible."""
+    match (left_operand, right_operand):
+        case (value_types.Integer(), value_types.Integer()):
+            return evaluate_integer_infix_expression(left_operand, operator, right_operand)
+        case (
+            value_types.Integer() | value_types.Float(),
+            value_types.Integer() | value_types.Float(),
+        ):
+            return evaluate_float_infix_expression(left_operand, operator, right_operand)
+        case _:
+            return Err(errors.UnsuportedInfixOperation(left_operand, operator, right_operand))
+
+
+def evaluate_integer_infix_expression(
+    left_operand: value_types.Integer, operator: Operator, right_operand: value_types.Integer
+) -> Result[value_types.Integer, EvaluationError]:
+    """
+    Applies given binary operator on given integer operands,
+    with result of an integer value if possible.
+    """
+    left = left_operand.value
+    right = right_operand.value
+    match operator:
+        case Operator.PLUS:
+            return Ok(value_types.Integer(left + right))
+        case Operator.MINUS:
+            return Ok(value_types.Integer(left - right))
+        case Operator.MULT:
+            return Ok(value_types.Integer(left * right))
+        case Operator.DIV:
+            return Ok(value_types.Integer(left // right))
+        case _:
+            return Err(errors.UnsuportedInfixOperation(left_operand, operator, right_operand))
+
+
+def evaluate_float_infix_expression(
+    left_operand: value_types.Float | value_types.Integer,
+    operator: Operator,
+    right_operand: value_types.Float | value_types.Integer,
+) -> Result[value_types.Float, EvaluationError]:
+    """
+    Applies given binary operator on given integer/float operands,
+    with result of a float value if possible.
+    """
+    left = left_operand.value
+    right = right_operand.value
+    match operator:
+        case Operator.PLUS:
+            return Ok(value_types.Float(left + right))
+        case Operator.MINUS:
+            return Ok(value_types.Float(left - right))
+        case Operator.MULT:
+            return Ok(value_types.Float(left * right))
+        case Operator.DIV:
+            return Ok(value_types.Float(left / right))
+        case _:
+            return Err(errors.UnsuportedInfixOperation(left_operand, operator, right_operand))

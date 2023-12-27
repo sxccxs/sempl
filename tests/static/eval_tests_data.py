@@ -1,0 +1,92 @@
+from src.ast import ast_nodes
+from src.ast.abstract import Statement
+from src.evaluation.values import value_types
+from src.evaluation.values.value_base import Value
+from src.parser.types import Operator
+
+SINGLE_VALID_INFIX_OPERATION_AND_EXPECTED: list[tuple[list[Statement], Value]] = [
+    (
+        [
+            ast_nodes.ExpressionStatement(
+                expression=ast_nodes.InfixOperation(
+                    left=ast_nodes.InfixOperation(
+                        left=ast_nodes.InfixOperation(
+                            left=ast_nodes.IntegerLiteral(value=5),
+                            operator=Operator.PLUS,
+                            right=ast_nodes.IntegerLiteral(value=5),
+                        ),
+                        operator=Operator.PLUS,
+                        right=ast_nodes.IntegerLiteral(value=5),
+                    ),
+                    operator=Operator.MINUS,
+                    right=ast_nodes.IntegerLiteral(value=10),
+                )
+            )
+        ],
+        value_types.Integer(5),
+    ),
+    (
+        [
+            ast_nodes.ExpressionStatement(
+                expression=ast_nodes.InfixOperation(
+                    left=ast_nodes.FloatLiteral(value=1.1),
+                    operator=Operator.PLUS,
+                    right=ast_nodes.InfixOperation(
+                        left=ast_nodes.FloatLiteral(value=10.0),
+                        operator=Operator.MULT,
+                        right=ast_nodes.IntegerLiteral(value=2),
+                    ),
+                )
+            )
+        ],
+        value_types.Float(21.1),
+    ),
+    (
+        [
+            ast_nodes.ExpressionStatement(
+                expression=ast_nodes.InfixOperation(
+                    left=ast_nodes.InfixOperation(
+                        left=ast_nodes.IntegerLiteral(value=10),
+                        operator=Operator.MULT,
+                        right=ast_nodes.IntegerLiteral(value=3),
+                    ),
+                    operator=Operator.DIV,
+                    right=ast_nodes.IntegerLiteral(value=4),
+                )
+            )
+        ],
+        value_types.Integer(7),
+    ),
+    (
+        [
+            ast_nodes.ExpressionStatement(
+                expression=ast_nodes.InfixOperation(
+                    left=ast_nodes.InfixOperation(
+                        left=ast_nodes.IntegerLiteral(value=10),
+                        operator=Operator.MULT,
+                        right=ast_nodes.IntegerLiteral(value=2),
+                    ),
+                    operator=Operator.PLUS,
+                    right=ast_nodes.FloatLiteral(value=0.0),
+                )
+            )
+        ],
+        value_types.Float(20.0),
+    ),
+    (
+        [
+            ast_nodes.ExpressionStatement(
+                expression=ast_nodes.InfixOperation(
+                    left=ast_nodes.InfixOperation(
+                        left=ast_nodes.IntegerLiteral(value=20),
+                        operator=Operator.MULT,
+                        right=ast_nodes.IntegerLiteral(value=2),
+                    ),
+                    operator=Operator.DIV,
+                    right=ast_nodes.FloatLiteral(value=5.0),
+                )
+            )
+        ],
+        value_types.Float(8.0),
+    ),
+]

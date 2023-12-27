@@ -2,14 +2,14 @@ from __future__ import annotations
 
 from enum import Enum
 
-from src.evaluation.values import values_types
+from src.evaluation.values import value_types
 
 
 class TrueFalse(Enum):
     """The only two True and False constants"""
 
-    TRUE = values_types.Boolean(True)
-    FALSE = values_types.Boolean(False)
+    TRUE = value_types.Boolean(True)
+    FALSE = value_types.Boolean(False)
 
     @classmethod
     def from_bool(cls, value: bool) -> TrueFalse:
