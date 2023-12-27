@@ -1,10 +1,9 @@
 from typing import Iterable
 
-from result import Ok, Result
+from result import Ok
 
 from src.ast import ast_nodes
 from src.ast.abstract import Statement
-from src.parser.errors import ParsingError
 from src.parser.interfaces import IParser
 
 
@@ -12,7 +11,7 @@ class ParserMock(IParser):
     def __init__(self) -> None:
         self.statements: list[Statement] = []
 
-    def parse_program(self) -> Result[ast_nodes.Program, ParsingError]:
+    def parse_program(self) -> Ok[ast_nodes.Program]:
         """Parses the whole program."""
         return Ok(ast_nodes.Program(self.statements))
 

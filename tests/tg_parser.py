@@ -39,7 +39,8 @@ class TestParserTg:
     )
     @n_len_program(1)
     def test_grouped_expression(self, ok_len_program: ast_nodes.Program, expected: str) -> None:
-        """Tests parser parsing grouped expressions (expressions in braces).
+        """
+        Tests parser parsing grouped expressions (expressions in braces).
 
         Arrange: Provide tokens to Lexer Mock.
         Arrange: Create Parser with Lexer Mock.

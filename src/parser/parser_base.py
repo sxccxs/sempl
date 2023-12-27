@@ -5,11 +5,11 @@ from typing import TYPE_CHECKING
 
 from result import Result
 
-from src.ast import ast_nodes
 from src.lexer.tokens import Token, TokenType
 from src.parser.errors import ParsingError
 
 if TYPE_CHECKING:
+    from src.ast import ast_nodes
     from src.parser.types import InfixParserType, Precedence, PrefixParserType
 
 

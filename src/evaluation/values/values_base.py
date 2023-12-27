@@ -6,9 +6,10 @@ from enum import StrEnum, auto
 class ValueType(StrEnum):
     INT = auto()
     BOOL = auto()
+    FLOAT = auto()
 
 
-@dataclass(slots=True)
+@dataclass(frozen=True)
 class Value(ABC):
     @property
     @abstractmethod
