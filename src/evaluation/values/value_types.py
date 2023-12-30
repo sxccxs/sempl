@@ -1,39 +1,35 @@
 from dataclasses import dataclass
 
-from src.evaluation.values.value_base import Value, ValueType
+from src.evaluation.values.value_base import NumericValue, Value, ValuedValue
 
 
 @dataclass(frozen=True)
-class Integer(Value):
+class Integer(NumericValue):
     value: int
 
-    @property
-    def value_type(self) -> ValueType:
-        return ValueType.INT
-
     def __str__(self) -> str:
         return str(self.value)
 
 
 @dataclass(frozen=True)
-class Boolean(Value):
+class Boolean(ValuedValue):
     value: bool
 
-    @property
-    def value_type(self) -> ValueType:
-        return ValueType.BOOL
+    def __str__(self) -> str:
+        return str(self.value)
+
+
+@dataclass(frozen=True)
+class Float(NumericValue):
+    value: float
 
     def __str__(self) -> str:
         return str(self.value)
 
 
 @dataclass(frozen=True)
-class Float(Value):
-    value: float
-
-    @property
-    def value_type(self) -> ValueType:
-        return ValueType.FLOAT
+class Type(ValuedValue):
+    value: type[Value]
 
     def __str__(self) -> str:
         return str(self.value)

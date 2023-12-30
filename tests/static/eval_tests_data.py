@@ -1,8 +1,10 @@
 from src.ast import ast_nodes
 from src.ast.abstract import Statement
+from src.evaluation.consts import TrueFalse
 from src.evaluation.values import value_types
 from src.evaluation.values.value_base import Value
 from src.parser.types import Operator
+from tests.utils.payloads import ExpectedEvaluatedLet
 
 SINGLE_VALID_INFIX_OPERATION_AND_EXPECTED: list[tuple[list[Statement], Value]] = [
     (
@@ -88,5 +90,129 @@ SINGLE_VALID_INFIX_OPERATION_AND_EXPECTED: list[tuple[list[Statement], Value]] =
             )
         ],
         value_types.Float(8.0),
+    ),
+]
+
+SINGLE_VALID_COMPARISON_AND_EXPECTED: list[tuple[list[Statement], TrueFalse]] = [
+    (
+        [
+            ast_nodes.ExpressionStatement(
+                expression=ast_nodes.InfixOperation(
+                    left=ast_nodes.BooleanLiteral(value=True),
+                    operator=Operator.EQ,
+                    right=ast_nodes.BooleanLiteral(value=True),
+                )
+            )
+        ],
+        TrueFalse.TRUE,
+    ),
+    (
+        [
+            ast_nodes.ExpressionStatement(
+                expression=ast_nodes.InfixOperation(
+                    left=ast_nodes.BooleanLiteral(value=False),
+                    operator=Operator.EQ,
+                    right=ast_nodes.BooleanLiteral(value=False),
+                )
+            )
+        ],
+        TrueFalse.TRUE,
+    ),
+    (
+        [
+            ast_nodes.ExpressionStatement(
+                expression=ast_nodes.InfixOperation(
+                    left=ast_nodes.BooleanLiteral(value=True),
+                    operator=Operator.EQ,
+                    right=ast_nodes.BooleanLiteral(value=False),
+                )
+            )
+        ],
+        TrueFalse.FALSE,
+    ),
+    (
+        [
+            ast_nodes.ExpressionStatement(
+                expression=ast_nodes.InfixOperation(
+                    left=ast_nodes.BooleanLiteral(value=True),
+                    operator=Operator.NOT_EQ,
+                    right=ast_nodes.BooleanLiteral(value=False),
+                )
+            )
+        ],
+        TrueFalse.TRUE,
+    ),
+    (
+        [
+            ast_nodes.ExpressionStatement(
+                expression=ast_nodes.InfixOperation(
+                    left=ast_nodes.InfixOperation(
+                        left=ast_nodes.IntegerLiteral(value=1),
+                        operator=Operator.GT,
+                        right=ast_nodes.IntegerLiteral(value=2),
+                    ),
+                    operator=Operator.NOT_EQ,
+                    right=ast_nodes.BooleanLiteral(value=True),
+                )
+            )
+        ],
+        TrueFalse.TRUE,
+    ),
+    (
+        [
+            ast_nodes.ExpressionStatement(
+                expression=ast_nodes.InfixOperation(
+                    left=ast_nodes.BooleanLiteral(value=False),
+                    operator=Operator.EQ,
+                    right=ast_nodes.InfixOperation(
+                        left=ast_nodes.IntegerLiteral(value=2),
+                        operator=Operator.GTEQ,
+                        right=ast_nodes.FloatLiteral(value=2.1),
+                    ),
+                )
+            )
+        ],
+        TrueFalse.TRUE,
+    ),
+    (
+        [
+            ast_nodes.ExpressionStatement(
+                expression=ast_nodes.InfixOperation(
+                    left=ast_nodes.IntegerLiteral(value=0),
+                    operator=Operator.EQ,
+                    right=ast_nodes.FloatLiteral(value=0.0),
+                )
+            )
+        ],
+        TrueFalse.TRUE,
+    ),
+]
+
+SINGLE_VALID_LET_AND_EXPECTED: list[tuple[list[Statement], ExpectedEvaluatedLet]] = [
+    (
+        [
+            ast_nodes.LetStatement(
+                is_mut=True,
+                var_type=ast_nodes.Identifier(value="int"),
+                var_name=ast_nodes.Identifier(value="x"),
+                var_value=ast_nodes.IntegerLiteral(value=10),
+            )
+        ],
+        ExpectedEvaluatedLet("x", value_types.Integer, True, value_types.Integer(10)),
+    ),
+    (
+        [
+            ast_nodes.LetStatement(
+                is_mut=False,
+                var_type=ast_nodes.Identifier(value="float"),
+                var_name=ast_nodes.Identifier(value="my_variable"),
+                var_value=ast_nodes.InfixOperation(
+                    left=ast_nodes.FloatLiteral(value=5.5),
+                    operator=Operator.MULT,
+                    right=ast_nodes.IntegerLiteral(value=2),
+                ),
+            )
+        ],
+        ExpectedEvaluatedLet("my_variable", value_types.Float, False, value_types.Float(11.0)),
     ),
 ]

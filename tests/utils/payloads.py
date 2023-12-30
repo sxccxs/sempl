@@ -1,6 +1,7 @@
 from typing import NamedTuple
 
 from src.ast.abstract import Expression, Statement
+from src.evaluation.values.value_base import Value
 
 
 class ExpectedLetStatement(NamedTuple):
@@ -48,3 +49,10 @@ class ExpectedInfixOperation(NamedTuple):
 class ExpectedCallExpression(NamedTuple):
     callable: Expression
     args: list[Expression]
+
+
+class ExpectedEvaluatedLet(NamedTuple):
+    name: str
+    type_: type[Value]
+    is_mut: bool
+    value: Value

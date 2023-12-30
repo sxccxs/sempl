@@ -4,7 +4,7 @@ from result import Err, Ok, Result, is_err
 
 from src.ast import ast_nodes
 from src.ast.abstract import Statement
-from src.helpers.result_helpers import results_gather
+from src.helpers.result_helpers import create_err, results_gather
 from src.lexer.tokens import TokenType
 from src.parser import errors
 from src.parser.errors import StatementValidationError
@@ -63,14 +63,16 @@ def parse_let_statement(
     parser.next_token()
 
     if not parser.peek_token_is(TokenType.ASSIGN):
-        return Err(errors.InvalidTokenTypeInStatement(TokenType.ASSIGN, parser.peek_token.type))
+        return create_err(
+            errors.InvalidTokenTypeInStatement(TokenType.ASSIGN, parser.peek_token.type)
+        )
 
     parser.next_token()
     parser.next_token()
 
     match parse_expression(parser, Precedence.LOWEST):
         case Err(err):
-            return Err(StatementValidationError(err))
+            return create_err(StatementValidationError(err))
         case Ok(expr):
             var_value = expr
 
@@ -103,7 +105,7 @@ def parse_return_statement(
     parser.next_token()
     match parse_expression(parser, Precedence.LOWEST):
         case Err(err):
-            return Err(StatementValidationError(err))
+            return create_err(StatementValidationError(err))
         case Ok(expr):
             return_value = expr
 
@@ -136,10 +138,10 @@ def parse_block_statement(
 
     while not parser.cur_token_is(TokenType.RCURLY):
         if parser.cur_token_is(TokenType.EOF):
-            return Err(StatementValidationError("Unexpected EOF. Brace was not closed."))
+            return create_err(StatementValidationError("Unexpected EOF. Brace was not closed."))
         match parse_statement(parser):
             case Err(err):
-                return Err(StatementValidationError(err))
+                return create_err(StatementValidationError(err))
             case Ok(stmt):
                 if stmt is not None:
                     statements.append(stmt)
@@ -167,12 +169,14 @@ def parse_if_statement(
     parser.next_token()
     match parse_expression(parser, Precedence.LOWEST):
         case Err(err):
-            return Err(StatementValidationError(err))
+            return create_err(StatementValidationError(err))
         case Ok(expr):
             condition = expr
 
     if not parser.move_to_next_if_peek_is(TokenType.LCURLY):
-        return Err(errors.InvalidTokenTypeInStatement(TokenType.LCURLY, parser.peek_token.type))
+        return create_err(
+            errors.InvalidTokenTypeInStatement(TokenType.LCURLY, parser.peek_token.type)
+        )
 
     match parse_block_statement(parser):
         case Err() as err:
@@ -190,7 +194,7 @@ def parse_if_statement(
                     else_clause = stmt
         else:  # if there is "else <smth>"
             if not parser.move_to_next_if_peek_is(TokenType.IF):  # if <smth> is not "if"
-                return Err(
+                return create_err(
                     errors.InvalidTokenTypeInStatement(TokenType.LCURLY, parser.peek_token.type)
                 )
             match parse_if_statement(parser):  # if there is "else if"
@@ -333,7 +337,7 @@ def parse_func_parameter(
     parser.next_token()
     match parse_expression(parser, Precedence.LOWEST):
         case Err(err):
-            return Err(StatementValidationError(err))
+            return create_err(StatementValidationError(err))
         case Ok(expr):
             default_value = expr
 
@@ -355,7 +359,7 @@ def parse_expression_statement(
     """
     match parse_expression(parser, Precedence.LOWEST):
         case Err(err):
-            return Err(StatementValidationError(err))
+            return create_err(StatementValidationError(err))
         case Ok(expr):
             return Ok(ast_nodes.ExpressionStatement(expression=expr))
 
@@ -377,14 +381,14 @@ def _check_cur_and_peek_tokens(
         Result[None, errors.InvalidTokenTypeInStatement]: Validation result.
     """
     if not parser.cur_token_is(cur_tt):
-        return Err(
+        return create_err(
             errors.InvalidTokenTypeInStatement(
                 cur_tt,
                 parser.current_token.type,
             )
         )
     if not parser.peek_token_is(peek_tt):
-        return Err(
+        return create_err(
             errors.InvalidTokenTypeInStatement(
                 peek_tt,
                 parser.peek_token.type,
@@ -403,4 +407,4 @@ def _check_cur_token(
     """
     if parser.cur_token_is(expected_tt):
         return Ok(None)
-    return Err(errors.InvalidTokenTypeInStatement(expected_tt, parser.current_token.type))
+    return create_err(errors.InvalidTokenTypeInStatement(expected_tt, parser.current_token.type))

@@ -3,7 +3,7 @@ from result import Err, Ok, Result, is_err
 from src.ast import ast_nodes
 from src.ast.abstract import Expression
 from src.helpers.enum_helpers import enum_contains
-from src.helpers.result_helpers import results_gather
+from src.helpers.result_helpers import create_err, results_gather
 from src.lexer.tokens import TokenType
 from src.parser.errors import (
     ExpressionValidationError,
@@ -30,7 +30,7 @@ def parse_expression(
     """
     prefix_parser = parser.prefix_parsers.get(parser.current_token.type)
     if prefix_parser is None:
-        return Err(UnsupportedExpressionError(parser.current_token.type))
+        return create_err(UnsupportedExpressionError(parser.current_token.type))
 
     expr: Expression
     match prefix_parser(parser):
@@ -74,7 +74,7 @@ def parse_boolean_literal(
     After the successful read, parser.current_token does not change.
     """
     if not parser.cur_token_is(TokenType.FALSE) and not parser.cur_token_is(TokenType.TRUE):
-        return Err(
+        return create_err(
             ExpressionValidationError(
                 f"Token in expressin was expected to be {repr(TokenType.TRUE)} "
                 f"or {repr(TokenType.FALSE)}, but actually was {parser.current_token.type}."
@@ -96,7 +96,7 @@ def parse_integer_literal(
     try:
         value = int(parser.current_token.literal)
     except ValueError as err:
-        return Err(ExpressionValidationError(f"Unexpected error in integer literal: {err}"))
+        return create_err(ExpressionValidationError(f"Unexpected error in integer literal: {err}"))
     return Ok(ast_nodes.IntegerLiteral(value))
 
 
@@ -113,7 +113,7 @@ def parse_float_literal(
     try:
         value = float(parser.current_token.literal)
     except ValueError as err:
-        return Err(ExpressionValidationError(f"Unexpected error in float literal: {err}"))
+        return create_err(ExpressionValidationError(f"Unexpected error in float literal: {err}"))
     return Ok(ast_nodes.FloatLiteral(value))
 
 
@@ -178,7 +178,7 @@ def parse_grouped_expression(parser: BaseParser) -> Result[Expression, Expressio
             expr = value
 
     if not parser.peek_token_is(TokenType.RPAREN):
-        return Err(ExpressionValidationError(f"Brace was not closed after expression=<{expr}>"))
+        return create_err(ExpressionValidationError(f"Brace was not closed after expression=<{expr}>"))
 
     parser.next_token()
     return Ok(expr)
@@ -252,13 +252,13 @@ def _check_cur_token(
     """
     if parser.cur_token_is(expected_tt):
         return Ok(None)
-    return Err(InvalidTokenTypeInExpression(expected_tt, parser.current_token.type))
+    return create_err(InvalidTokenTypeInExpression(expected_tt, parser.current_token.type))
 
 
 def _check_cur_token_is_operator(parser: BaseParser) -> Result[None, ExpressionValidationError]:
     if enum_contains(Operator, parser.current_token.literal):
         return Ok(None)
-    return Err(
+    return create_err(
         ExpressionValidationError(
             f"Token in expressin was expected to be a valid Operator, "
             f"but actually was {parser.current_token.type}."

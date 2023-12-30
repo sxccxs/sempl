@@ -27,3 +27,10 @@ class UnsuportedInfixOperation(EvaluationError):
         super().__init__(
             f"Infix operator `{operator}` on `{type(left)}` and `{type(right)}` is not supported."
         )
+
+
+class InvalidType(EvaluationError):
+    def __init__(self, value: Value, expected_type: type[Value]) -> None:
+        super().__init__(
+            f"Can't assign value {value} of type {type(value)} to variable of type {expected_type}."
+        )

@@ -3,7 +3,7 @@ import pytest
 from result import Ok, is_ok
 
 from src.ast import ast_nodes
-from src.evaluation.evaluator import evaluate
+from src.evaluation.evaluator import Evaluator
 from src.evaluation.values.value_base import Value
 from src.lexer.interfaces import ILexer
 from src.lexer.tokens import Token, TokenType
@@ -35,12 +35,16 @@ def parser_mock(request: pytest.FixtureRequest) -> YieldFixture[IParser]:
 
 
 @pytest.fixture
-def ok_eval_res(parser_mock: IParser) -> YieldFixture[Value]:
+def evaluator(parser_mock: IParser) -> YieldFixture[Evaluator]:
+    """Creates evaluater with required parser"""
+    yield Evaluator(parser_mock)
+
+
+@pytest.fixture
+def ok_eval_res(evaluator: Evaluator) -> YieldFixture[Value]:
     """Gets ok value from evaluation result."""
-    program = parser_mock.parse_program()
-    assert is_ok(program), "Invalid program."
-    result = evaluate(program.ok_value)
-    assert is_ok(result), "Unexpected err in evaluation."
+    result = evaluator.evaluate()
+    assert is_ok(result), "Evaluation unexpetedly failed."
     yield result.ok_value
 
 

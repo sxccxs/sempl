@@ -1,21 +1,23 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from enum import StrEnum, auto
+from decimal import Decimal
+from typing import Any
 
-
-class ValueType(StrEnum):
-    INT = auto()
-    BOOL = auto()
-    FLOAT = auto()
+Numeric = int | float | Decimal
 
 
 @dataclass(frozen=True)
 class Value(ABC):
-    @property
-    @abstractmethod
-    def value_type(self) -> ValueType:
-        """Type of the value."""
-
     @abstractmethod
     def __str__(self) -> str:
         ...
+
+
+@dataclass(frozen=True)
+class ValuedValue(Value):
+    value: Any
+
+
+@dataclass(frozen=True)
+class NumericValue(ValuedValue):
+    value: Numeric
