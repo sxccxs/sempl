@@ -15,3 +15,7 @@ class TrueFalse(Enum):
     def from_bool(cls, value: bool) -> TrueFalse:
         """Gets value"""
         return TrueFalse.TRUE if value else TrueFalse.FALSE
+
+
+SINGULARITY = value_types.Singularity()
+NO_EFFECT = value_types.NoEffect()

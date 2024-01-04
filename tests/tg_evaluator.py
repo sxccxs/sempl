@@ -1,18 +1,51 @@
+# pylint: disable=redefined-outer-name
 import pytest
+from result import is_ok
 
 from src.ast import ast_nodes
-from src.evaluation.consts import TrueFalse
-from src.evaluation.evaluator import Evaluator
-from src.evaluation.values import value_types
-from src.evaluation.values.types import VarEntry
+from src.evaluation.evaluator import STD_LIB, Evaluator
+from src.evaluation.values import consts, value_types
+from src.evaluation.values.scope import FuncEntry, Scope, VarEntry
 from src.evaluation.values.value_base import Value
+from src.parser.interfaces import IParser
 from src.parser.types import Operator
+from tests.mock.parser_mock import ParserMock
 from tests.static.eval_tests_data import (
-    SINGLE_VALID_COMPARISON_AND_EXPECTED,
-    SINGLE_VALID_INFIX_OPERATION_AND_EXPECTED,
-    SINGLE_VALID_LET_AND_EXPECTED,
-)
-from tests.utils.payloads import ExpectedEvaluatedLet
+    SINGLE_VALID_COMPARISON_AND_EXPECTED, SINGLE_VALID_FUNC_CALL_AND_EXPECTED,
+    SINGLE_VALID_FUNC_DEF_AND_EXPECTED,
+    SINGLE_VALID_INFIX_OPERATION_AND_EXPECTED, SINGLE_VALID_LET_AND_EXPECTED)
+from tests.utils.payloads import (ExpectedEvaluatedFuncCall,
+                                  ExpectedEvaluatedFunction,
+                                  ExpectedEvaluatedLet)
+from tests.utils.types import YieldFixture
+
+
+@pytest.fixture
+def parser_mock(request: pytest.FixtureRequest) -> YieldFixture[IParser]:
+    """Creates parser mock object and provides statements from request to it."""
+    parser = ParserMock()
+    parser.set_data(request.param)
+    yield parser
+
+
+@pytest.fixture
+def scope() -> YieldFixture[Scope]:
+    """Provides scope for evaluator."""
+    yield STD_LIB
+
+
+@pytest.fixture
+def evaluator(parser_mock: IParser, scope: Scope) -> YieldFixture[Evaluator]:
+    """Creates evaluator with required parser and scope."""
+    yield Evaluator(parser_mock, scope)
+
+
+@pytest.fixture
+def ok_eval_res(evaluator: Evaluator) -> YieldFixture[Value]:
+    """Gets ok value from evaluation result."""
+    result = evaluator.evaluate()
+    assert is_ok(result), "Evaluation unexpetedly failed."
+    yield result.ok_value
 
 
 class TestEvaluatorTg:
@@ -65,9 +98,9 @@ class TestEvaluatorTg:
         # assert ok_eval_res.value_type == ValueType.BOOL, "Invalid evaluated's type."
         assert ok_eval_res.value == expected, "Invalid evaluated value."
         if ok_eval_res.value:
-            assert ok_eval_res is TrueFalse.TRUE.value, "Invalid True object."
+            assert ok_eval_res is consts.TrueFalse.TRUE.value, "Invalid True object."
         else:
-            assert ok_eval_res is TrueFalse.FALSE.value, "Invalid False object."
+            assert ok_eval_res is consts.TrueFalse.FALSE.value, "Invalid False object."
 
     @pytest.mark.parametrize(
         ("parser_mock", "expected"),
@@ -189,7 +222,7 @@ class TestEvaluatorTg:
         SINGLE_VALID_COMPARISON_AND_EXPECTED,
         indirect=["parser_mock"],
     )
-    def test_eval_valid_comparison(self, ok_eval_res: Value, expected: TrueFalse) -> None:
+    def test_eval_valid_comparison(self, ok_eval_res: Value, expected: consts.TrueFalse) -> None:
         """
         Tests evaluation of program with one valid comparison.
 
@@ -220,23 +253,102 @@ class TestEvaluatorTg:
 
         Act: Evaluate program from parser.
         Assert: No error returned.
-        Assert: Returned value is of expected type.
-        Assert: Returned value is equal to expected.
+        Assert: Returned value is NoEffect.
+        Assert: Returned value is a constant NO_EFFECT.
         Assert: Evaluator's scope contains entry for expected name.
         Assert: Entry is VarEntry.
         Assert: Entry has expected mutability.
         Assert: Entry has expected type.
-        Assert: Entry has expected value.
-        Assert: Entry has value equal to returned value.
-        Assert: Entry has value is of entry type.
+        Assert: Entry has expected variable value.
+        Assert: Entry variable value is of entry type.
+        Assert: Entry value is entry variable value.
         """
-        assert isinstance(ok_eval_res, expected.type_), "Evaluated is of invalid type."
-        assert ok_eval_res == expected.value, "Invalid evaluated."
+        assert isinstance(ok_eval_res, value_types.NoEffect), "Evaluated is of invalid type."
+        assert ok_eval_res is consts.NO_EFFECT, "Invalid evaluated."
         stored_entry = evaluator.scope.get(expected.name)
         assert stored_entry is not None, "Value was not stored."
         assert isinstance(stored_entry, VarEntry), "Value was stored as a wrond entry type."
         assert stored_entry.is_mut == expected.is_mut, "Invalid mutability."
-        assert stored_entry.type.value == expected.type_, "Invalid variable type."
-        assert stored_entry.value == expected.value, "Invalid stored value."
-        assert ok_eval_res == stored_entry.value
-        assert isinstance(stored_entry.value, stored_entry.type.value)
+        assert stored_entry.type_value.value == expected.type_, "Invalid variable type."
+        assert stored_entry.var_value == expected.value, "Invalid stored value."
+        assert isinstance(
+            stored_entry.var_value, stored_entry.type_value.value
+        ), "Variable value is of invalid type."
+        assert stored_entry.var_value is stored_entry.var_value, "Invalid entry value."
+
+    @pytest.mark.parametrize(
+        ("parser_mock", "expected"),
+        SINGLE_VALID_FUNC_DEF_AND_EXPECTED,
+        indirect=["parser_mock"],
+    )
+    def test_eval_valid_func_stmt(
+        self, ok_eval_res: Value, evaluator: Evaluator, expected: ExpectedEvaluatedFunction
+    ) -> None:
+        """
+        Tests evaluation of program with one valid let statement.
+
+        Arrange: Provide statements to Parser Mock.
+
+        Act: Evaluate program from parser.
+        Assert: No error returned.
+        Assert: Returned value is NoEffect.
+        Assert: Returned value is a constant NO_EFFECT.
+        Assert: Evaluator's scope contains entry for expected name.
+        Assert: Entry value is None.
+        Assert: Entry is FuncEntry.
+        Assert: Entry has expected return type.
+        Assert: Entry has expected body statements.
+        Assert: Entry has expected number of arguments.
+        For: Each parameter in entry.
+            Assert: Parameter name is equal to expected.
+            Assert: Parameter type is equal to expected.
+            Assert: Parameter default value is equal to expected.
+            If parameter has default value:
+                Assert: Parameter default value is of parameter type.
+        """
+        assert isinstance(ok_eval_res, value_types.NoEffect), "Evaluated is of invalid type."
+        assert ok_eval_res is consts.NO_EFFECT, "Invalid evaluated."
+        stored_entry = evaluator.scope.get(expected.name)
+        assert stored_entry is not None, "Value was not stored."
+        assert stored_entry.value is None, "Invalid entry value."
+        assert isinstance(stored_entry, FuncEntry), "Value was stored as a wrond entry type."
+        assert stored_entry.ret_type.value == expected.ret_type, "Invalid return type.."
+        assert stored_entry.body.statements == expected.body, "Invalid body."
+        assert len(stored_entry.parameters) == len(expected.params)
+        for param, eparam in zip(stored_entry.parameters, expected.params, strict=True):
+            assert param.name == eparam.name, "Invalid param name."
+            assert param.type_value.value == eparam.type_, "Invalid param type"
+            assert param.default_value == eparam.default, "Invalid param default value."
+            if param.default_value is not None:
+                assert isinstance(
+                    param.default_value, param.type_value.value
+                ), "Param default value is of invalid type."
+
+    @pytest.mark.parametrize(
+        ("parser_mock", "scope", "expected"),
+        SINGLE_VALID_FUNC_CALL_AND_EXPECTED,
+        indirect=["parser_mock"],
+    )
+    def test_eval_valid_func_call(
+        self, ok_eval_res: Value, evaluator: Evaluator, expected: ExpectedEvaluatedFuncCall
+    ) -> None:
+        """
+        Tests evaluation of program with one valid let statement.
+
+        Arrange: Provide statements to Parser Mock.
+        Arrange: Create scope with called function.
+
+        Act: Evaluate program from parser.
+        Assert: No error returned.
+        Assert: Returned value is of expected type.
+        Assert: Returned value is equal to expected.
+        Assert: Returned value is of type of FuncEntry in Evaluator's scope.
+        """
+        assert isinstance(
+            ok_eval_res, type(expected.returned_value)
+        ), "Evaluated is of invalid type."
+        assert ok_eval_res == expected.returned_value, "Evaluated is of invalid value."
+        stored_entry: FuncEntry = evaluator.scope[expected.func_name]  # type: ignore
+        assert isinstance(
+            ok_eval_res, stored_entry.ret_type.value
+        ), "Evaluated type is not matched with function return type."

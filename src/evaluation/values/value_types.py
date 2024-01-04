@@ -4,6 +4,18 @@ from src.evaluation.values.value_base import NumericValue, Value, ValuedValue
 
 
 @dataclass(frozen=True)
+class Singularity(Value):
+    def __str__(self) -> str:
+        return "singularity"
+
+
+@dataclass(frozen=True)
+class NoEffect(Value):
+    def __str__(self) -> str:
+        return "No effect"
+
+
+@dataclass(frozen=True)
 class Integer(NumericValue):
     value: int
 
@@ -33,3 +45,11 @@ class Type(ValuedValue):
 
     def __str__(self) -> str:
         return str(self.value)
+
+
+@dataclass(frozen=True)
+class ReturnValue(ValuedValue):
+    value: Value
+
+    def __str__(self) -> str:
+        return f"return {self.value}"

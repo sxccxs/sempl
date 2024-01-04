@@ -77,11 +77,3 @@ def results_gather(
             case Ok(value):
                 values.append(value)
     return Ok(values)
-
-
-def create_err(ex: Ex) -> Err[Ex]:
-    """Creates error with exception with traceback."""
-    try:
-        raise ex
-    except type(ex) as err:
-        return Err(err)

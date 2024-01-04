@@ -1,16 +1,12 @@
 # pylint: disable=redefined-outer-name
 import pytest
-from result import Ok, is_ok
+from result import Ok
 
 from src.ast import ast_nodes
-from src.evaluation.evaluator import Evaluator
-from src.evaluation.values.value_base import Value
 from src.lexer.interfaces import ILexer
 from src.lexer.tokens import Token, TokenType
-from src.parser.interfaces import IParser
 from src.parser.parser import Parser
 from tests.mock.lexer_mock import LexerMock
-from tests.mock.parser_mock import ParserMock
 from tests.utils.decorators import n_len_program
 from tests.utils.types import YieldFixture
 
@@ -25,27 +21,6 @@ def lexer_mock(request: pytest.FixtureRequest) -> YieldFixture[ILexer]:
     )  # Add EOF and extra token as parser ends on current token, not peek token.
     yield lexer
 
-
-@pytest.fixture
-def parser_mock(request: pytest.FixtureRequest) -> YieldFixture[IParser]:
-    """Creates parser mock object and provides statements from request to it."""
-    parser = ParserMock()
-    parser.set_data(request.param)
-    yield parser
-
-
-@pytest.fixture
-def evaluator(parser_mock: IParser) -> YieldFixture[Evaluator]:
-    """Creates evaluater with required parser"""
-    yield Evaluator(parser_mock)
-
-
-@pytest.fixture
-def ok_eval_res(evaluator: Evaluator) -> YieldFixture[Value]:
-    """Gets ok value from evaluation result."""
-    result = evaluator.evaluate()
-    assert is_ok(result), "Evaluation unexpetedly failed."
-    yield result.ok_value
 
 
 @pytest.fixture

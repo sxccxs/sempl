@@ -52,6 +52,6 @@ class InvalidTokenTypeInExpression(ExpressionValidationError):
             received_tt (TokenType): Actual token type.
         """
         super().__init__(
-            f"Token in expressin was expected to be {repr(expected_tt)}, "
+            f"Token in expression was expected to be {repr(expected_tt)}, "
             f"but actually was {repr(received_tt)}."
         )

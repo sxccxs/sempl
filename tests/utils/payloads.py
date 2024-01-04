@@ -56,3 +56,21 @@ class ExpectedEvaluatedLet(NamedTuple):
     type_: type[Value]
     is_mut: bool
     value: Value
+
+
+class ExpectedEvaluatedFuncParam(NamedTuple):
+    name: str
+    type_: type[Value]
+    default: Value | None
+
+
+class ExpectedEvaluatedFunction(NamedTuple):
+    name: str
+    ret_type: type[Value]
+    params: list[ExpectedEvaluatedFuncParam]
+    body: list[Statement]
+
+
+class ExpectedEvaluatedFuncCall(NamedTuple):
+    func_name: str
+    returned_value: Value

@@ -101,9 +101,11 @@ class LetStatement(Statement):
 
 @dataclass(slots=True)
 class ReturnStatement(Statement):
-    return_value: Expression
+    return_value: Expression | None
 
     def __str__(self) -> str:
+        if self.return_value is None:
+            return f"{Keyword.RETURN}"
         return f"{Keyword.RETURN} {self.return_value}"
 
 

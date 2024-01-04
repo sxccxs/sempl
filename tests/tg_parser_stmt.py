@@ -54,6 +54,13 @@ class TestParserStatementsTg:
             (
                 [
                     Token(TokenType.RETURN, literal="return"),
+                    Token(TokenType.ENDL, literal="\n"),
+                ],
+                None,
+            ),
+            (
+                [
+                    Token(TokenType.RETURN, literal="return"),
                     Token(TokenType.INT, literal="10"),
                     Token(TokenType.ENDL, literal="\n"),
                 ],
@@ -76,7 +83,7 @@ class TestParserStatementsTg:
     )
     @n_len_program(1)
     def test_single_valid_return_statement(
-        self, ok_len_program: ast_nodes.Program, expected: Expression
+        self, ok_len_program: ast_nodes.Program, expected: Expression | None
     ) -> None:
         """
         Tests parser parsing single valid return statement correctly.
