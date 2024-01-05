@@ -90,7 +90,10 @@ class REPL:
         """Starts read-evaluate-print loop."""
         self.writeln("REPL started.")
         while True:
-            line_stream = StringIO(self._read_valid_code_block())
+            text = self._read_valid_code_block()
+            if text == "exit\n":
+                return
+            line_stream = StringIO(text)
             match self.evaluator.evaluate(Parser(Lexer(line_stream))):
                 case Err(err):
                     self._write_error(err)
