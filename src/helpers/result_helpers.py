@@ -1,3 +1,4 @@
+"""Results helper functions."""
 from itertools import chain
 from typing import Iterable, TypeVar, overload
 

@@ -1,3 +1,4 @@
+"""Test data for statement parsing tests."""
 from src.ast import ast_nodes
 from src.ast.abstract import Statement
 from src.lexer.tokens import Token, TokenType

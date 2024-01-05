@@ -1,3 +1,4 @@
+"""Test group parsing complex expressions."""
 import pytest
 
 from src.ast import ast_nodes
@@ -12,6 +13,8 @@ from tests.utils.payloads import (
 
 
 class TestParserComplexExpressionTg:
+    """Test group for parsing of complex expressions."""
+
     @pytest.mark.parametrize(
         ("lexer_mock", "expected"),
         [

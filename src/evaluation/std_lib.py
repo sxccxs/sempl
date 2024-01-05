@@ -1,3 +1,4 @@
+"""Std library scope defenition."""
 from src.evaluation.values import value_types
 from src.evaluation.values.consts import SINGULARITY, TrueFalse
 from src.evaluation.values.scope import Scope, TypeEntry, VarEntry

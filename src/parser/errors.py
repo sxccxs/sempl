@@ -1,3 +1,4 @@
+"""Parsing errors."""
 from src.lexer.tokens import TokenType
 
 
@@ -6,23 +7,15 @@ class ParsingError(Exception):
 
 
 class StatementValidationError(ParsingError):
-    ...
+    """Base statement parsing error."""
 
 
 class ExpressionValidationError(ParsingError):
-    ...
-
-
-class UnsupportedStatementError(StatementValidationError):
-    def __init__(self, token_type: TokenType) -> None:
-        """
-        Args:
-            token_type (TokenType): Token type with which no statement begins.
-        """
-        super().__init__(f"Statement from token of type={repr(token_type)} does not exist.")
+    """Base expression parsing error."""
 
 
 class UnsupportedExpressionError(ExpressionValidationError):
+    """Error for expression which is not supported."""
     def __init__(self, token_type: TokenType) -> None:
         """
         Args:
@@ -32,6 +25,7 @@ class UnsupportedExpressionError(ExpressionValidationError):
 
 
 class InvalidTokenTypeInStatement(StatementValidationError):
+    """Error for invalid token in statement."""
     def __init__(self, expected_tt: TokenType, received_tt: TokenType) -> None:
         """
         Args:
@@ -45,6 +39,7 @@ class InvalidTokenTypeInStatement(StatementValidationError):
 
 
 class InvalidTokenTypeInExpression(ExpressionValidationError):
+    """Error for invalid token in expression."""
     def __init__(self, expected_tt: TokenType, received_tt: TokenType) -> None:
         """
         Args:

@@ -1,3 +1,4 @@
+"""Concrete expressions parsers."""
 from result import Err, Ok, Result, is_err
 
 from src.ast import ast_nodes

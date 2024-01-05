@@ -1,3 +1,5 @@
+"""Scope and related objects."""
+# pylint: disable=too-few-public-methods
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -14,14 +16,18 @@ TYPE = str
 
 
 class BaseEntry(ABC):
+    """Base class for scope entry."""
+
     @property
     @abstractmethod
     def value(self) -> Value | None:
-        """Underlying value of an entry."""
+        """Underlying value of an entry if any."""
 
 
 @dataclass(slots=True)
 class VarEntry(BaseEntry):
+    """Scope entry for variable definition."""
+
     var_value: Value
     is_mut: bool
     type_value: Type
@@ -33,6 +39,8 @@ class VarEntry(BaseEntry):
 
 @dataclass(frozen=True)
 class FuncParam:
+    """Payload for function parameter in scope entry."""
+
     name: str
     type_value: Type
     default_value: Value | None
@@ -40,6 +48,8 @@ class FuncParam:
 
 @dataclass(slots=True)
 class FuncEntry(BaseEntry):
+    """Scope entry for function definition."""
+
     parameters: list[FuncParam]
     body: ast_nodes.BlockStatement
     ret_type: Type
@@ -51,6 +61,8 @@ class FuncEntry(BaseEntry):
 
 @dataclass(slots=True)
 class TypeEntry(BaseEntry):
+    """Scope entry for type definition."""
+
     type: Type
 
     @property
@@ -58,11 +70,22 @@ class TypeEntry(BaseEntry):
         return self.type
 
 
+# Allowed scope entries
 ScopeEntry = VarEntry | FuncEntry | TypeEntry
 
 
 @dataclass(slots=True)
 class Scope:
+    """
+    Object representing encloused scope.
+
+    Args:
+        store (dict[str, ScopeEntry], optional): Predefined entries in scope.
+        Defaults to empty dict.
+        outer_scope (Scope | None, optional): Outer scope of current scope. If provided,
+        will not be modified. Defaults to None.
+    """
+
     store: dict[str, ScopeEntry] = field(default_factory=dict)
     outer_scope: Scope | None = None
 

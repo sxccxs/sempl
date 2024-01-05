@@ -1,3 +1,4 @@
+"""Repl payloads."""
 from dataclasses import dataclass
 from typing import NamedTuple
 
@@ -6,11 +7,15 @@ from src.repl.structures.enums import BraceType
 
 @dataclass(slots=True)
 class BracesCount:
+    """Brace count payload."""
+
     open_count: int = 0
     close_count: int = 0
 
 
 class Brace(NamedTuple):
+    """Brace object."""
+
     type: BraceType
     open: str
     close: str
@@ -23,6 +28,8 @@ DEFAULT_BRACES: list[Brace] = [
 
 
 class BracesStorage:
+    """Brace storage counting open and close braces."""
+
     __slots__ = ("storage",)
 
     # pylint: disable=dangerous-default-value

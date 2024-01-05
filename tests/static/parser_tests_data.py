@@ -1,3 +1,4 @@
+"""Test data for complex parser tests."""
 from src.lexer.tokens import Token, TokenType
 
 INFIX_OPERATIONS_PRECEDENCE_AND_EXPECTED: list[tuple[list[Token], str]] = [

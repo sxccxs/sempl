@@ -1,3 +1,4 @@
+"""Test group parsing literal expressions."""
 import pytest
 
 from src.ast import ast_nodes
@@ -5,6 +6,8 @@ from src.lexer.tokens import Token, TokenType
 
 
 class TestParserLiteralExpressionTg:
+    """Test group for parsing of literal expressions."""
+
     @pytest.mark.parametrize(
         ("lexer_mock", "expected"),
         [

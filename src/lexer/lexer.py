@@ -1,3 +1,5 @@
+"""Lexer class definition."""
+# pylint: disable=too-few-public-methods
 from io import StringIO
 from typing import TextIO
 

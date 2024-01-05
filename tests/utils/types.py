@@ -1,3 +1,4 @@
+"""Tests types definitions."""
 from typing import Generator, TypeVar
 
 T = TypeVar("T")

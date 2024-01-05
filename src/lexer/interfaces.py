@@ -1,10 +1,14 @@
-# pylint: disable=W2301
+"""Lexer interface."""
+from abc import abstractmethod
 from typing import Protocol
 
 from src.lexer.tokens import Token
 
 
+# pylint: disable=too-few-public-methods
 class ILexer(Protocol):
+    """Lexer interface."""
+
+    @abstractmethod
     def next_token(self) -> Token:
         """Reads a token."""
-        ...

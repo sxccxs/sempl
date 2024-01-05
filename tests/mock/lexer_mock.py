@@ -1,3 +1,4 @@
+"""Lexer mock."""
 import logging
 from itertools import chain
 from typing import Iterable, Iterator
@@ -8,6 +9,8 @@ from tests.mock.exceptions import UnexpectedMockCallException
 
 
 class LexerMock(ILexer):
+    """Lexer mock."""
+
     def __init__(self, *, strict: bool = False) -> None:
         """
         Args:

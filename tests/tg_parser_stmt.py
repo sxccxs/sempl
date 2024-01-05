@@ -1,3 +1,4 @@
+"""Test group parsing statements."""
 import pytest
 
 from src.ast import ast_nodes
@@ -15,6 +16,8 @@ from tests.utils.payloads import ExpectedFunc, ExpectedIfStatement, ExpectedLetS
 
 
 class TestParserStatementsTg:
+    """Test group for parsing of statements."""
+
     @pytest.mark.parametrize(
         ("lexer_mock", "expected_result"),
         VALID_LET_STATEMENT_TOKENS_AND_EXPECTED,

@@ -1,3 +1,4 @@
+"""Conftest."""
 # pylint: disable=redefined-outer-name
 import pytest
 from result import Ok
@@ -20,7 +21,6 @@ def lexer_mock(request: pytest.FixtureRequest) -> YieldFixture[ILexer]:
         [Token(TokenType.EOF, "\0"), Token(TokenType.EOF, "\0")]
     )  # Add EOF and extra token as parser ends on current token, not peek token.
     yield lexer
-
 
 
 @pytest.fixture

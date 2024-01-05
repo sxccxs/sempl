@@ -1,3 +1,4 @@
+"""Concrete AST nodes evaluators."""
 from functools import partial
 from itertools import zip_longest
 from typing import Iterable, Literal, OrderedDict, cast
@@ -15,6 +16,7 @@ from src.helpers.result_helpers import err_with_note, results_gather
 from src.parser.types import Operator
 
 
+# pylint: disable=too-many-return-statements
 def evaluate(node: ASTNode, scope: Scope) -> Result[Value, EvaluationError]:
     """
     Evalueates given AST node to a Value.

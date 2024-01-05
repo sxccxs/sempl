@@ -1,3 +1,4 @@
+"""AST evaluator."""
 from result import Err, Ok, Result
 
 from src.evaluation import sub_evaluators
@@ -9,8 +10,11 @@ from src.parser.errors import ParsingError
 from src.parser.interfaces import IParser
 
 
+# pylint: disable=too-few-public-methods
 class Evaluator:
-    __slots__ = "scope"
+    """AST evaluator."""
+
+    __slots__ = ("scope",)
 
     def __init__(self, scope: Scope = STD_LIB) -> None:
         self.scope = Scope(scope.store.copy())

@@ -1,3 +1,4 @@
+"""Types required in parsing."""
 from enum import IntEnum, StrEnum
 from typing import Callable
 
@@ -12,10 +13,14 @@ InfixParserType = Callable[[BaseParser, Expression], Result[Expression, Expressi
 
 
 class Precedence(IntEnum):
+    """Expression precedence."""
+
     LOWEST, EQUALS, LESSGREATER, SUM, PRODUCT, PREFIX, CALL = range(7)
 
 
 class Operator(StrEnum):
+    """Operator."""
+
     PLUS = "+"
     MINUS = "-"
     MULT = "*"

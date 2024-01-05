@@ -1,3 +1,4 @@
+"""Concrete evaluated values types."""
 from dataclasses import dataclass
 
 from src.evaluation.values.value_base import NumericValue, Value, ValuedValue
@@ -5,18 +6,24 @@ from src.evaluation.values.value_base import NumericValue, Value, ValuedValue
 
 @dataclass(frozen=True)
 class Singularity(Value):
+    """Singularity value."""
+
     def __str__(self) -> str:
         return "singularity"
 
 
 @dataclass(frozen=True)
 class NoEffect(Value):
+    """No effect value."""
+
     def __str__(self) -> str:
         return "No effect"
 
 
 @dataclass(frozen=True)
 class Int(NumericValue):
+    """Integer value."""
+
     value: int
 
     def __str__(self) -> str:
@@ -25,6 +32,8 @@ class Int(NumericValue):
 
 @dataclass(frozen=True)
 class Bool(ValuedValue):
+    """Boolean value."""
+
     value: bool
 
     def __str__(self) -> str:
@@ -33,6 +42,8 @@ class Bool(ValuedValue):
 
 @dataclass(frozen=True)
 class Float(NumericValue):
+    """Float value."""
+
     value: float
 
     def __str__(self) -> str:
@@ -41,6 +52,8 @@ class Float(NumericValue):
 
 @dataclass(frozen=True)
 class Type(ValuedValue):
+    """Type value."""
+
     value: type[Value]
 
     def __str__(self) -> str:
@@ -49,6 +62,8 @@ class Type(ValuedValue):
 
 @dataclass(frozen=True)
 class ReturnValue(ValuedValue):
+    """Return value."""
+
     value: Value
 
     def __str__(self) -> str:

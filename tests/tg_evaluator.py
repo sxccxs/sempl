@@ -1,3 +1,4 @@
+"""Test group evaluator."""
 # pylint: disable=redefined-outer-name
 import pytest
 from result import is_ok
@@ -55,6 +56,7 @@ def ok_eval_res(parser_mock: IParser, evaluator: Evaluator) -> YieldFixture[Valu
 
 
 class TestEvaluatorTg:
+    """Test group for evaluator."""
     @pytest.mark.parametrize(
         ("parser_mock", "expected"),
         [

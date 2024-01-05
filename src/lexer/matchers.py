@@ -1,3 +1,4 @@
+"""character or string matchers."""
 import re
 
 

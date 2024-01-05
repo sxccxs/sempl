@@ -1,3 +1,4 @@
+"""REPL."""
 import sys
 from io import StringIO
 from types import TracebackType
@@ -29,8 +30,8 @@ class REPL:
     ) -> None:
         """
         Args:
-            in_stream (TextIO, optional): Input stream. Defaults to stdin.
-            out_stream (TextIO, optional): Output stram. Defaults to stdout.
+            in_stream (TextIO, optional): Input stream. Defaults to sys.stdin.
+            out_stream (TextIO, optional): Output stram. Defaults to sys.stdout.
             prompt_in (str, optional): Input prefix. Defaults to ">>>".
             prompt_out (str, optional): Output prefix. Defaults to "<<<".
             prompt_block (str, optional): Intput prefix in the multiline code block.

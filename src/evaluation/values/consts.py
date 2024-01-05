@@ -1,3 +1,4 @@
+"""Constant Values - ones, for which only one object instance is enough."""
 from __future__ import annotations
 
 from enum import Enum
@@ -17,5 +18,5 @@ class TrueFalse(Enum):
         return TrueFalse.TRUE if value else TrueFalse.FALSE
 
 
-SINGULARITY = value_types.Singularity()
-NO_EFFECT = value_types.NoEffect()
+SINGULARITY = value_types.Singularity()  # Constant for singularity object
+NO_EFFECT = value_types.NoEffect()  # Constant for no effect object

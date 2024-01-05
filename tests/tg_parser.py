@@ -1,3 +1,4 @@
+"""Test group parsing complex statements."""
 import pytest
 
 from src.ast import ast_nodes
@@ -9,6 +10,8 @@ from tests.utils.decorators import n_len_program
 
 
 class TestParserTg:
+    """Test group for parsing of complex statements."""
+
     @pytest.mark.parametrize(
         ("lexer_mock", "expected"),
         INFIX_OPERATIONS_PRECEDENCE_AND_EXPECTED,

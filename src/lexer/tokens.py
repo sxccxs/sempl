@@ -1,8 +1,11 @@
+"""Tokens related objects."""
 from enum import StrEnum, auto
 from typing import NamedTuple
 
 
 class TokenType(StrEnum):
+    """Token type."""
+
     ILLEGAL = auto()
     EOF = auto()
     ENDL = auto()
@@ -46,11 +49,15 @@ class TokenType(StrEnum):
 
 
 class Token(NamedTuple):
+    """Token object."""
+
     type: TokenType
     literal: str
 
 
 class Keyword(StrEnum):
+    """Key words."""
+
     LET = "let"
     IF = "if"
     ELSE = "else"
@@ -59,6 +66,7 @@ class Keyword(StrEnum):
     FN = "fn"
 
 
+# Key words to token types mapping.
 KEYWORDS: dict[str, TokenType] = {
     Keyword.LET.value: TokenType.LET,
     Keyword.IF.value: TokenType.IF,

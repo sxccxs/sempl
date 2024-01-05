@@ -1,3 +1,4 @@
+"""Parser class."""
 from result import Err, Ok, Result
 
 from src.ast import ast_nodes
@@ -10,6 +11,7 @@ from src.parser.types import InfixParserType, Precedence, PrefixParserType
 
 
 class Parser(BaseParser):
+    """Parser implementing BaseParser."""
     def __init__(self, lexer: ILexer) -> None:
         """
         Args:

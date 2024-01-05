@@ -1,14 +1,18 @@
+"""Concrete nodes of AST."""
 from dataclasses import dataclass, field
 from io import StringIO
 
 from src.ast.abstract import ASTNode, Expression, Statement
-from src.ast.to_str_helpers import sio_write_with_after_value, sio_write_with_sep
+from src.ast.to_str_helpers import (sio_write_with_after_value,
+                                    sio_write_with_sep)
 from src.lexer.tokens import Keyword
 from src.parser.types import Operator
 
 
 @dataclass(slots=True)
 class Program(ASTNode):
+    """Program AST node."""
+
     statements: list[Statement] = field(default_factory=list)
 
     def __str__(self) -> str:
@@ -19,6 +23,8 @@ class Program(ASTNode):
 
 @dataclass(slots=True)
 class Identifier(Expression):
+    """Identifier AST node."""
+
     value: str
 
     def __str__(self) -> str:
@@ -27,6 +33,8 @@ class Identifier(Expression):
 
 @dataclass(slots=True)
 class IntegerLiteral(Expression):
+    """Integer literal AST node."""
+
     value: int
 
     def __str__(self) -> str:
@@ -35,6 +43,8 @@ class IntegerLiteral(Expression):
 
 @dataclass(slots=True)
 class FloatLiteral(Expression):
+    """Float literal AST node."""
+
     value: float
 
     def __str__(self) -> str:
@@ -43,6 +53,8 @@ class FloatLiteral(Expression):
 
 @dataclass(slots=True)
 class PrefixOperation(Expression):
+    """Prefix operation AST node."""
+
     operator: Operator
     right: Expression
 
@@ -52,6 +64,8 @@ class PrefixOperation(Expression):
 
 @dataclass(slots=True)
 class InfixOperation(Expression):
+    """Infix (Binary) operation AST node."""
+
     left: Expression
     operator: Operator
     right: Expression
@@ -62,6 +76,8 @@ class InfixOperation(Expression):
 
 @dataclass(slots=True)
 class CallExpression(Expression):
+    """Call AST node."""
+
     callable: Expression
     arguments: list[Expression]
 
@@ -75,6 +91,8 @@ class CallExpression(Expression):
 
 @dataclass(slots=True)
 class LetStatement(Statement):
+    """Let statement AST node."""
+
     is_mut: bool
     var_type: Identifier
     var_name: Identifier
@@ -93,6 +111,8 @@ class LetStatement(Statement):
 
 @dataclass(slots=True)
 class ReturnStatement(Statement):
+    """Return statement AST node."""
+
     return_value: Expression | None
 
     def __str__(self) -> str:
@@ -103,6 +123,8 @@ class ReturnStatement(Statement):
 
 @dataclass(slots=True)
 class ExpressionStatement(Statement):
+    """Expression statement AST node."""
+
     expression: Expression
 
     def __str__(self) -> str:
@@ -111,6 +133,7 @@ class ExpressionStatement(Statement):
 
 @dataclass(slots=True)
 class BlockStatement(Statement):
+    """Block statement AST node."""
     statements: list[Statement]
 
     def __str__(self) -> str:
@@ -123,6 +146,7 @@ class BlockStatement(Statement):
 
 @dataclass(slots=True)
 class IfStatement(Statement):
+    """If statement AST node."""
     condition: Expression
     then: BlockStatement
     else_: BlockStatement | None = None
@@ -135,7 +159,8 @@ class IfStatement(Statement):
 
 
 @dataclass(slots=True)
-class FuncParameter(Statement):
+class FuncParameter:
+    """Function parameter payload."""
     name: Identifier
     type: Identifier
     default_value: Expression | None
@@ -149,6 +174,7 @@ class FuncParameter(Statement):
 
 @dataclass(slots=True)
 class FuncStatement(Statement):
+    """Function statement AST node."""
     name: Identifier
     parameters: list[FuncParameter]
     return_type: Identifier

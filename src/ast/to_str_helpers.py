@@ -1,3 +1,4 @@
+"""AST nodes helper functions."""
 from io import StringIO
 from typing import Iterable
 

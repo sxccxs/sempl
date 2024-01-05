@@ -1,3 +1,4 @@
+"""Test group lexer."""
 from io import StringIO
 
 import pytest
@@ -83,6 +84,8 @@ INPUT_AND_EXPECTED: dict[str, list[Token]] = {
 
 
 class TestLexerTg:
+    """Test group for lexer."""
+
     @pytest.mark.parametrize(("input_", "expected"), list(INPUT_AND_EXPECTED.items()))
     def test_multiple_literals(self, input_: str, expected: list[Token]) -> None:
         """

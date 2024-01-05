@@ -1,3 +1,4 @@
+"""Base parser class."""
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -14,6 +15,7 @@ if TYPE_CHECKING:
 
 
 class BaseParser(ABC):
+    """Base parser class."""
     @property
     @abstractmethod
     def current_token(self) -> Token:

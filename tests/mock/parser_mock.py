@@ -1,3 +1,4 @@
+"""Parser mock."""
 from typing import Iterable
 
 from result import Ok
@@ -8,6 +9,8 @@ from src.parser.interfaces import IParser
 
 
 class ParserMock(IParser):
+    """Parser mock."""
+
     def __init__(self) -> None:
         self.statements: list[Statement] = []
 

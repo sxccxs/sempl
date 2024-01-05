@@ -1,4 +1,4 @@
-# pylint: disable=redefined-outer-name
+"""Test decorators."""
 import pytest
 
 
