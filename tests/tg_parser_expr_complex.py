@@ -6,6 +6,7 @@ from src.lexer.tokens import Token, TokenType
 from src.parser.types import Operator
 from tests.static.parser_expr_complex_tests_data import VALID_SINGLE_INFIX_OPERATIONS_AND_EXPECTED
 from tests.utils.payloads import (
+    ExpectedAssignmentExpression,
     ExpectedCallExpression,
     ExpectedInfixOperation,
     ExpectedPrefixOperation,
@@ -176,3 +177,99 @@ class TestParserComplexExpressionTg:
         ), "Invalid number of parameters if call expression."
         for i, (arg, exp) in enumerate(zip(expr.arguments, expected.args)):
             assert arg == exp, f"Invalid argument #{i} in call epxression."
+
+    @pytest.mark.parametrize(
+        ("lexer_mock", "expected"),
+        [
+            (
+                [
+                    Token(TokenType.IDENT, "func"),
+                    Token(TokenType.ASSIGN, "="),
+                    Token(TokenType.INT, "10"),
+                    Token(TokenType.ENDL, "\n"),
+                ],
+                ExpectedAssignmentExpression(
+                    ast_nodes.Identifier("func"), ast_nodes.IntegerLiteral(10)
+                ),
+            ),
+            (
+                [
+                    Token(TokenType.IDENT, "a"),
+                    Token(TokenType.ASSIGN, "="),
+                    Token(TokenType.LPAREN, "("),
+                    Token(TokenType.FLOAT, "10.5"),
+                    Token(TokenType.PLUS, "+"),
+                    Token(TokenType.INT, "10"),
+                    Token(TokenType.RPAREN, ")"),
+                    Token(TokenType.ENDL, "\n"),
+                ],
+                ExpectedAssignmentExpression(
+                    ast_nodes.Identifier("a"),
+                    ast_nodes.InfixOperation(
+                        ast_nodes.FloatLiteral(10.5), Operator.PLUS, ast_nodes.IntegerLiteral(10)
+                    ),
+                ),
+            ),
+            (
+                [
+                    Token(TokenType.IDENT, "a"),
+                    Token(TokenType.ASSIGN, "="),
+                    Token(TokenType.FLOAT, "10.5"),
+                    Token(TokenType.PLUS, "+"),
+                    Token(TokenType.INT, "10"),
+                    Token(TokenType.ENDL, "\n"),
+                ],
+                ExpectedAssignmentExpression(
+                    ast_nodes.Identifier("a"),
+                    ast_nodes.InfixOperation(
+                        ast_nodes.FloatLiteral(10.5), Operator.PLUS, ast_nodes.IntegerLiteral(10)
+                    ),
+                ),
+            ),
+            (
+                [
+                    Token(TokenType.IDENT, "a"),
+                    Token(TokenType.ASSIGN, "="),
+                    Token(TokenType.IDENT, "abs"),
+                    Token(TokenType.LPAREN, "("),
+                    Token(TokenType.MINUS, "-"),
+                    Token(TokenType.INT, "10"),
+                    Token(TokenType.RPAREN, ")"),
+                    Token(TokenType.ENDL, "\n"),
+                ],
+                ExpectedAssignmentExpression(
+                    ast_nodes.Identifier("a"),
+                    ast_nodes.CallExpression(
+                        ast_nodes.Identifier("abs"),
+                        [
+                            ast_nodes.PrefixOperation(Operator.MINUS, ast_nodes.IntegerLiteral(10)),
+                        ],
+                    ),
+                ),
+            ),
+        ],
+        indirect=["lexer_mock"],
+    )
+    def test_single_valid_assignment(
+        self, expression_stmt: ast_nodes.ExpressionStatement, expected: ExpectedAssignmentExpression
+    ) -> None:
+        """
+        Tests parser parsing single call expression correctly.
+
+        Arrange: Provide tokens to Lexer Mock.
+        Arrange: Create Parser with Lexer Mock.
+
+        Act: Parse program.
+        Assert: No error returned.
+        Assert: Program contains only one statement.
+        Assert: Statement is ExpressionStatement.
+        Assert: Underlying expression is Assignment.
+        Assert: Assignment assignee is equal to the expected.
+        Assert: Assignment value is equal to the expected.
+        """
+        expr = expression_stmt.expression
+        assert isinstance(
+            expr, ast_nodes.Assignment
+        ), f"Unexpected expression in ExpressionStatement of type `{type(expr)}`."
+        assert expr.assignee == expected.assignee, "Invalid assignee in assignment expression."
+        assert expr.value == expected.value, "Invalid value in assignment expression."

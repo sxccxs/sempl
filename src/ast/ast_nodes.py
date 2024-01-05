@@ -52,6 +52,17 @@ class FloatLiteral(Expression):
 
 
 @dataclass(slots=True)
+class Assignment(Expression):
+    """Assignment literal AST node."""
+
+    assignee: Expression
+    value: Expression
+
+    def __str__(self) -> str:
+        return f"{self.assignee} = {self.value}"
+
+
+@dataclass(slots=True)
 class PrefixOperation(Expression):
     """Prefix operation AST node."""
 
@@ -134,6 +145,7 @@ class ExpressionStatement(Statement):
 @dataclass(slots=True)
 class BlockStatement(Statement):
     """Block statement AST node."""
+
     statements: list[Statement]
 
     def __str__(self) -> str:
@@ -147,6 +159,7 @@ class BlockStatement(Statement):
 @dataclass(slots=True)
 class IfStatement(Statement):
     """If statement AST node."""
+
     condition: Expression
     then: BlockStatement
     else_: BlockStatement | None = None
@@ -161,6 +174,7 @@ class IfStatement(Statement):
 @dataclass(slots=True)
 class FuncParameter:
     """Function parameter payload."""
+
     name: Identifier
     type: Identifier
     default_value: Expression | None
@@ -175,6 +189,7 @@ class FuncParameter:
 @dataclass(slots=True)
 class FuncStatement(Statement):
     """Function statement AST node."""
+
     name: Identifier
     parameters: list[FuncParameter]
     return_type: Identifier

@@ -13,6 +13,7 @@ from src.parser.interfaces import IParser
 from src.parser.types import Operator
 from tests.mock.parser_mock import ParserMock
 from tests.static.eval_tests_data import (
+    SINGLE_VALID_ASSIGN_AND_EXPECTED,
     SINGLE_VALID_COMPARISON_AND_EXPECTED,
     SINGLE_VALID_FUNC_CALL_AND_EXPECTED,
     SINGLE_VALID_FUNC_DEF_AND_EXPECTED,
@@ -20,6 +21,7 @@ from tests.static.eval_tests_data import (
     SINGLE_VALID_LET_AND_EXPECTED,
 )
 from tests.utils.payloads import (
+    ExpectedEvaluatedAssignment,
     ExpectedEvaluatedFuncCall,
     ExpectedEvaluatedFunction,
     ExpectedEvaluatedLet,
@@ -57,6 +59,7 @@ def ok_eval_res(parser_mock: IParser, evaluator: Evaluator) -> YieldFixture[Valu
 
 class TestEvaluatorTg:
     """Test group for evaluator."""
+
     @pytest.mark.parametrize(
         ("parser_mock", "expected"),
         [
@@ -329,3 +332,36 @@ class TestEvaluatorTg:
         assert isinstance(
             ok_eval_res, stored_entry.ret_type.value
         ), "Evaluated type is not matched with function return type."
+
+    @pytest.mark.parametrize(
+        ("parser_mock", "scope", "expected"),
+        SINGLE_VALID_ASSIGN_AND_EXPECTED,
+        indirect=["parser_mock"],
+    )
+    def test_eval_valid_assignment(
+        self, ok_eval_res: Value, evaluator: Evaluator, expected: ExpectedEvaluatedAssignment
+    ) -> None:
+        """
+        Tests evaluation of program with one valid let statement.
+
+        Arrange: Provide statements to Parser Mock.
+        Arrange: Create scope with variable defined.
+
+        Act: Evaluate program from parser.
+        Assert: No error returned.
+        Assert: Evaluator's scope contains entry for expected variable name.
+        Assert: Entry value is not None.
+        Assert: Entry is VarEntry.
+        Assert: Entry variable value
+        Assert: Entry has expected body statements.
+        Assert: Entry has expected number of arguments.
+        """
+        variable_entry = evaluator.scope.get(expected.var_name)
+        assert variable_entry is not None, "Value was not stored."
+        assert variable_entry.value is not None, "Invalid entry value."
+        assert isinstance(variable_entry, VarEntry), "Value was stored as a wrond entry type."
+        assert ok_eval_res is variable_entry.var_value, "Returned and stored value differ."
+        assert ok_eval_res == expected.new_value, "Invalid new value."
+        assert isinstance(
+            ok_eval_res, variable_entry.type_value.value
+        ), "New value is of wrong type."

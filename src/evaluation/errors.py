@@ -43,5 +43,5 @@ class InvalidType(EvaluationError):
 
     def __init__(self, value: Value, expected_type: type[Value]) -> None:
         super().__init__(
-            f"Can't assign value {value} of type {type(value)} to variable of type {expected_type}."
+            f"Can't assign value `{value}` of type {type(value)} to variable of type {expected_type}."
         )

@@ -127,7 +127,7 @@ def parse_inifix_operation(
     """
     Parses an InfixOperation with provided left operand,
     operator from current token of provided parser
-    and right operand from next token of provided parser, if possible.
+    and right operand parsed from next token of provided parser, if possible.
     Expected and checked parser.current_token is an Operator.
     After the successful read, parser.current_token is the last token of the operation.
     """
@@ -142,6 +142,26 @@ def parse_inifix_operation(
             return err
         case Ok(right):
             return Ok(ast_nodes.InfixOperation(left, operator, right))
+
+
+def parse_assignment(
+    parser: BaseParser, assignee: ast_nodes.Expression
+) -> Result[ast_nodes.Assignment, ExpressionValidationError]:
+    """
+    Parses an Assignme with provided assignee,
+    and value parsed from next token of provided parser, if possible.
+    Expected and checked parser.current_token is an `=`.
+    After the successful read, parser.current_token is the last token of the assignment value.
+    """
+    if is_err(res := _check_cur_token(parser, TokenType.ASSIGN)):
+        return res
+
+    parser.next_token()
+    match parse_expression(parser, Precedence.LOWEST):
+        case Err() as err:
+            return err
+        case Ok(value):
+            return Ok(ast_nodes.Assignment(assignee, value))
 
 
 def parse_grouped_expression(parser: BaseParser) -> Result[Expression, ExpressionValidationError]:

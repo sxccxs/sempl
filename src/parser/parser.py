@@ -12,6 +12,7 @@ from src.parser.types import InfixParserType, Precedence, PrefixParserType
 
 class Parser(BaseParser):
     """Parser implementing BaseParser."""
+
     def __init__(self, lexer: ILexer) -> None:
         """
         Args:
@@ -107,6 +108,7 @@ class Parser(BaseParser):
         self.register_infix_parser(TokenType.LT, expr_sub_parsers.parse_inifix_operation)
         self.register_infix_parser(TokenType.LTEQ, expr_sub_parsers.parse_inifix_operation)
         self.register_infix_parser(TokenType.LPAREN, expr_sub_parsers.parse_call_expression)
+        self.register_infix_parser(TokenType.ASSIGN, expr_sub_parsers.parse_assignment)
 
     def _set_precedences(self) -> None:
         """Sets all precedences."""
@@ -121,3 +123,4 @@ class Parser(BaseParser):
         self.set_precedence(TokenType.ASTERIX, Precedence.PRODUCT)
         self.set_precedence(TokenType.SLASH, Precedence.PRODUCT)
         self.set_precedence(TokenType.LPAREN, Precedence.CALL)
+        self.set_precedence(TokenType.ASSIGN, Precedence.ASSIGN)

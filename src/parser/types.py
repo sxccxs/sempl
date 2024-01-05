@@ -15,7 +15,7 @@ InfixParserType = Callable[[BaseParser, Expression], Result[Expression, Expressi
 class Precedence(IntEnum):
     """Expression precedence."""
 
-    LOWEST, EQUALS, LESSGREATER, SUM, PRODUCT, PREFIX, CALL = range(7)
+    LOWEST, EQUALS, LESSGREATER, SUM, PRODUCT, PREFIX, CALL, ASSIGN = range(8)
 
 
 class Operator(StrEnum):

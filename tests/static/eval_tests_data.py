@@ -4,15 +4,14 @@ from src.ast.abstract import Statement
 from src.evaluation.std_lib import STD_LIB
 from src.evaluation.values import value_types
 from src.evaluation.values.consts import TrueFalse
-from src.evaluation.values.scope import FuncEntry, FuncParam, Scope
+from src.evaluation.values.scope import FuncEntry, FuncParam, Scope, VarEntry
 from src.evaluation.values.value_base import Value
 from src.parser.types import Operator
-from tests.utils.payloads import (
-    ExpectedEvaluatedFuncCall,
-    ExpectedEvaluatedFuncParam,
-    ExpectedEvaluatedFunction,
-    ExpectedEvaluatedLet,
-)
+from tests.utils.payloads import (ExpectedEvaluatedAssignment,
+                                  ExpectedEvaluatedFuncCall,
+                                  ExpectedEvaluatedFuncParam,
+                                  ExpectedEvaluatedFunction,
+                                  ExpectedEvaluatedLet)
 
 SINGLE_VALID_INFIX_OPERATION_AND_EXPECTED: list[tuple[list[Statement], Value]] = [
     (
@@ -414,5 +413,39 @@ SINGLE_VALID_FUNC_CALL_AND_EXPECTED: list[
             STD_LIB,
         ),
         ExpectedEvaluatedFuncCall("num", value_types.Float(0.5)),
+    ),
+]
+
+SINGLE_VALID_ASSIGN_AND_EXPECTED: list[
+    tuple[list[Statement], Scope, ExpectedEvaluatedAssignment]
+] = [
+    (
+        [
+            ast_nodes.ExpressionStatement(
+                expression=ast_nodes.Assignment(
+                    assignee=ast_nodes.Identifier("x"), value=ast_nodes.IntegerLiteral(10)
+                )
+            )
+        ],
+        Scope(
+            {"x": VarEntry(value_types.Int(20), True, value_types.Type(value_types.Int))}, STD_LIB
+        ),
+        ExpectedEvaluatedAssignment("x", value_types.Int(10)),
+    ),
+    (
+        [
+            ast_nodes.ExpressionStatement(
+                expression=ast_nodes.Assignment(
+                    assignee=ast_nodes.Identifier("y"),
+                    value=ast_nodes.InfixOperation(
+                        ast_nodes.IntegerLiteral(20), Operator.MULT, ast_nodes.IntegerLiteral(2)
+                    ),
+                )
+            )
+        ],
+        Scope(
+            {"y": VarEntry(value_types.Int(20), True, value_types.Type(value_types.Int))}, STD_LIB
+        ),
+        ExpectedEvaluatedAssignment("y", value_types.Int(40)),
     ),
 ]

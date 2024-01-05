@@ -81,6 +81,8 @@ def evaluate(node: ASTNode, scope: Scope) -> Result[Value, EvaluationError]:
             return evaluate_function_statement(node, scope)
         case ast_nodes.CallExpression():
             return evaluate_function_call(node, scope)
+        case ast_nodes.Assignment():
+            return evaluate_assignment(node, scope)
         case _:
             return Err(errors.UnsuportedNodeError(node))
 
@@ -149,6 +151,30 @@ def evaluate_indetifier(node: ast_nodes.Identifier, scope: Scope) -> Result[Valu
     if entry.value is None:
         return Err(EvaluationError(f"Identifier `{node.value}` can not be used as a value."))
     return Ok(entry.value)
+
+
+def evaluate_assignment(node: ast_nodes.Assignment, scope: Scope) -> Result[Value, EvaluationError]:
+    if not isinstance(node.assignee, ast_nodes.Identifier):
+        return Err(EvaluationError("Left part of assignment must be an identifier."))
+    name = node.assignee.value
+    match var := scope.get(name):
+        case None:
+            return Err(EvaluationError(f"Identifier `{name}` not found."))
+        case VarEntry():
+            pass
+        case _:
+            return Err(EvaluationError(f"Identifier `{name}` is not assignable."))
+    if not var.is_mut:
+        return Err(EvaluationError(f"Identifier `{name}` is not mutable."))
+    match evaluate(node.value, scope):
+        case Err() as err:
+            return err
+        case Ok(value):
+            new_value = value
+    if not isinstance(new_value, var.type_value.value):
+        return Err(errors.InvalidType(new_value, var.type_value.value))
+    var.var_value = new_value
+    return Ok(new_value)
 
 
 def evaluate_prefix_expression(
