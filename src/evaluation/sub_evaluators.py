@@ -1,3 +1,4 @@
+from functools import partial
 from itertools import zip_longest
 from typing import Iterable, Literal, OrderedDict, cast
 
@@ -10,7 +11,7 @@ from src.evaluation.errors import EvaluationError
 from src.evaluation.values import consts, value_types
 from src.evaluation.values.scope import FuncEntry, FuncParam, Scope, VarEntry
 from src.evaluation.values.value_base import NumericValue, Value, ValuedValue
-from src.helpers.result_helpers import results_gather
+from src.helpers.result_helpers import err_with_note, results_gather
 from src.parser.types import Operator
 
 
@@ -71,7 +72,7 @@ def evaluate(node: ASTNode, scope: Scope) -> Result[Value, EvaluationError]:
                 return Ok(value_types.ReturnValue(consts.SINGULARITY))
             match evaluate(node.return_value, scope):
                 case Err() as err:
-                    return err
+                    return err_with_note(err, "return statement")
                 case Ok(value):
                     return Ok(value_types.ReturnValue(value))
         case ast_nodes.LetStatement():
@@ -120,18 +121,23 @@ def evaluate_let_statement(
         Result[value_types.NoEffect, EvaluationError]: Ok(consts.NO_EFFECT) constant
         if evaluation succeeded, else corresponding error.
     """
+    err_with_note_ = partial(
+        err_with_note, note=f"let statement of variable `{node.var_name.value}`"
+    )
     match results_gather(evaluate(node.var_value, scope), evaluate(node.var_type, scope)):
         case Err() as err:
-            return err
+            return err_with_note_(err)
         case Ok(vals):
             var_value, var_type = vals
     match var_type:
         case value_types.Type():
             pass
         case _:
-            return Err(EvaluationError(f"Expected type identifier, received {type(var_type)}"))
+            return err_with_note_(
+                EvaluationError(f"Expected type identifier, received {type(var_type)}")
+            )
     if not isinstance(var_value, var_type.value):
-        return Err(errors.InvalidType(var_value, var_type.value))
+        return err_with_note_(errors.InvalidType(var_value, var_type.value))
     scope[node.var_name.value] = VarEntry(var_value, node.is_mut, var_type)
     return Ok(consts.NO_EFFECT)
 
@@ -220,7 +226,9 @@ def evaluate_integer_infix_expression(
         case Operator.MULT:
             return Ok(value_types.Integer(left * right))
         case Operator.DIV:
-            return Ok(value_types.Integer(left // right))
+            if right != 0:
+                return Ok(value_types.Integer(left // right))
+            return Err(EvaluationError("Can't divide by zero."))
         case _:
             return Err(errors.UnsuportedInfixOperation(left_operand, operator, right_operand))
 
@@ -244,7 +252,9 @@ def evaluate_float_infix_expression(
         case Operator.MULT:
             return Ok(value_types.Float(left * right))
         case Operator.DIV:
-            return Ok(value_types.Float(left / right))
+            if right != 0:
+                return Ok(value_types.Float(left / right))
+            return Err(EvaluationError("Can't divide by zero."))
         case _:
             return Err(errors.UnsuportedInfixOperation(left_operand, operator, right_operand))
 
@@ -308,18 +318,21 @@ def evaluate_function_statement(
         Result[value_types.NoEffect, EvaluationError]: Ok(consts.NO_EFFECT) constant
         if evaluation succeeded, else corresponding error.
     """
+    err_with_note_ = partial(err_with_note, note=f"function `{node.name.value}` definition")
     match evaluate_function_parameters(node, scope):
         case Err() as err:
-            return err
+            return err_with_note_(err)
         case Ok(values):
             params = values
     match evaluate(node.return_type, scope):
         case Err() as err:
-            return err
+            return err_with_note_(err)
         case Ok(value_types.Type() as value):
             type_ = value
         case Ok(value):
-            return Err(EvaluationError(f"Expected type identifier, received {type(value)}"))
+            return err_with_note_(
+                EvaluationError(f"Expected type identifier, received {type(value)}")
+            )
     scope[node.name.value] = FuncEntry(params, node.body, type_)
     return Ok(consts.NO_EFFECT)
 
@@ -334,15 +347,18 @@ def evaluate_function_parameters(
         node (ast_nodes.FuncStatement): Function statement.
         scope (Scope): Scope when function is being defined.
     """
+    err_with_note_ = partial(
+        err_with_note, note=f"function `{node.name.value}` parameters definition"
+    )
     must_have_default = False
     params = OrderedDict[str, FuncParam]()
     for param in node.parameters:
         match evaluate_function_parameter(param, scope, must_have_default):
             case Err() as err:
-                return err
+                return err_with_note_(err)
             case Ok(param):
                 if param.name in params:
-                    return Err(
+                    return err_with_note_(
                         EvaluationError(
                             "Function parameters names must be unique. "
                             f"Non-unique name: `{param.name}`."
@@ -365,29 +381,36 @@ def evaluate_function_parameter(
         node (ast_nodes.FuncStatement): Function statement.
         scope (Scope): Scope when function is being defined.
     """
+    err_with_note_ = partial(
+        err_with_note, note=f"function parameter `{parameter.name.value}` definition"
+    )
     name = parameter.name.value
     match evaluate(parameter.type, scope):
         case Err() as err:
-            return err
+            return err_with_note_(err)
         case Ok(value_types.Type() as value):
             type_ = value
         case Ok(value):
-            return Err(EvaluationError(f"Expected type identifier, received {type(value)}"))
+            return err_with_note_(
+                EvaluationError(f"Expected type identifier, received {type(value)}")
+            )
 
     if must_have_default and parameter.default_value is None:
-        return Err(EvaluationError(f"Parameter `{parameter.name}` must have a default value."))
+        return err_with_note_(
+            EvaluationError(f"Parameter `{parameter.name.value}` must have a default value.")
+        )
 
     if parameter.default_value is None:
         return Ok(FuncParam(name, type_, default_value=None))
 
     match evaluate(parameter.default_value, scope):
         case Err() as err:
-            return err
+            return err_with_note_(err)
         case Ok(value):
             default = value
 
     if not isinstance(default, type_.value):
-        return Err(errors.InvalidType(value, type_.value))
+        return err_with_note_(errors.InvalidType(value, type_.value))
 
     return Ok(FuncParam(name, type_, default))
 
@@ -408,33 +431,36 @@ def evaluate_function_call(
         case _:
             return Err(errors.EvaluationError(f"Expression `{node.callable}` is not callable."))
 
+    err_with_note_ = partial(
+        err_with_note, note=f"function `{name}` call"
+    )
     if (func := scope.get(name)) is None or not isinstance(func, FuncEntry):
-        return Err(errors.EvaluationError(f"Function `{name}` was not defined."))
+        return err_with_note_(errors.EvaluationError(f"Function `{name}` was not defined."))
 
     match results_gather(evaluate(arg, scope) for arg in node.arguments):
         case Err() as err:
-            return err
+            return err_with_note_(err)
         case Ok(val):
             args = val
 
     func_scope = Scope.from_outer(scope)
     if is_err(res := bind_call_arguments(func.parameters, args, func_scope)):
-        return res
+        return err_with_note_(res)
 
     match evaluate_statements(func.body.statements, func_scope):
         case Err() as err:
-            return err
+            return err_with_note_(err)
         case Ok(value_types.ReturnValue(value)):
             ret_value = value
         case Ok(value):
             match evaluate_no_return(func, value):
                 case Err() as err:
-                    return err
+                    return err_with_note_(err)
                 case Ok(val):
                     ret_value = value
 
     if not isinstance(ret_value, func.ret_type.value):
-        return Err(errors.InvalidType(ret_value, func.ret_type.value))
+        return err_with_note_(errors.InvalidType(ret_value, func.ret_type.value))
 
     return Ok(ret_value)
 

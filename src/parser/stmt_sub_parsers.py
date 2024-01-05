@@ -1,19 +1,23 @@
 from __future__ import annotations
 
+from functools import partial
+
 from result import Err, Ok, Result, is_err
 
 from src.ast import ast_nodes
 from src.ast.abstract import Statement
-from src.helpers.result_helpers import results_gather
+from src.helpers.result_helpers import err_with_note, results_gather
 from src.lexer.tokens import TokenType
 from src.parser import errors
-from src.parser.errors import StatementValidationError
+from src.parser.errors import ExpressionValidationError, StatementValidationError
 from src.parser.expr_sub_parsers import parse_expression
 from src.parser.parser_base import BaseParser
 from src.parser.types import Precedence
 
 
-def parse_statement(parser: BaseParser) -> Result[Statement | None, StatementValidationError]:
+def parse_statement(
+    parser: BaseParser,
+) -> Result[Statement | None, StatementValidationError | ExpressionValidationError]:
     """Parses one statement from parser current token if such is valid."""
     match parser.current_token.type:
         case TokenType.LET:
@@ -34,20 +38,16 @@ def parse_statement(parser: BaseParser) -> Result[Statement | None, StatementVal
 
 def parse_let_statement(
     parser: BaseParser,
-) -> Result[ast_nodes.LetStatement, StatementValidationError]:
+) -> Result[ast_nodes.LetStatement, StatementValidationError | ExpressionValidationError]:
     """
     Parses Let statement from current position of provided parser.
     Expected and checked parser.current_token is `let`.
     After the successful read, parser.current_token is the last token of the statement.
-
-    Args:
-        parser (BaseParser): Provided parser.
-
-    Returns:
-        Result[ast_nodes.LetStatement, StatementValidationError]: parsing result.
     """
+    err_with_note_ = partial(err_with_note, note="let statement parsing")
     if is_err(res := _check_cur_token(parser, TokenType.LET)):
         return res
+
     parser.next_token()
     is_mut = False
     if parser.cur_token_is(TokenType.MUT):
@@ -55,7 +55,7 @@ def parse_let_statement(
         parser.next_token()
 
     if is_err(res := _check_cur_and_peek_tokens(parser, TokenType.IDENT, TokenType.IDENT)):
-        return res
+        return err_with_note_(res)
 
     var_type = ast_nodes.Identifier(parser.current_token.literal)
     var_name = ast_nodes.Identifier(parser.peek_token.literal)
@@ -63,14 +63,16 @@ def parse_let_statement(
     parser.next_token()
 
     if not parser.peek_token_is(TokenType.ASSIGN):
-        return Err(errors.InvalidTokenTypeInStatement(TokenType.ASSIGN, parser.peek_token.type))
+        return err_with_note_(
+            errors.InvalidTokenTypeInStatement(TokenType.ASSIGN, parser.peek_token.type)
+        )
 
     parser.next_token()
     parser.next_token()
 
     match parse_expression(parser, Precedence.LOWEST):
         case Err(err):
-            return Err(StatementValidationError(err))
+            return err_with_note_(err)
         case Ok(expr):
             var_value = expr
 
@@ -86,17 +88,11 @@ def parse_let_statement(
 
 def parse_return_statement(
     parser: BaseParser,
-) -> Result[ast_nodes.ReturnStatement, StatementValidationError]:
+) -> Result[ast_nodes.ReturnStatement, StatementValidationError | ExpressionValidationError]:
     """
     Parses Return statement from current position of provided parser.
     Expected and checked parser.current_token is `return`.
     After the successful read, parser.current_token is the last token of the statement.
-
-    Args:
-        parser (BaseParser): Provided parser.
-
-    Returns:
-        Result[ast_nodes.ReturnStatement, StatementValidationError]: parsing result.
     """
     if is_err(res := _check_cur_token(parser, TokenType.RETURN)):
         return res
@@ -106,7 +102,7 @@ def parse_return_statement(
 
     match parse_expression(parser, Precedence.LOWEST):
         case Err(err):
-            return Err(StatementValidationError(err))
+            return err_with_note(err, "return statement parsing")
         case Ok(expr):
             return_value = expr
 
@@ -120,17 +116,11 @@ def parse_return_statement(
 
 def parse_block_statement(
     parser: BaseParser,
-) -> Result[ast_nodes.BlockStatement, StatementValidationError]:
+) -> Result[ast_nodes.BlockStatement, StatementValidationError | ExpressionValidationError]:
     """
     Parses Block statement from current position of provided parser.
     Expected and checked checked parser.current_token is `{`.
     After the successful read, parser.current_token is the `}`.
-
-    Args:
-        parser (BaseParser): Provided parser.
-
-    Returns:
-        Result[ast_nodes.BlockStatement, StatementValidationError]: parsing result.
     """
     if is_err(res := _check_cur_token(parser, TokenType.LCURLY)):
         return res
@@ -142,7 +132,7 @@ def parse_block_statement(
             return Err(StatementValidationError("Unexpected EOF. Brace was not closed."))
         match parse_statement(parser):
             case Err(err):
-                return Err(StatementValidationError(err))
+                return Err(err)
             case Ok(stmt):
                 if stmt is not None:
                     statements.append(stmt)
@@ -153,17 +143,11 @@ def parse_block_statement(
 
 def parse_if_statement(
     parser: BaseParser,
-) -> Result[ast_nodes.IfStatement, StatementValidationError]:
+) -> Result[ast_nodes.IfStatement, StatementValidationError | ExpressionValidationError]:
     """
     Parses If statement from current position of provided parser.
     Expected and checked parser.current_token is `if`.
     After the successful read, parser.current_token is the `}` - end of last block of if statement.
-
-    Args:
-        parser (BaseParser): Provided parser.
-
-    Returns:
-        Result[ast_nodes.IfStatement, StatementValidationError]: parsing result.
     """
     if is_err(res := _check_cur_token(parser, TokenType.IF)):
         return res
@@ -207,54 +191,49 @@ def parse_if_statement(
 
 def parse_func_statement(
     parser: BaseParser,
-) -> Result[ast_nodes.FuncStatement, StatementValidationError]:
+) -> Result[ast_nodes.FuncStatement, StatementValidationError | ExpressionValidationError]:
     """
     Parses function statement from current position of provided parser.
     Expected and checked parser.current_token is `fn`.
     After the successful read, parser.current_token is the `}` - end of function body.
-
-    Args:
-        parser (BaseParser): Provided parser.
-
-    Returns:
-        Result[ast_nodes.FuncStatement, StatementValidationError]: parsing result.
     """
     if is_err(res := _check_cur_token(parser, TokenType.FN)):
         return res
 
     parser.next_token()
-    if is_err(res := _check_cur_and_peek_tokens(parser, TokenType.IDENT, TokenType.LPAREN)):
-        return res
+    if is_err(res := _check_cur_token(parser, TokenType.IDENT)):
+        return err_with_note(res, "function statement parsing")
 
     func_name = ast_nodes.Identifier(parser.current_token.literal)
     parser.next_token()
+    err_with_note_ = partial(err_with_note, note=f"function `{func_name}` statement parsing")
 
     if is_err(res := _check_cur_token(parser, TokenType.LPAREN)):
-        return res
+        return err_with_note_(res)
 
     match parse_func_parameters(parser):
         case Err() as err:
-            return err
+            return err_with_note_(err)
         case Ok(params):
             func_params = params
 
     if is_err(res := _check_cur_token(parser, TokenType.RPAREN)):
-        return res
+        return err_with_note_(res)
 
     parser.next_token()
     if is_err(res := _check_cur_and_peek_tokens(parser, TokenType.ARROW, TokenType.IDENT)):
-        return res
+        return err_with_note_(res)
 
     parser.next_token()
     func_ret_type = ast_nodes.Identifier(parser.current_token.literal)
     parser.next_token()
 
     if is_err(res := _check_cur_token(parser, TokenType.LCURLY)):
-        return res
+        return err_with_note_(res)
 
     match parse_block_statement(parser):
         case Err() as err:
-            return err
+            return err_with_note_(err)
         case Ok(block):
             func_body = block
 
@@ -263,26 +242,23 @@ def parse_func_statement(
 
 def parse_func_parameters(
     parser: BaseParser,
-) -> Result[list[ast_nodes.FuncParameter], StatementValidationError]:
+) -> Result[list[ast_nodes.FuncParameter], StatementValidationError | ExpressionValidationError]:
     """
     Parses all function parameters from current position of provided parser.
     Expected and checked parser.current_token is `(`.
     After the successful read, parser.current_token is `)`.
-
-    Args:
-        parser (BaseParser): Provided parser.
-
-    Returns:
-        Result[list[ast_nodes.FuncParameter], StatementValidationError]: parsing result.
     """
     if is_err(res := _check_cur_token(parser, TokenType.LPAREN)):
         return res
 
+    err_with_note_ = partial(err_with_note, note="function parameters parsing")
     if parser.peek_token_is(TokenType.RPAREN):
         parser.next_token()
         return Ok([])
 
-    results: list[Result[ast_nodes.FuncParameter, StatementValidationError]] = []
+    results: list[
+        Result[ast_nodes.FuncParameter, StatementValidationError | ExpressionValidationError]
+    ] = []
     parser.next_token()
     results.append(parse_func_parameter(parser))
 
@@ -293,31 +269,25 @@ def parse_func_parameters(
 
     match results_gather(results):
         case Err() as err:
-            return err
+            return err_with_note_(err)
         case Ok(value):
             params = value
 
     parser.next_token()
     if is_err(res := _check_cur_token(parser, TokenType.RPAREN)):
-        return res
+        return err_with_note_(res)
 
     return Ok(params)
 
 
 def parse_func_parameter(
     parser: BaseParser,
-) -> Result[ast_nodes.FuncParameter, StatementValidationError]:
+) -> Result[ast_nodes.FuncParameter, StatementValidationError | ExpressionValidationError]:
     """
     Parses one function parameter from current position of provided parser.
     Expected and checked parser.current_token is parameter name.
     After the successful read, parser.current_token is
     the last token of the parameter (of the type or default value expression).
-
-    Args:
-        parser (BaseParser): Provided parser.
-
-    Returns:
-        Result[ast_nodes.FuncParameter, StatementValidationError]: parsing result.
     """
     if is_err(res := _check_cur_token(parser, TokenType.IDENT)):
         return res
@@ -336,7 +306,7 @@ def parse_func_parameter(
     parser.next_token()
     match parse_expression(parser, Precedence.LOWEST):
         case Err(err):
-            return Err(StatementValidationError(err))
+            return err_with_note(err, f"function parameter `{param_name}` parsing")
         case Ok(expr):
             default_value = expr
 
@@ -345,20 +315,15 @@ def parse_func_parameter(
 
 def parse_expression_statement(
     parser: BaseParser,
-) -> Result[ast_nodes.ExpressionStatement, StatementValidationError]:
+) -> Result[ast_nodes.ExpressionStatement, ExpressionValidationError]:
     """
     Parses expression statement from current position of provided parser.
     After the successful read, parser.current_token is the last token of the statement.
-
-    Args:
-        parser (BaseParser): Provided parser.
-
-    Returns:
-        Result[ast_nodes.ExpressionStatement, StatementValidationError]: Parsing result.
     """
+
     match parse_expression(parser, Precedence.LOWEST):
-        case Err(err):
-            return Err(StatementValidationError(err))
+        case Err() as err:
+            return err
         case Ok(expr):
             return Ok(ast_nodes.ExpressionStatement(expression=expr))
 

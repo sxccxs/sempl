@@ -6,6 +6,7 @@ from src.evaluation.values import value_types
 from src.evaluation.values.consts import SINGULARITY
 from src.evaluation.values.scope import Scope, TypeEntry, VarEntry
 from src.evaluation.values.value_base import Value
+from src.parser.errors import ParsingError
 from src.parser.interfaces import IParser
 
 STD_LIB = Scope(
@@ -25,11 +26,11 @@ class Evaluator:
         self.parser = parser
         self.scope = Scope(scope.store.copy())
 
-    def evaluate(self) -> Result[Value, EvaluationError]:
+    def evaluate(self) -> Result[Value, EvaluationError | ParsingError]:
         """Evaluates program from saved parser with std lib."""
         match self.parser.parse_program():
-            case Err(err):
-                return Err(EvaluationError(err))
+            case Err() as err:
+                return err
             case Ok(value):
                 program = value
         match sub_evaluators.evaluate(program, self.scope):
