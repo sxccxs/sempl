@@ -17,6 +17,7 @@ from tests.static.eval_tests_data import (
     SINGLE_VALID_COMPARISON_AND_EXPECTED,
     SINGLE_VALID_FUNC_CALL_AND_EXPECTED,
     SINGLE_VALID_FUNC_DEF_AND_EXPECTED,
+    SINGLE_VALID_IF_AND_EXPECTED,
     SINGLE_VALID_INFIX_OPERATION_AND_EXPECTED,
     SINGLE_VALID_LET_AND_EXPECTED,
 )
@@ -315,8 +316,8 @@ class TestEvaluatorTg:
         """
         Tests evaluation of program with one valid let statement.
 
-        Arrange: Provide statements to Parser Mock.
         Arrange: Create scope with called function.
+        Arrange: Provide statements to Parser Mock.
 
         Act: Evaluate program from parser.
         Assert: No error returned.
@@ -344,15 +345,16 @@ class TestEvaluatorTg:
         """
         Tests evaluation of program with one valid let statement.
 
-        Arrange: Provide statements to Parser Mock.
         Arrange: Create scope with variable defined.
+        Arrange: Provide statements to Parser Mock.
 
         Act: Evaluate program from parser.
         Assert: No error returned.
         Assert: Evaluator's scope contains entry for expected variable name.
         Assert: Entry value is not None.
         Assert: Entry is VarEntry.
-        Assert: Entry variable value
+        Assert: Entry variable value is the returned value.
+        Assert: Entry variable value is equal to expected.
         Assert: Entry has expected body statements.
         Assert: Entry has expected number of arguments.
         """
@@ -365,3 +367,33 @@ class TestEvaluatorTg:
         assert isinstance(
             ok_eval_res, variable_entry.type_value.value
         ), "New value is of wrong type."
+
+    @pytest.mark.parametrize(
+        ("parser_mock", "scope", "expected"),
+        SINGLE_VALID_IF_AND_EXPECTED,
+        indirect=["parser_mock"],
+    )
+    def test_eval_valid_if(
+        self, ok_eval_res: Value, evaluator: Evaluator, expected: ExpectedEvaluatedAssignment
+    ) -> None:
+        """
+        Tests evaluation of program with one valid let statement.
+
+        Arrange: Provide statements to Parser Mock, so that `x`
+        is set to ad different value in each if-else block.
+        Arrange: Create scope with variable `x` defined.
+
+        Act: Evaluate program from parser.
+        Assert: Returned value is NO_EFFECT constant.
+        Assert: No error returned.
+        Assert: Evaluator's scope contains entry for expected variable name.
+        Assert: Entry value is not None.
+        Assert: Entry is VarEntry.
+        Assert: Entry variable value is equal to expected.
+        """
+        assert ok_eval_res is consts.NO_EFFECT, "Invalid retuned value."
+        variable_entry = evaluator.scope.get(expected.var_name)
+        assert variable_entry is not None, "Value was not stored."
+        assert variable_entry.value is not None, "Invalid entry value."
+        assert isinstance(variable_entry, VarEntry), "Value was stored as a wrond entry type."
+        assert variable_entry.var_value == expected, "Invalid value."

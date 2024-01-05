@@ -3,8 +3,7 @@ from dataclasses import dataclass, field
 from io import StringIO
 
 from src.ast.abstract import ASTNode, Expression, Statement
-from src.ast.to_str_helpers import (sio_write_with_after_value,
-                                    sio_write_with_sep)
+from src.ast.to_str_helpers import sio_write_with_after_value, sio_write_with_sep
 from src.lexer.tokens import Keyword
 from src.parser.types import Operator
 

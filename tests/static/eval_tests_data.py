@@ -7,11 +7,13 @@ from src.evaluation.values.consts import TrueFalse
 from src.evaluation.values.scope import FuncEntry, FuncParam, Scope, VarEntry
 from src.evaluation.values.value_base import Value
 from src.parser.types import Operator
-from tests.utils.payloads import (ExpectedEvaluatedAssignment,
-                                  ExpectedEvaluatedFuncCall,
-                                  ExpectedEvaluatedFuncParam,
-                                  ExpectedEvaluatedFunction,
-                                  ExpectedEvaluatedLet)
+from tests.utils.payloads import (
+    ExpectedEvaluatedAssignment,
+    ExpectedEvaluatedFuncCall,
+    ExpectedEvaluatedFuncParam,
+    ExpectedEvaluatedFunction,
+    ExpectedEvaluatedLet,
+)
 
 SINGLE_VALID_INFIX_OPERATION_AND_EXPECTED: list[tuple[list[Statement], Value]] = [
     (
@@ -447,5 +449,206 @@ SINGLE_VALID_ASSIGN_AND_EXPECTED: list[
             {"y": VarEntry(value_types.Int(20), True, value_types.Type(value_types.Int))}, STD_LIB
         ),
         ExpectedEvaluatedAssignment("y", value_types.Int(40)),
+    ),
+]
+
+SINGLE_VALID_IF_AND_EXPECTED: list[tuple[list[Statement], Scope, Value]] = [
+    (
+        [
+            ast_nodes.IfStatement(
+                condition=ast_nodes.Identifier("True"),
+                then=ast_nodes.BlockStatement(
+                    [
+                        ast_nodes.ExpressionStatement(
+                            ast_nodes.Assignment(
+                                ast_nodes.Identifier("x"), ast_nodes.IntegerLiteral(1)
+                            )
+                        )
+                    ]
+                ),
+                else_=None,
+            ),
+        ],
+        Scope(
+            {"x": VarEntry(value_types.Int(0), True, value_types.Type(value_types.Int))}, STD_LIB
+        ),
+        value_types.Int(1),
+    ),
+    (
+        [
+            ast_nodes.IfStatement(
+                condition=ast_nodes.Identifier("False"),
+                then=ast_nodes.BlockStatement(
+                    [
+                        ast_nodes.ExpressionStatement(
+                            ast_nodes.Assignment(
+                                ast_nodes.Identifier("x"), ast_nodes.IntegerLiteral(1)
+                            )
+                        )
+                    ]
+                ),
+                else_=None,
+            ),
+        ],
+        Scope(
+            {"x": VarEntry(value_types.Int(0), True, value_types.Type(value_types.Int))}, STD_LIB
+        ),
+        value_types.Int(0),
+    ),
+    (
+        [
+            ast_nodes.IfStatement(
+                condition=ast_nodes.Identifier("False"),
+                then=ast_nodes.BlockStatement(
+                    [
+                        ast_nodes.ExpressionStatement(
+                            ast_nodes.Assignment(
+                                ast_nodes.Identifier("x"), ast_nodes.IntegerLiteral(1)
+                            )
+                        )
+                    ]
+                ),
+                else_=ast_nodes.BlockStatement(
+                    [
+                        ast_nodes.ExpressionStatement(
+                            ast_nodes.Assignment(
+                                ast_nodes.Identifier("x"), ast_nodes.IntegerLiteral(2)
+                            )
+                        )
+                    ]
+                ),
+            ),
+        ],
+        Scope(
+            {"x": VarEntry(value_types.Int(0), True, value_types.Type(value_types.Int))}, STD_LIB
+        ),
+        value_types.Int(2),
+    ),
+    (
+        [
+            ast_nodes.IfStatement(
+                condition=ast_nodes.Identifier("True"),
+                then=ast_nodes.BlockStatement(
+                    [
+                        ast_nodes.ExpressionStatement(
+                            ast_nodes.Assignment(
+                                ast_nodes.Identifier("x"), ast_nodes.IntegerLiteral(1)
+                            )
+                        )
+                    ]
+                ),
+                else_=ast_nodes.BlockStatement(
+                    [
+                        ast_nodes.ExpressionStatement(
+                            ast_nodes.Assignment(
+                                ast_nodes.Identifier("x"), ast_nodes.IntegerLiteral(2)
+                            )
+                        )
+                    ]
+                ),
+            ),
+        ],
+        Scope(
+            {"x": VarEntry(value_types.Int(0), True, value_types.Type(value_types.Int))}, STD_LIB
+        ),
+        value_types.Int(1),
+    ),
+    (
+        [
+            ast_nodes.IfStatement(
+                condition=ast_nodes.InfixOperation(
+                    ast_nodes.Identifier("x"),
+                    Operator.EQ,
+                    ast_nodes.IntegerLiteral(1),
+                ),
+                then=ast_nodes.BlockStatement(
+                    [
+                        ast_nodes.ExpressionStatement(
+                            ast_nodes.Assignment(
+                                ast_nodes.Identifier("x"), ast_nodes.IntegerLiteral(1)
+                            )
+                        )
+                    ]
+                ),
+                else_=ast_nodes.BlockStatement(
+                    [
+                        ast_nodes.IfStatement(
+                            condition=ast_nodes.InfixOperation(
+                                ast_nodes.Identifier("x"),
+                                Operator.NOT_EQ,
+                                ast_nodes.IntegerLiteral(1),
+                            ),
+                            then=ast_nodes.BlockStatement(
+                                [
+                                    ast_nodes.ExpressionStatement(
+                                        ast_nodes.Assignment(
+                                            ast_nodes.Identifier("x"), ast_nodes.IntegerLiteral(2)
+                                        )
+                                    )
+                                ]
+                            ),
+                            else_=None,
+                        ),
+                    ]
+                ),
+            ),
+        ],
+        Scope(
+            {"x": VarEntry(value_types.Int(0), True, value_types.Type(value_types.Int))}, STD_LIB
+        ),
+        value_types.Int(2),
+    ),
+    (
+        [
+            ast_nodes.IfStatement(
+                condition=ast_nodes.InfixOperation(
+                    ast_nodes.Identifier("x"),
+                    Operator.EQ,
+                    ast_nodes.IntegerLiteral(1),
+                ),
+                then=ast_nodes.BlockStatement(
+                    [
+                        ast_nodes.ExpressionStatement(
+                            ast_nodes.Assignment(
+                                ast_nodes.Identifier("x"), ast_nodes.IntegerLiteral(1)
+                            )
+                        )
+                    ]
+                ),
+                else_=ast_nodes.BlockStatement(
+                    [
+                        ast_nodes.IfStatement(
+                            condition=ast_nodes.InfixOperation(
+                                ast_nodes.Identifier("x"),
+                                Operator.NOT_EQ,
+                                ast_nodes.IntegerLiteral(0),
+                            ),
+                            then=ast_nodes.BlockStatement(
+                                [
+                                    ast_nodes.ExpressionStatement(
+                                        ast_nodes.Assignment(
+                                            ast_nodes.Identifier("x"), ast_nodes.IntegerLiteral(2)
+                                        )
+                                    )
+                                ]
+                            ),
+                            else_=ast_nodes.BlockStatement(
+                                [
+                                    ast_nodes.ExpressionStatement(
+                                        ast_nodes.Assignment(
+                                            ast_nodes.Identifier("x"), ast_nodes.IntegerLiteral(3)
+                                        )
+                                    )
+                                ]
+                            ),
+                        ),
+                    ]
+                ),
+            ),
+        ],
+        Scope(
+            {"x": VarEntry(value_types.Int(0), True, value_types.Type(value_types.Int))}, STD_LIB
+        ),
+        value_types.Int(3),
     ),
 ]
