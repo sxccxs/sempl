@@ -3,7 +3,8 @@ import pytest
 from result import is_ok
 
 from src.ast import ast_nodes
-from src.evaluation.evaluator import STD_LIB, Evaluator
+from src.evaluation.evaluator import Evaluator
+from src.evaluation.std_lib import STD_LIB
 from src.evaluation.values import consts, value_types
 from src.evaluation.values.scope import FuncEntry, Scope, VarEntry
 from src.evaluation.values.value_base import Value
@@ -11,12 +12,17 @@ from src.parser.interfaces import IParser
 from src.parser.types import Operator
 from tests.mock.parser_mock import ParserMock
 from tests.static.eval_tests_data import (
-    SINGLE_VALID_COMPARISON_AND_EXPECTED, SINGLE_VALID_FUNC_CALL_AND_EXPECTED,
+    SINGLE_VALID_COMPARISON_AND_EXPECTED,
+    SINGLE_VALID_FUNC_CALL_AND_EXPECTED,
     SINGLE_VALID_FUNC_DEF_AND_EXPECTED,
-    SINGLE_VALID_INFIX_OPERATION_AND_EXPECTED, SINGLE_VALID_LET_AND_EXPECTED)
-from tests.utils.payloads import (ExpectedEvaluatedFuncCall,
-                                  ExpectedEvaluatedFunction,
-                                  ExpectedEvaluatedLet)
+    SINGLE_VALID_INFIX_OPERATION_AND_EXPECTED,
+    SINGLE_VALID_LET_AND_EXPECTED,
+)
+from tests.utils.payloads import (
+    ExpectedEvaluatedFuncCall,
+    ExpectedEvaluatedFunction,
+    ExpectedEvaluatedLet,
+)
 from tests.utils.types import YieldFixture
 
 
@@ -35,15 +41,15 @@ def scope() -> YieldFixture[Scope]:
 
 
 @pytest.fixture
-def evaluator(parser_mock: IParser, scope: Scope) -> YieldFixture[Evaluator]:
-    """Creates evaluator with required parser and scope."""
-    yield Evaluator(parser_mock, scope)
+def evaluator(scope: Scope) -> YieldFixture[Evaluator]:
+    """Creates evaluator with required scope."""
+    yield Evaluator(scope)
 
 
 @pytest.fixture
-def ok_eval_res(evaluator: Evaluator) -> YieldFixture[Value]:
-    """Gets ok value from evaluation result."""
-    result = evaluator.evaluate()
+def ok_eval_res(parser_mock: IParser, evaluator: Evaluator) -> YieldFixture[Value]:
+    """Gets ok value from evaluation result with parser mock."""
+    result = evaluator.evaluate(parser_mock)
     assert is_ok(result), "Evaluation unexpetedly failed."
     yield result.ok_value
 
@@ -69,38 +75,8 @@ class TestEvaluatorTg:
         Assert: Returned value has value_type of ValueType.INT.
         Assert: Returned value has expected value.
         """
-        assert isinstance(ok_eval_res, value_types.Integer), "Result is of invalid type."
-        # assert ok_eval_res.value_type == ValueType.INT, "Invalid result's type."
+        assert isinstance(ok_eval_res, value_types.Int), "Result is of invalid type."
         assert ok_eval_res.value == expected, "Invalid result value."
-
-    @pytest.mark.parametrize(
-        ("parser_mock", "expected"),
-        [
-            ([ast_nodes.BooleanLiteral(True)], True),
-            ([ast_nodes.BooleanLiteral(False)], False),
-        ],
-        indirect=["parser_mock"],
-    )
-    def test_eval_valid_boolean_expression(self, ok_eval_res: Value, expected: bool) -> None:
-        """
-        Tests evaluation of program with one boolean literal.
-
-        Arrange: Provide statements to Parser Mock.
-
-        Act: Evaluate program from parser.
-        Assert: No error returned.
-        Assert: Returned value is of type Boolean.
-        Assert: Returned value has value_type of ValueType.BOOL.
-        Assert: Returned value has expected value.
-        Assert: The correct constant object is used.
-        """
-        assert isinstance(ok_eval_res, value_types.Boolean), "Evaluated is of invalid type."
-        # assert ok_eval_res.value_type == ValueType.BOOL, "Invalid evaluated's type."
-        assert ok_eval_res.value == expected, "Invalid evaluated value."
-        if ok_eval_res.value:
-            assert ok_eval_res is consts.TrueFalse.TRUE.value, "Invalid True object."
-        else:
-            assert ok_eval_res is consts.TrueFalse.FALSE.value, "Invalid False object."
 
     @pytest.mark.parametrize(
         ("parser_mock", "expected"),
@@ -123,7 +99,6 @@ class TestEvaluatorTg:
         Assert: Returned value has expected value.
         """
         assert isinstance(ok_eval_res, value_types.Float), "Evaluated is of invalid type."
-        # assert ok_eval_res.value_type == ValueType.FLOAT, "Invalid evaluated's type."
         assert ok_eval_res.value == expected, "Invalid evaluated value."
 
     @pytest.mark.parametrize(
@@ -131,11 +106,11 @@ class TestEvaluatorTg:
         [
             (
                 [ast_nodes.PrefixOperation(Operator.MINUS, ast_nodes.IntegerLiteral(5))],
-                value_types.Integer(-5),
+                value_types.Int(-5),
             ),
             (
                 [ast_nodes.PrefixOperation(Operator.MINUS, ast_nodes.IntegerLiteral(0))],
-                value_types.Integer(0),
+                value_types.Int(0),
             ),
             (
                 [ast_nodes.PrefixOperation(Operator.MINUS, ast_nodes.FloatLiteral(0.3))],
@@ -167,11 +142,11 @@ class TestEvaluatorTg:
         [
             (
                 [ast_nodes.PrefixOperation(Operator.PLUS, ast_nodes.IntegerLiteral(5))],
-                value_types.Integer(5),
+                value_types.Int(5),
             ),
             (
                 [ast_nodes.PrefixOperation(Operator.PLUS, ast_nodes.IntegerLiteral(0))],
-                value_types.Integer(0),
+                value_types.Int(0),
             ),
             (
                 [ast_nodes.PrefixOperation(Operator.PLUS, ast_nodes.FloatLiteral(0.3))],

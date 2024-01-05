@@ -16,7 +16,7 @@ class NoEffect(Value):
 
 
 @dataclass(frozen=True)
-class Integer(NumericValue):
+class Int(NumericValue):
     value: int
 
     def __str__(self) -> str:
@@ -24,7 +24,7 @@ class Integer(NumericValue):
 
 
 @dataclass(frozen=True)
-class Boolean(ValuedValue):
+class Bool(ValuedValue):
     value: bool
 
     def __str__(self) -> str:
@@ -44,7 +44,7 @@ class Type(ValuedValue):
     value: type[Value]
 
     def __str__(self) -> str:
-        return str(self.value)
+        return str(self.value.__name__)
 
 
 @dataclass(frozen=True)

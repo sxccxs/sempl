@@ -5,7 +5,8 @@ from typing import Self, TextIO
 
 from result import Err, Ok
 
-from src.ast.ast_nodes import Program
+from src.evaluation.evaluator import Evaluator
+from src.evaluation.values.value_types import NoEffect
 from src.lexer.lexer import Lexer
 from src.parser.parser import Parser
 from src.repl.structures.payloads import BracesStorage
@@ -15,7 +16,7 @@ from src.repl.structures.payloads import BracesStorage
 class REPL:
     """Implements basic read-evaluate-print loop."""
 
-    __slots__ = ("in_stream", "out_stream", "prompt_in", "prompt_out", "prompt_block")
+    __slots__ = ("evaluator", "in_stream", "out_stream", "prompt_in", "prompt_out", "prompt_block")
 
     def __init__(
         self,
@@ -35,6 +36,7 @@ class REPL:
             prompt_block (str, optional): Intput prefix in the multiline code block.
             Defaults to "<<<".
         """
+        self.evaluator = Evaluator()
         self.in_stream = in_stream
         self.out_stream = out_stream
         self.prompt_in = prompt_in
@@ -88,13 +90,13 @@ class REPL:
         self.writeln("REPL started.")
         while True:
             line_stream = StringIO(self._read_valid_code_block())
-            lexer = Lexer(line_stream)
-            parser = Parser(lexer)
-            match parser.parse_program():
+            match self.evaluator.evaluate(Parser(Lexer(line_stream))):
                 case Err(err):
-                    self.writeln(f"Unexpected error while parsing: {err}")
-                case Ok(program):
-                    self._write_program(program)
+                    self._write_error(err)
+                case Ok(NoEffect()):
+                    pass
+                case Ok(value):
+                    self.writeln(str(value))
 
     def __enter__(self) -> Self:
         return self
@@ -130,9 +132,10 @@ class REPL:
 
         return ss.getvalue()
 
-    def _write_program(self, program: Program) -> None:
-        self.writeln(f"{'-'*5}Parsed result{'-'*5}")
-        for line in str(program).split("\n"):
-            self.writeln(line)
-        self.writeln()
-        self.writeln(f"{'-'*5}Parsed result end{'-'*5}")
+    def _write_error(self, exc: Exception) -> None:
+        if not hasattr(exc, "__notes__"):
+            self.writeln(str(exc))
+            return
+        for note in reversed(exc.__notes__):
+            self.writeln(note)
+        self.writeln(str(exc))

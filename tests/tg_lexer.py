@@ -41,8 +41,6 @@ LITERAL_TOKEN_MAP: dict[str, Token] = {
     "return": Token(TokenType.RETURN, "return"),
     "mut": Token(TokenType.MUT, "mut"),
     "let": Token(TokenType.LET, "let"),
-    "True": Token(TokenType.TRUE, "True"),
-    "False": Token(TokenType.FALSE, "False"),
 }
 
 INPUT_AND_EXPECTED: dict[str, list[Token]] = {

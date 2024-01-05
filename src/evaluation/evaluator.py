@@ -2,33 +2,22 @@ from result import Err, Ok, Result
 
 from src.evaluation import sub_evaluators
 from src.evaluation.errors import EvaluationError
-from src.evaluation.values import value_types
-from src.evaluation.values.consts import SINGULARITY
-from src.evaluation.values.scope import Scope, TypeEntry, VarEntry
+from src.evaluation.std_lib import STD_LIB
+from src.evaluation.values.scope import Scope
 from src.evaluation.values.value_base import Value
 from src.parser.errors import ParsingError
 from src.parser.interfaces import IParser
 
-STD_LIB = Scope(
-    {
-        "int": TypeEntry(value_types.Type(value_types.Integer)),
-        "float": TypeEntry(value_types.Type(value_types.Float)),
-        "Singularity": TypeEntry(value_types.Type(value_types.Singularity)),
-        "singularity": VarEntry(SINGULARITY, False, value_types.Type(value_types.Singularity)),
-    }
-)
-
 
 class Evaluator:
-    __slots__ = ("parser", "scope")
+    __slots__ = "scope"
 
-    def __init__(self, parser: IParser, scope: Scope = STD_LIB) -> None:
-        self.parser = parser
+    def __init__(self, scope: Scope = STD_LIB) -> None:
         self.scope = Scope(scope.store.copy())
 
-    def evaluate(self) -> Result[Value, EvaluationError | ParsingError]:
+    def evaluate(self, parser: IParser) -> Result[Value, EvaluationError | ParsingError]:
         """Evaluates program from saved parser with std lib."""
-        match self.parser.parse_program():
+        match parser.parse_program():
             case Err() as err:
                 return err
             case Ok(value):

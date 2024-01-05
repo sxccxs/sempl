@@ -1,6 +1,6 @@
 from src.ast import ast_nodes
 from src.ast.abstract import Statement
-from src.evaluation.evaluator import STD_LIB
+from src.evaluation.std_lib import STD_LIB
 from src.evaluation.values import value_types
 from src.evaluation.values.consts import TrueFalse
 from src.evaluation.values.scope import FuncEntry, FuncParam, Scope
@@ -32,7 +32,7 @@ SINGLE_VALID_INFIX_OPERATION_AND_EXPECTED: list[tuple[list[Statement], Value]] =
                 )
             )
         ],
-        value_types.Integer(5),
+        value_types.Int(5),
     ),
     (
         [
@@ -64,7 +64,7 @@ SINGLE_VALID_INFIX_OPERATION_AND_EXPECTED: list[tuple[list[Statement], Value]] =
                 )
             )
         ],
-        value_types.Integer(7),
+        value_types.Int(7),
     ),
     (
         [
@@ -105,9 +105,9 @@ SINGLE_VALID_COMPARISON_AND_EXPECTED: list[tuple[list[Statement], TrueFalse]] = 
         [
             ast_nodes.ExpressionStatement(
                 expression=ast_nodes.InfixOperation(
-                    left=ast_nodes.BooleanLiteral(value=True),
+                    left=ast_nodes.Identifier(str(TrueFalse.TRUE.value)),
                     operator=Operator.EQ,
-                    right=ast_nodes.BooleanLiteral(value=True),
+                    right=ast_nodes.Identifier(str(TrueFalse.TRUE.value)),
                 )
             )
         ],
@@ -117,9 +117,9 @@ SINGLE_VALID_COMPARISON_AND_EXPECTED: list[tuple[list[Statement], TrueFalse]] = 
         [
             ast_nodes.ExpressionStatement(
                 expression=ast_nodes.InfixOperation(
-                    left=ast_nodes.BooleanLiteral(value=False),
+                    left=ast_nodes.Identifier(str(TrueFalse.FALSE.value)),
                     operator=Operator.EQ,
-                    right=ast_nodes.BooleanLiteral(value=False),
+                    right=ast_nodes.Identifier(str(TrueFalse.FALSE.value)),
                 )
             )
         ],
@@ -129,9 +129,9 @@ SINGLE_VALID_COMPARISON_AND_EXPECTED: list[tuple[list[Statement], TrueFalse]] = 
         [
             ast_nodes.ExpressionStatement(
                 expression=ast_nodes.InfixOperation(
-                    left=ast_nodes.BooleanLiteral(value=True),
+                    left=ast_nodes.Identifier(str(TrueFalse.TRUE.value)),
                     operator=Operator.EQ,
-                    right=ast_nodes.BooleanLiteral(value=False),
+                    right=ast_nodes.Identifier(str(TrueFalse.FALSE.value)),
                 )
             )
         ],
@@ -141,9 +141,9 @@ SINGLE_VALID_COMPARISON_AND_EXPECTED: list[tuple[list[Statement], TrueFalse]] = 
         [
             ast_nodes.ExpressionStatement(
                 expression=ast_nodes.InfixOperation(
-                    left=ast_nodes.BooleanLiteral(value=True),
+                    left=ast_nodes.Identifier(str(TrueFalse.TRUE.value)),
                     operator=Operator.NOT_EQ,
-                    right=ast_nodes.BooleanLiteral(value=False),
+                    right=ast_nodes.Identifier(str(TrueFalse.FALSE.value)),
                 )
             )
         ],
@@ -159,7 +159,7 @@ SINGLE_VALID_COMPARISON_AND_EXPECTED: list[tuple[list[Statement], TrueFalse]] = 
                         right=ast_nodes.IntegerLiteral(value=2),
                     ),
                     operator=Operator.NOT_EQ,
-                    right=ast_nodes.BooleanLiteral(value=True),
+                    right=ast_nodes.Identifier(str(TrueFalse.TRUE.value)),
                 )
             )
         ],
@@ -169,7 +169,7 @@ SINGLE_VALID_COMPARISON_AND_EXPECTED: list[tuple[list[Statement], TrueFalse]] = 
         [
             ast_nodes.ExpressionStatement(
                 expression=ast_nodes.InfixOperation(
-                    left=ast_nodes.BooleanLiteral(value=False),
+                    left=ast_nodes.Identifier(str(TrueFalse.FALSE.value)),
                     operator=Operator.EQ,
                     right=ast_nodes.InfixOperation(
                         left=ast_nodes.IntegerLiteral(value=2),
@@ -200,18 +200,18 @@ SINGLE_VALID_LET_AND_EXPECTED: list[tuple[list[Statement], ExpectedEvaluatedLet]
         [
             ast_nodes.LetStatement(
                 is_mut=True,
-                var_type=ast_nodes.Identifier(value="int"),
+                var_type=ast_nodes.Identifier(value="Int"),
                 var_name=ast_nodes.Identifier(value="x"),
                 var_value=ast_nodes.IntegerLiteral(value=10),
             )
         ],
-        ExpectedEvaluatedLet("x", value_types.Integer, True, value_types.Integer(10)),
+        ExpectedEvaluatedLet("x", value_types.Int, True, value_types.Int(10)),
     ),
     (
         [
             ast_nodes.LetStatement(
                 is_mut=False,
-                var_type=ast_nodes.Identifier(value="float"),
+                var_type=ast_nodes.Identifier(value="Float"),
                 var_name=ast_nodes.Identifier(value="my_variable"),
                 var_value=ast_nodes.InfixOperation(
                     left=ast_nodes.FloatLiteral(value=5.5),
@@ -232,12 +232,12 @@ SINGLE_VALID_FUNC_DEF_AND_EXPECTED: list[tuple[list[Statement], ExpectedEvaluate
                 parameters=[
                     ast_nodes.FuncParameter(
                         name=ast_nodes.Identifier(value="a"),
-                        type=ast_nodes.Identifier(value="int"),
+                        type=ast_nodes.Identifier(value="Int"),
                         default_value=None,
                     ),
                     ast_nodes.FuncParameter(
                         name=ast_nodes.Identifier(value="b"),
-                        type=ast_nodes.Identifier(value="float"),
+                        type=ast_nodes.Identifier(value="Float"),
                         default_value=ast_nodes.FloatLiteral(value=10.0),
                     ),
                 ],
@@ -249,7 +249,7 @@ SINGLE_VALID_FUNC_DEF_AND_EXPECTED: list[tuple[list[Statement], ExpectedEvaluate
             "func",
             value_types.Singularity,
             [
-                ExpectedEvaluatedFuncParam("a", value_types.Integer, None),
+                ExpectedEvaluatedFuncParam("a", value_types.Int, None),
                 ExpectedEvaluatedFuncParam("b", value_types.Float, value_types.Float(10.0)),
             ],
             [],
@@ -273,11 +273,11 @@ SINGLE_VALID_FUNC_DEF_AND_EXPECTED: list[tuple[list[Statement], ExpectedEvaluate
                 parameters=[
                     ast_nodes.FuncParameter(
                         name=ast_nodes.Identifier(value="num"),
-                        type=ast_nodes.Identifier(value="int"),
+                        type=ast_nodes.Identifier(value="Int"),
                         default_value=ast_nodes.IntegerLiteral(value=10),
                     )
                 ],
-                return_type=ast_nodes.Identifier(value="int"),
+                return_type=ast_nodes.Identifier(value="Int"),
                 body=ast_nodes.BlockStatement(
                     statements=[
                         ast_nodes.ReturnStatement(return_value=ast_nodes.Identifier(value="num"))
@@ -287,8 +287,8 @@ SINGLE_VALID_FUNC_DEF_AND_EXPECTED: list[tuple[list[Statement], ExpectedEvaluate
         ],
         ExpectedEvaluatedFunction(
             "x__x",
-            value_types.Integer,
-            [ExpectedEvaluatedFuncParam("num", value_types.Integer, value_types.Integer(10))],
+            value_types.Int,
+            [ExpectedEvaluatedFuncParam("num", value_types.Int, value_types.Int(10))],
             [ast_nodes.ReturnStatement(return_value=ast_nodes.Identifier(value="num"))],
         ),
     ),
@@ -312,12 +312,12 @@ SINGLE_VALID_FUNC_CALL_AND_EXPECTED: list[
                     ast_nodes.BlockStatement(
                         [ast_nodes.ReturnStatement(ast_nodes.IntegerLiteral(10))]
                     ),
-                    value_types.Type(value_types.Integer),
+                    value_types.Type(value_types.Int),
                 )
             },
             STD_LIB,
         ),
-        ExpectedEvaluatedFuncCall("x", value_types.Integer(10)),
+        ExpectedEvaluatedFuncCall("x", value_types.Int(10)),
     ),
     (
         [
@@ -331,16 +331,16 @@ SINGLE_VALID_FUNC_CALL_AND_EXPECTED: list[
         Scope(
             {
                 "num": FuncEntry(
-                    [FuncParam("x", value_types.Type(value_types.Integer), None)],
+                    [FuncParam("x", value_types.Type(value_types.Int), None)],
                     ast_nodes.BlockStatement(
                         [ast_nodes.ReturnStatement(ast_nodes.Identifier("x"))]
                     ),
-                    value_types.Type(value_types.Integer),
+                    value_types.Type(value_types.Int),
                 )
             },
             STD_LIB,
         ),
-        ExpectedEvaluatedFuncCall("num", value_types.Integer(10)),
+        ExpectedEvaluatedFuncCall("num", value_types.Int(10)),
     ),
     (
         [
@@ -354,16 +354,16 @@ SINGLE_VALID_FUNC_CALL_AND_EXPECTED: list[
         Scope(
             {
                 "num": FuncEntry(
-                    [FuncParam("x", value_types.Type(value_types.Integer), value_types.Integer(1))],
+                    [FuncParam("x", value_types.Type(value_types.Int), value_types.Int(1))],
                     ast_nodes.BlockStatement(
                         [ast_nodes.ReturnStatement(ast_nodes.Identifier("x"))]
                     ),
-                    value_types.Type(value_types.Integer),
+                    value_types.Type(value_types.Int),
                 )
             },
             STD_LIB,
         ),
-        ExpectedEvaluatedFuncCall("num", value_types.Integer(10)),
+        ExpectedEvaluatedFuncCall("num", value_types.Int(10)),
     ),
     (
         [
@@ -377,16 +377,16 @@ SINGLE_VALID_FUNC_CALL_AND_EXPECTED: list[
         Scope(
             {
                 "num": FuncEntry(
-                    [FuncParam("x", value_types.Type(value_types.Integer), value_types.Integer(5))],
+                    [FuncParam("x", value_types.Type(value_types.Int), value_types.Int(5))],
                     ast_nodes.BlockStatement(
                         [ast_nodes.ReturnStatement(ast_nodes.Identifier("x"))]
                     ),
-                    value_types.Type(value_types.Integer),
+                    value_types.Type(value_types.Int),
                 )
             },
             STD_LIB,
         ),
-        ExpectedEvaluatedFuncCall("num", value_types.Integer(5)),
+        ExpectedEvaluatedFuncCall("num", value_types.Int(5)),
     ),
     (
         [
@@ -401,7 +401,7 @@ SINGLE_VALID_FUNC_CALL_AND_EXPECTED: list[
             {
                 "num": FuncEntry(
                     [
-                        FuncParam("x", value_types.Type(value_types.Integer), None),
+                        FuncParam("x", value_types.Type(value_types.Int), None),
                         FuncParam("y", value_types.Type(value_types.Float), value_types.Float(0.5)),
                     ],
                     ast_nodes.BlockStatement(

@@ -38,8 +38,6 @@ class TokenType(StrEnum):
 
     # keywords
     FN = auto()
-    TRUE = auto()
-    FALSE = auto()
     LET = auto()
     IF = auto()
     ELSE = auto()
@@ -53,8 +51,6 @@ class Token(NamedTuple):
 
 
 class Keyword(StrEnum):
-    TRUE = "True"
-    FALSE = "False"
     LET = "let"
     IF = "if"
     ELSE = "else"
@@ -64,8 +60,6 @@ class Keyword(StrEnum):
 
 
 KEYWORDS: dict[str, TokenType] = {
-    Keyword.TRUE.value: TokenType.TRUE,
-    Keyword.FALSE.value: TokenType.FALSE,
     Keyword.LET.value: TokenType.LET,
     Keyword.IF.value: TokenType.IF,
     Keyword.ELSE.value: TokenType.ELSE,

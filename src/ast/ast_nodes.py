@@ -26,14 +26,6 @@ class Identifier(Expression):
 
 
 @dataclass(slots=True)
-class BooleanLiteral(Expression):
-    value: bool
-
-    def __str__(self) -> str:
-        return Keyword.TRUE.value if self.value else Keyword.FALSE.value
-
-
-@dataclass(slots=True)
 class IntegerLiteral(Expression):
     value: int
 

@@ -8,8 +8,8 @@ from src.evaluation.values import value_types
 class TrueFalse(Enum):
     """The only two True and False constants"""
 
-    TRUE = value_types.Boolean(True)
-    FALSE = value_types.Boolean(False)
+    TRUE = value_types.Bool(True)
+    FALSE = value_types.Bool(False)
 
     @classmethod
     def from_bool(cls, value: bool) -> TrueFalse:

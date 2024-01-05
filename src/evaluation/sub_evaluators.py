@@ -28,11 +28,9 @@ def evaluate(node: ASTNode, scope: Scope) -> Result[Value, EvaluationError]:
     """
     match node:
         case ast_nodes.IntegerLiteral():
-            return Ok(value_types.Integer(node.value))
+            return Ok(value_types.Int(node.value))
         case ast_nodes.FloatLiteral():
             return Ok(value_types.Float(node.value))
-        case ast_nodes.BooleanLiteral():
-            return Ok(consts.TrueFalse.from_bool(node.value).value)
         case ast_nodes.Program():
             match evaluate_statements(node.statements, scope):
                 case Err() as err:
@@ -167,8 +165,8 @@ def evaluate_prefix_expression(
 def evaluate_prefix_minus_expression(operand: Value) -> Result[Value, EvaluationError]:
     """Applies unary minus on given operand if possible."""
     match operand:
-        case value_types.Integer() as i:
-            return Ok(value_types.Integer(-1 * i.value))
+        case value_types.Int() as i:
+            return Ok(value_types.Int(-1 * i.value))
         case value_types.Float() as f:
             return Ok(value_types.Float(-1 * f.value))
         case _:
@@ -178,7 +176,7 @@ def evaluate_prefix_minus_expression(operand: Value) -> Result[Value, Evaluation
 def evaluate_prefix_plus_expression(operand: Value) -> Result[Value, EvaluationError]:
     """Applies unary plus on given operand if possible."""
     match operand:
-        case value_types.Integer() as i:
+        case value_types.Int() as i:
             return Ok(i)
         case value_types.Float() as f:
             return Ok(f)
@@ -198,11 +196,11 @@ def evaluate_infix_expression(
         case _:
             pass
     match (left_operand, right_operand):
-        case (value_types.Integer(), value_types.Integer()):
+        case (value_types.Int(), value_types.Int()):
             return evaluate_integer_infix_expression(left_operand, operator, right_operand)
         case (
-            value_types.Integer() | value_types.Float(),
-            value_types.Integer() | value_types.Float(),
+            value_types.Int() | value_types.Float(),
+            value_types.Int() | value_types.Float(),
         ):
             return evaluate_float_infix_expression(left_operand, operator, right_operand)
         case _:
@@ -210,7 +208,7 @@ def evaluate_infix_expression(
 
 
 def evaluate_integer_infix_expression(
-    left_operand: value_types.Integer, operator: Operator, right_operand: value_types.Integer
+    left_operand: value_types.Int, operator: Operator, right_operand: value_types.Int
 ) -> Result[Value, EvaluationError]:
     """
     Applies given binary operator on given integer operands,
@@ -220,23 +218,23 @@ def evaluate_integer_infix_expression(
     right = right_operand.value
     match operator:
         case Operator.PLUS:
-            return Ok(value_types.Integer(left + right))
+            return Ok(value_types.Int(left + right))
         case Operator.MINUS:
-            return Ok(value_types.Integer(left - right))
+            return Ok(value_types.Int(left - right))
         case Operator.MULT:
-            return Ok(value_types.Integer(left * right))
+            return Ok(value_types.Int(left * right))
         case Operator.DIV:
             if right != 0:
-                return Ok(value_types.Integer(left // right))
+                return Ok(value_types.Int(left // right))
             return Err(EvaluationError("Can't divide by zero."))
         case _:
             return Err(errors.UnsuportedInfixOperation(left_operand, operator, right_operand))
 
 
 def evaluate_float_infix_expression(
-    left_operand: value_types.Float | value_types.Integer,
+    left_operand: value_types.Float | value_types.Int,
     operator: Operator,
-    right_operand: value_types.Float | value_types.Integer,
+    right_operand: value_types.Float | value_types.Int,
 ) -> Result[Value, EvaluationError]:
     """
     Applies given binary operator on given integer/float operands,
@@ -261,7 +259,7 @@ def evaluate_float_infix_expression(
 
 def evaluate_equality_expression(
     left: Value, operator: Literal[Operator.EQ] | Literal[Operator.NOT_EQ], right: Value
-) -> Result[value_types.Boolean, EvaluationError]:
+) -> Result[value_types.Bool, EvaluationError]:
     """Checks equality/not-equalit of to given operands if possible."""
     match (left, right):
         case (ValuedValue(), ValuedValue()):
@@ -283,7 +281,7 @@ def evaluate_comparison_expression(
     | Literal[Operator.LT]
     | Literal[Operator.LTEQ],
     right: Value,
-) -> Result[value_types.Boolean, EvaluationError]:
+) -> Result[value_types.Bool, EvaluationError]:
     """Compares two given operands with given operator if possible."""
     match (left, right):
         case (NumericValue(), NumericValue()):
@@ -431,9 +429,7 @@ def evaluate_function_call(
         case _:
             return Err(errors.EvaluationError(f"Expression `{node.callable}` is not callable."))
 
-    err_with_note_ = partial(
-        err_with_note, note=f"function `{name}` call"
-    )
+    err_with_note_ = partial(err_with_note, note=f"function `{name}` call")
     if (func := scope.get(name)) is None or not isinstance(func, FuncEntry):
         return err_with_note_(errors.EvaluationError(f"Function `{name}` was not defined."))
 
@@ -456,8 +452,8 @@ def evaluate_function_call(
             match evaluate_no_return(func, value):
                 case Err() as err:
                     return err_with_note_(err)
-                case Ok(val):
-                    ret_value = value
+                case Ok(no_return_val):
+                    ret_value = no_return_val
 
     if not isinstance(ret_value, func.ret_type.value):
         return err_with_note_(errors.InvalidType(ret_value, func.ret_type.value))
@@ -498,9 +494,7 @@ def bind_call_arguments(
     return Ok(None)
 
 
-def evaluate_no_return(
-    func: FuncEntry, value: Value
-) -> Result[value_types.ReturnValue, EvaluationError]:
+def evaluate_no_return(func: FuncEntry, value: Value) -> Result[Value, EvaluationError]:
     """
     Checks if given function is valid without a return statement.
     If so, evaluates it's return.
@@ -510,7 +504,7 @@ def evaluate_no_return(
 
     match func.ret_type.value:
         case value_types.Singularity:
-            return Ok(value_types.ReturnValue(consts.SINGULARITY))
+            return Ok(consts.SINGULARITY)
         case _:
             return Err(
                 EvaluationError(f"Function has to return a value of type `{func.ret_type.value}`")
