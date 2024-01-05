@@ -47,12 +47,14 @@ def scope() -> YieldFixture[Scope]:
 @pytest.fixture
 def evaluator(scope: Scope) -> YieldFixture[Evaluator]:
     """Creates evaluator with required scope."""
+    print(scope)
     yield Evaluator(scope)
 
 
 @pytest.fixture
 def ok_eval_res(parser_mock: IParser, evaluator: Evaluator) -> YieldFixture[Value]:
     """Gets ok value from evaluation result with parser mock."""
+    print(evaluator.scope)
     result = evaluator.evaluate(parser_mock)
     assert is_ok(result), "Evaluation unexpetedly failed."
     yield result.ok_value
@@ -373,9 +375,7 @@ class TestEvaluatorTg:
         SINGLE_VALID_IF_AND_EXPECTED,
         indirect=["parser_mock"],
     )
-    def test_eval_valid_if(
-        self, ok_eval_res: Value, evaluator: Evaluator, expected: ExpectedEvaluatedAssignment
-    ) -> None:
+    def test_eval_valid_if(self, ok_eval_res: Value, evaluator: Evaluator, expected: Value) -> None:
         """
         Tests evaluation of program with one valid let statement.
 
@@ -392,7 +392,7 @@ class TestEvaluatorTg:
         Assert: Entry variable value is equal to expected.
         """
         assert ok_eval_res is consts.NO_EFFECT, "Invalid retuned value."
-        variable_entry = evaluator.scope.get(expected.var_name)
+        variable_entry = evaluator.scope.get("x")
         assert variable_entry is not None, "Value was not stored."
         assert variable_entry.value is not None, "Invalid entry value."
         assert isinstance(variable_entry, VarEntry), "Value was stored as a wrond entry type."

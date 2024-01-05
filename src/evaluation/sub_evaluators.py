@@ -83,6 +83,8 @@ def evaluate(node: ASTNode, scope: Scope) -> Result[Value, EvaluationError]:
             return evaluate_function_call(node, scope)
         case ast_nodes.Assignment():
             return evaluate_assignment(node, scope)
+        case ast_nodes.IfStatement():
+            return evaluate_if_statement(node, scope)
         case _:
             return Err(errors.UnsuportedNodeError(node))
 
@@ -140,6 +142,23 @@ def evaluate_let_statement(
         return err_with_note_(errors.TypeMistmatchError(var_value, var_type.value))
     scope[node.var_name.value] = VarEntry(var_value, node.is_mut, var_type)
     return Ok(consts.NO_EFFECT)
+
+
+def evaluate_if_statement(
+    node: ast_nodes.IfStatement, scope: Scope
+) -> Result[Value, EvaluationError]:
+    """Evaluates given if[-else] statement in provided scope if possible."""
+    match evaluate(node.condition, scope):
+        case Err() as err:
+            return err
+        case Ok(value_types.Bool(True)):
+            return evaluate(node.then, scope)
+        case Ok(value_types.Bool(False)):
+            if node.else_ is None:
+                return Ok(consts.NO_EFFECT)
+            return evaluate(node.else_, scope)
+        case Ok(value):
+            return Err(errors.TypeMistmatchError(value, value_types.Bool))
 
 
 def evaluate_indetifier(node: ast_nodes.Identifier, scope: Scope) -> Result[Value, EvaluationError]:
