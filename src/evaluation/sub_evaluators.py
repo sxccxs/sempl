@@ -154,6 +154,7 @@ def evaluate_indetifier(node: ast_nodes.Identifier, scope: Scope) -> Result[Valu
 
 
 def evaluate_assignment(node: ast_nodes.Assignment, scope: Scope) -> Result[Value, EvaluationError]:
+    """Evaluates given assignment in provided scope if possible."""
     if not isinstance(node.assignee, ast_nodes.Identifier):
         return Err(EvaluationError("Left part of assignment must be an identifier."))
     name = node.assignee.value
