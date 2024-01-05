@@ -5,7 +5,7 @@ from src.ast import ast_nodes
 from src.lexer.interfaces import ILexer
 from src.lexer.tokens import Token, TokenType
 from src.parser import expr_sub_parsers, stmt_sub_parsers
-from src.parser.errors import ParsingError
+from src.errors.parser_errors import ParsingError
 from src.parser.parser_base import BaseParser
 from src.parser.types import InfixParserType, Precedence, PrefixParserType
 

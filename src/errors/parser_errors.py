@@ -1,9 +1,10 @@
 """Parsing errors."""
 from src.lexer.tokens import TokenType
+from src.errors.error import Error
 
 
-class ParsingError(Exception):
-    """Base exception type for parsing."""
+class ParsingError(Error):
+    """Base error type for parsing."""
 
 
 class StatementValidationError(ParsingError):

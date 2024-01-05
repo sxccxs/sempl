@@ -7,10 +7,10 @@ from result import Err, Ok, Result, is_err
 
 from src.ast import ast_nodes
 from src.ast.abstract import Statement
+from src.errors import parser_errors as errors
+from src.errors.parser_errors import ExpressionValidationError, StatementValidationError
 from src.helpers.result_helpers import err_with_note, results_gather
 from src.lexer.tokens import TokenType
-from src.parser import errors
-from src.parser.errors import ExpressionValidationError, StatementValidationError
 from src.parser.expr_sub_parsers import parse_expression
 from src.parser.parser_base import BaseParser
 from src.parser.types import Precedence
@@ -155,7 +155,7 @@ def parse_if_statement(
     parser.next_token()
     match parse_expression(parser, Precedence.LOWEST):
         case Err(err):
-            return Err(StatementValidationError(err))
+            return Err(err)
         case Ok(expr):
             condition = expr
 

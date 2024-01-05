@@ -6,7 +6,7 @@ from src.ast.abstract import Expression
 from src.helpers.enum_helpers import enum_contains
 from src.helpers.result_helpers import results_gather
 from src.lexer.tokens import TokenType
-from src.parser.errors import (
+from src.errors.parser_errors import (
     ExpressionValidationError,
     InvalidTokenTypeInExpression,
     UnsupportedExpressionError,

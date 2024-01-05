@@ -1,5 +1,6 @@
 """REPL main."""
 from src.repl.repl import REPL
 
-with REPL() as repl:
-    repl.run()
+repl = REPL()
+repl.writeln("REPL started.")
+repl.run()

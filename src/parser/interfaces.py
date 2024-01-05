@@ -5,7 +5,7 @@ from typing import Protocol
 from result import Result
 
 from src.ast import ast_nodes
-from src.parser.errors import ParsingError
+from src.errors.parser_errors import ParsingError
 
 
 # pylint: disable=too-few-public-methods

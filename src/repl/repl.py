@@ -1,11 +1,11 @@
 """REPL."""
 import sys
 from io import StringIO
-from types import TracebackType
-from typing import Self, TextIO
+from typing import TextIO
 
 from result import Err, Ok
 
+from src.errors.error import Error
 from src.evaluation.evaluator import Evaluator
 from src.evaluation.values.value_types import NoEffect
 from src.lexer.lexer import Lexer
@@ -24,18 +24,18 @@ class REPL:
         in_stream: TextIO = sys.stdin,
         out_stream: TextIO = sys.stdout,
         *,
-        prompt_in: str = ">>>",
-        prompt_out: str = "<<<",
-        prompt_block: str = "...",
+        prompt_in: str = ">>> ",
+        prompt_out: str = "<<< ",
+        prompt_block: str = "... ",
     ) -> None:
         """
         Args:
             in_stream (TextIO, optional): Input stream. Defaults to sys.stdin.
             out_stream (TextIO, optional): Output stram. Defaults to sys.stdout.
-            prompt_in (str, optional): Input prefix. Defaults to ">>>".
-            prompt_out (str, optional): Output prefix. Defaults to "<<<".
+            prompt_in (str, optional): Input prefix. Defaults to ">>> ".
+            prompt_out (str, optional): Output prefix. Defaults to "<<< ".
             prompt_block (str, optional): Intput prefix in the multiline code block.
-            Defaults to "<<<".
+            Defaults to "<<< ".
         """
         self.evaluator = Evaluator()
         self.in_stream = in_stream
@@ -54,7 +54,7 @@ class REPL:
         """
         if prefix is None:
             prefix = self.prompt_out
-        self.out_stream.write(f"{prefix} {text}")
+        self.out_stream.write(f"{prefix}{text}")
 
     def writeln(self, text: str = "", *, prefix: str | None = None) -> None:
         """Writes text with output prefix and a new line after to output stream.
@@ -81,14 +81,20 @@ class REPL:
         """
         if prefix is None:
             prefix = self.prompt_in
-        self.out_stream.write(prefix)
-        self.out_stream.write(" ")
+        self.write("", prefix=prefix)
         self.out_stream.flush()
         return self.in_stream.readline()
 
     def run(self) -> None:
-        """Starts read-evaluate-print loop."""
-        self.writeln("REPL started.")
+        """Runs read-evaluate-print loop."""
+        try:
+            self._run()
+        except KeyboardInterrupt:
+            self.writeln(prefix="")
+            self.run()
+
+    def _run(self) -> None:
+        """Runs read-evaluate-print loop without error handling."""
         while True:
             text = self._read_valid_code_block()
             if text == "exit\n":
@@ -96,30 +102,11 @@ class REPL:
             line_stream = StringIO(text)
             match self.evaluator.evaluate(Parser(Lexer(line_stream))):
                 case Err(err):
-                    self._write_error(err)
+                    self._print_error(err)
                 case Ok(NoEffect()):
                     pass
                 case Ok(value):
                     self.writeln(str(value))
-
-    def __enter__(self) -> Self:
-        return self
-
-    def __exit__(
-        self,
-        exc_type: type[BaseException] | None,
-        exc_val: BaseException | None,
-        exc_tb: TracebackType | None,
-    ) -> None:
-        """Exits program with 0 code if received `KeyboardInterupt` exception.
-        Does nothing otherwise.
-        """
-        if exc_type is not KeyboardInterrupt:
-            return
-
-        self.out_stream.write("\n")
-        self.out_stream.flush()
-        sys.exit(0)
 
     def _read_valid_code_block(self) -> str:
         """Reads a block of code, such that all braces are closed."""
@@ -136,10 +123,8 @@ class REPL:
 
         return ss.getvalue()
 
-    def _write_error(self, exc: Exception) -> None:
-        if not hasattr(exc, "__notes__"):
-            self.writeln(str(exc))
-            return
-        for note in reversed(exc.__notes__):
-            self.writeln(note)
-        self.writeln(str(exc))
+    def _print_error(self, error: Error) -> None:
+        self.writeln("-" * (50 + len(self.prompt_out)), prefix="")
+        for line in str(error).split("\n"):
+            self.writeln(line)
+        self.writeln(prefix="")

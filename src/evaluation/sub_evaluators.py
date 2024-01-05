@@ -7,8 +7,8 @@ from result import Err, Ok, Result, do, is_err
 
 from src.ast import ast_nodes
 from src.ast.abstract import ASTNode, Statement
-from src.evaluation import errors
-from src.evaluation.errors import EvaluationError
+from src.errors import evaluator_errors as errors
+from src.errors.evaluator_errors import EvaluationError
 from src.evaluation.values import consts, value_types
 from src.evaluation.values.scope import FuncEntry, FuncParam, Scope, VarEntry
 from src.evaluation.values.value_base import NumericValue, Value, ValuedValue
@@ -135,45 +135,43 @@ def evaluate_let_statement(
         case value_types.Type():
             pass
         case _:
-            return err_with_note_(
-                EvaluationError(f"Expected type identifier, received {type(var_type)}")
-            )
+            return err_with_note_(errors.ExpectedTypeIdentifierError(var_type))
     if not isinstance(var_value, var_type.value):
-        return err_with_note_(errors.InvalidType(var_value, var_type.value))
+        return err_with_note_(errors.TypeMistmatchError(var_value, var_type.value))
     scope[node.var_name.value] = VarEntry(var_value, node.is_mut, var_type)
     return Ok(consts.NO_EFFECT)
 
 
 def evaluate_indetifier(node: ast_nodes.Identifier, scope: Scope) -> Result[Value, EvaluationError]:
-    """Evaluates given identifier if it is defined in provided scope."""
+    """Evaluates given identifier if it is defined in provided scope and has a value."""
     if (entry := scope.get(node.value)) is None:
-        return Err(EvaluationError(f"Identifier `{node.value}` not found."))
+        return Err(errors.NameNotDefinedError(node.value))
     if entry.value is None:
-        return Err(EvaluationError(f"Identifier `{node.value}` can not be used as a value."))
+        return Err(errors.UsageError(node.value, as_what="a value"))
     return Ok(entry.value)
 
 
 def evaluate_assignment(node: ast_nodes.Assignment, scope: Scope) -> Result[Value, EvaluationError]:
     """Evaluates given assignment in provided scope if possible."""
     if not isinstance(node.assignee, ast_nodes.Identifier):
-        return Err(EvaluationError("Left part of assignment must be an identifier."))
+        return Err(errors.ExpectedIdentifierError(node.assignee))
     name = node.assignee.value
     match var := scope.get(name):
         case None:
-            return Err(EvaluationError(f"Identifier `{name}` not found."))
+            return Err(errors.NameNotDefinedError(name))
         case VarEntry():
             pass
         case _:
-            return Err(EvaluationError(f"Identifier `{name}` is not assignable."))
+            return Err(errors.UsageError(name, as_what="an assignable."))
     if not var.is_mut:
-        return Err(EvaluationError(f"Identifier `{name}` is not mutable."))
+        return Err(errors.MutabilityError(name))
     match evaluate(node.value, scope):
         case Err() as err:
             return err
         case Ok(value):
             new_value = value
     if not isinstance(new_value, var.type_value.value):
-        return Err(errors.InvalidType(new_value, var.type_value.value))
+        return Err(errors.TypeMistmatchError(new_value, var.type_value.value))
     var.var_value = new_value
     return Ok(new_value)
 
@@ -255,7 +253,7 @@ def evaluate_integer_infix_expression(
         case Operator.DIV:
             if right != 0:
                 return Ok(value_types.Int(left // right))
-            return Err(EvaluationError("Can't divide by zero."))
+            return Err(errors.DivideByZeroError())
         case _:
             return Err(errors.UnsuportedInfixOperation(left_operand, operator, right_operand))
 
@@ -281,7 +279,7 @@ def evaluate_float_infix_expression(
         case Operator.DIV:
             if right != 0:
                 return Ok(value_types.Float(left / right))
-            return Err(EvaluationError("Can't divide by zero."))
+            return Err(errors.DivideByZeroError())
         case _:
             return Err(errors.UnsuportedInfixOperation(left_operand, operator, right_operand))
 
@@ -357,9 +355,7 @@ def evaluate_function_statement(
         case Ok(value_types.Type() as value):
             type_ = value
         case Ok(value):
-            return err_with_note_(
-                EvaluationError(f"Expected type identifier, received {type(value)}")
-            )
+            return err_with_note_(errors.ExpectedTypeIdentifierError(value))
     scope[node.name.value] = FuncEntry(params, node.body, type_)
     return Ok(consts.NO_EFFECT)
 
@@ -386,7 +382,7 @@ def evaluate_function_parameters(
             case Ok(param):
                 if param.name in params:
                     return err_with_note_(
-                        EvaluationError(
+                        errors.FunctionParameterError(
                             "Function parameters names must be unique. "
                             f"Non-unique name: `{param.name}`."
                         )
@@ -418,13 +414,13 @@ def evaluate_function_parameter(
         case Ok(value_types.Type() as value):
             type_ = value
         case Ok(value):
-            return err_with_note_(
-                EvaluationError(f"Expected type identifier, received {type(value)}")
-            )
+            return err_with_note_(errors.ExpectedTypeIdentifierError(value))
 
     if must_have_default and parameter.default_value is None:
         return err_with_note_(
-            EvaluationError(f"Parameter `{parameter.name.value}` must have a default value.")
+            errors.FunctionParameterError(
+                f"Parameter `{parameter.name.value}` must have a default value."
+            )
         )
 
     if parameter.default_value is None:
@@ -437,7 +433,7 @@ def evaluate_function_parameter(
             default = value
 
     if not isinstance(default, type_.value):
-        return err_with_note_(errors.InvalidType(value, type_.value))
+        return err_with_note_(errors.TypeMistmatchError(value, type_.value))
 
     return Ok(FuncParam(name, type_, default))
 
@@ -456,11 +452,11 @@ def evaluate_function_call(
         case ast_nodes.Identifier():
             name = node.callable.value
         case _:
-            return Err(errors.EvaluationError(f"Expression `{node.callable}` is not callable."))
+            return Err(errors.UsageError(str(node.callable), as_what="a callable."))
 
     err_with_note_ = partial(err_with_note, note=f"function `{name}` call")
     if (func := scope.get(name)) is None or not isinstance(func, FuncEntry):
-        return err_with_note_(errors.EvaluationError(f"Function `{name}` was not defined."))
+        return err_with_note_(errors.NameNotDefinedError(name))
 
     match results_gather(evaluate(arg, scope) for arg in node.arguments):
         case Err() as err:
@@ -469,7 +465,7 @@ def evaluate_function_call(
             args = val
 
     func_scope = Scope.from_outer(scope)
-    if is_err(res := bind_call_arguments(func.parameters, args, func_scope)):
+    if is_err(res := bind_call_arguments(name, func.parameters, args, func_scope)):
         return err_with_note_(res)
 
     match evaluate_statements(func.body.statements, func_scope):
@@ -478,20 +474,20 @@ def evaluate_function_call(
         case Ok(value_types.ReturnValue(value)):
             ret_value = value
         case Ok(value):
-            match evaluate_no_return(func, value):
+            match evaluate_no_return(name, func, value):
                 case Err() as err:
                     return err_with_note_(err)
                 case Ok(no_return_val):
                     ret_value = no_return_val
 
     if not isinstance(ret_value, func.ret_type.value):
-        return err_with_note_(errors.InvalidType(ret_value, func.ret_type.value))
+        return err_with_note_(errors.TypeMistmatchError(ret_value, func.ret_type.value))
 
     return Ok(ret_value)
 
 
 def bind_call_arguments(
-    params: list[FuncParam], args: list[Value], func_scope: Scope
+    func_name: str, params: list[FuncParam], args: list[Value], func_scope: Scope
 ) -> Result[None, EvaluationError]:
     """Binds given arguments to given parameters in provided scope if possible.
 
@@ -502,28 +498,35 @@ def bind_call_arguments(
     """
     if len(args) > len(params):
         return Err(
-            EvaluationError(
-                f"Invalid number of parameters: {len(params)} expected, {len(args)} was given."
+            errors.ArgumentBindingError(
+                f"Invalid number of parameters for function {func_name}: "
+                f"{len(params)} expected, {len(args)} was given."
             )
         )
     for param, arg in zip_longest(params, args, fillvalue=None):
         param = cast(FuncParam, param)
         match arg:
             case None if param.default_value is None:
-                return Err(EvaluationError("Not enough arguments provided."))
+                return Err(
+                    errors.ArgumentBindingError(
+                        f"Not enough arguments provided for function {func_name}."
+                    )
+                )
             case None:
                 param_value: Value = param.default_value  # type: ignore
             case Value() as value:
                 param_value: Value = value
 
         if not isinstance(param_value, param.type_value.value):
-            return Err(errors.InvalidType(param_value, param.type_value.value))
+            return Err(errors.TypeMistmatchError(param_value, param.type_value.value))
         func_scope[param.name] = VarEntry(param_value, True, param.type_value)
 
     return Ok(None)
 
 
-def evaluate_no_return(func: FuncEntry, value: Value) -> Result[Value, EvaluationError]:
+def evaluate_no_return(
+    func_name: str, func: FuncEntry, value: Value
+) -> Result[Value, EvaluationError]:
     """
     Checks if given function is valid without a return statement.
     If so, evaluates it's return.
@@ -535,6 +538,4 @@ def evaluate_no_return(func: FuncEntry, value: Value) -> Result[Value, Evaluatio
         case value_types.Singularity:
             return Ok(consts.SINGULARITY)
         case _:
-            return Err(
-                EvaluationError(f"Function has to return a value of type `{func.ret_type.value}`")
-            )
+            return Err(errors.NoReturnError(func_name, func.ret_type.value))

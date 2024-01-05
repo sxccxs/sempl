@@ -4,10 +4,12 @@ from typing import Iterable, TypeVar, overload
 
 from result import Err, Ok, Result
 
+from src.errors.error import Error
+
 T = TypeVar("T")
 E = TypeVar("E")
 
-Ex = TypeVar("Ex", bound=Exception)
+ErrT = TypeVar("ErrT", bound=Error)
 
 
 @overload
@@ -81,17 +83,41 @@ def results_gather(
 
 
 @overload
-def err_with_note(err: Ex, note: str) -> Err[Ex]:
-    """Adds note to a given exception and returns it as an Err."""
+def err_with_note(err: ErrT, note: str, template: str = "Error in {}.") -> Err[ErrT]:
+    """
+    Creates full note from given template and note,
+    adds it to the given Error and returns it as Err[Error].
+
+    Args:
+        err (ErrT): Error.
+        note (str): Note part.
+        template (str, optional): Note template. Defaults to "Error in {}.".
+    """
 
 
 @overload
-def err_with_note(err: Err[Ex], note: str) -> Err[Ex]:
-    """Adds note to an err_value of given Err and returns as Err."""
+def err_with_note(err: Err[ErrT], note: str, template: str = "Error in {}.") -> Err[ErrT]:
+    """
+    Creates full note from given template and note,
+    adds it to the Error of the given Err[Error] and returns it as Err[Error].
+
+    Args:
+        err (Err[ErrT]): Err[Error].
+        note (str): Note part.
+        template (str, optional): Note template. Defaults to "Error in {}.".
+    """
 
 
-def err_with_note(err: Err[Ex] | Ex, note: str, template: str = "Error in {}.") -> Err[Ex]:
-    """Returns an Err with given note from given templates on the underying exception."""
+def err_with_note(err: Err[ErrT] | ErrT, note: str, template: str = "Error in {}.") -> Err[ErrT]:
+    """
+    Creates full note from given template and note,
+    adds it to the given Error or Err[Error] and returns it as Err[Error].
+
+    Args:
+        err (ErrT | Err[ErrT]): Error or Err[Error].
+        note (str): Note part.
+        template (str, optional): Note template. Defaults to "Error in {}.".
+    """
     exc = err if not isinstance(err, Err) else err.err_value
     exc.add_note(template.format(note))
     return Err(exc)

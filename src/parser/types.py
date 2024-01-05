@@ -5,7 +5,7 @@ from typing import Callable
 from result import Result
 
 from src.ast.abstract import Expression
-from src.parser.errors import ExpressionValidationError
+from src.errors.parser_errors import ExpressionValidationError
 from src.parser.parser_base import BaseParser
 
 PrefixParserType = Callable[[BaseParser], Result[Expression, ExpressionValidationError]]

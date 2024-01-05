@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING
 
 from result import Result
 
+from src.errors.parser_errors import ParsingError
 from src.lexer.tokens import Token, TokenType
-from src.parser.errors import ParsingError
 
 if TYPE_CHECKING:
     from src.ast import ast_nodes
@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 
 class BaseParser(ABC):
     """Base parser class."""
+
     @property
     @abstractmethod
     def current_token(self) -> Token:
