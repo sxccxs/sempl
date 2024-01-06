@@ -8,6 +8,7 @@ from tests.utils.payloads import (
     ExpectedIfStatement,
     ExpectedLetStatement,
     ExpectedParam,
+    ExpectedWhileStatement,
 )
 
 VALID_LET_STATEMENT_TOKENS_AND_EXPECTED: list[tuple[list[Token], ExpectedLetStatement]] = [
@@ -462,6 +463,43 @@ VALID_FUNC_AND_EXPECTED: list[tuple[list[Token], ExpectedFunc]] = [
                     ),
                 ),
                 ast_nodes.ReturnStatement(ast_nodes.Identifier("b")),
+            ],
+        ),
+    ),
+]
+
+VALID_WHILE_STATEMENT_AND_EXPECTED: list[tuple[list[Token], ExpectedWhileStatement]] = [
+    (
+        [
+            Token(TokenType.WHILE, literal="while"),
+            Token(TokenType.IDENT, literal="True"),
+            Token(TokenType.LCURLY, literal="{"),
+            Token(TokenType.ENDL, literal="\n"),
+            Token(TokenType.RCURLY, literal="}"),
+        ],
+        ExpectedWhileStatement(
+            ast_nodes.Identifier("True"),
+            [],
+        ),
+    ),
+    (
+        [
+            Token(TokenType.WHILE, literal="while"),
+            Token(TokenType.IDENT, literal="True"),
+            Token(TokenType.LCURLY, literal="{"),
+            Token(TokenType.ENDL, literal="\n"),
+            Token(TokenType.IDENT, literal="xx"),
+            Token(TokenType.LPAREN, literal="("),
+            Token(TokenType.RPAREN, literal=")"),
+            Token(TokenType.ENDL, literal="\n"),
+            Token(TokenType.RCURLY, literal="}"),
+        ],
+        ExpectedWhileStatement(
+            ast_nodes.Identifier("True"),
+            [
+                ast_nodes.ExpressionStatement(
+                    ast_nodes.CallExpression(ast_nodes.Identifier("xx"), []),
+                )
             ],
         ),
     ),

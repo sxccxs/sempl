@@ -10,9 +10,15 @@ from tests.static.parser_stmt_tests_data import (
     VALID_FUNC_AND_EXPECTED,
     VALID_IF_STATEMENT_AND_EXPECTED,
     VALID_LET_STATEMENT_TOKENS_AND_EXPECTED,
+    VALID_WHILE_STATEMENT_AND_EXPECTED,
 )
 from tests.utils.decorators import n_len_program
-from tests.utils.payloads import ExpectedFunc, ExpectedIfStatement, ExpectedLetStatement
+from tests.utils.payloads import (
+    ExpectedFunc,
+    ExpectedIfStatement,
+    ExpectedLetStatement,
+    ExpectedWhileStatement,
+)
 
 
 class TestParserStatementsTg:
@@ -222,3 +228,34 @@ class TestParserStatementsTg:
                 param.default_value == expected_param.default_value
             ), f"Invalid default value of parameter #{i}."
         assert stmt.body.statements == expected.body, "Invalid statements in function body."
+
+    @pytest.mark.parametrize(
+        ("lexer_mock", "expected"),
+        VALID_WHILE_STATEMENT_AND_EXPECTED,
+        indirect=["lexer_mock"],
+    )
+    @n_len_program(1)
+    def test_single_valid_while_statement(
+        self, ok_len_program: ast_nodes.Program, expected: ExpectedWhileStatement
+    ) -> None:
+        """
+        Tests parser parsing single valid if statement correctly.
+
+        Arrange: Provide tokens to Lexer Mock.
+        Arrange: Create Parser with Lexer Mock.
+
+        Act: Parse program.
+        Assert: No error returned.
+        Assert: Program contains only one statement.
+        Assert: Statement is WhileStatement.
+        Assert: WhileStatement condition is equal to the expected.
+        Assert: WhileStatement actions is equal to the expected.
+        """
+        stmt = ok_len_program.statements[0]
+        assert isinstance(
+            stmt, ast_nodes.WhileStatement
+        ), f"Unexpected statement of type `{type(stmt)}`."
+        assert stmt.condition == expected.condition, "Invalid condition in while statement."
+        assert (
+            stmt.actions.statements == expected.actions_statements
+        ), "Invalid statements in while actions."

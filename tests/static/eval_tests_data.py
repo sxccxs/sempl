@@ -8,6 +8,7 @@ from src.evaluation.values.scope import FuncEntry, FuncParam, Scope, VarEntry
 from src.evaluation.values.value_base import Value
 from src.parser.types import Operator
 from tests.utils.payloads import (
+    ExpectedChangedVariableValue,
     ExpectedEvaluatedAssignment,
     ExpectedEvaluatedFuncCall,
     ExpectedEvaluatedFuncParam,
@@ -452,7 +453,7 @@ SINGLE_VALID_ASSIGN_AND_EXPECTED: list[
     ),
 ]
 
-SINGLE_VALID_IF_AND_EXPECTED: list[tuple[list[Statement], Scope, Value]] = [
+SINGLE_VALID_IF_AND_EXPECTED: list[tuple[list[Statement], Scope, ExpectedChangedVariableValue]] = [
     (
         [
             ast_nodes.IfStatement(
@@ -472,7 +473,7 @@ SINGLE_VALID_IF_AND_EXPECTED: list[tuple[list[Statement], Scope, Value]] = [
         Scope(
             {"x": VarEntry(value_types.Int(0), True, value_types.Type(value_types.Int))}, STD_LIB
         ),
-        value_types.Int(1),
+        ExpectedChangedVariableValue("x", value_types.Int(1)),
     ),
     (
         [
@@ -493,7 +494,7 @@ SINGLE_VALID_IF_AND_EXPECTED: list[tuple[list[Statement], Scope, Value]] = [
         Scope(
             {"x": VarEntry(value_types.Int(0), True, value_types.Type(value_types.Int))}, STD_LIB
         ),
-        value_types.Int(0),
+        ExpectedChangedVariableValue("x", value_types.Int(0)),
     ),
     (
         [
@@ -522,7 +523,7 @@ SINGLE_VALID_IF_AND_EXPECTED: list[tuple[list[Statement], Scope, Value]] = [
         Scope(
             {"x": VarEntry(value_types.Int(0), True, value_types.Type(value_types.Int))}, STD_LIB
         ),
-        value_types.Int(2),
+        ExpectedChangedVariableValue("x", value_types.Int(2)),
     ),
     (
         [
@@ -551,7 +552,7 @@ SINGLE_VALID_IF_AND_EXPECTED: list[tuple[list[Statement], Scope, Value]] = [
         Scope(
             {"x": VarEntry(value_types.Int(0), True, value_types.Type(value_types.Int))}, STD_LIB
         ),
-        value_types.Int(1),
+        ExpectedChangedVariableValue("x", value_types.Int(1)),
     ),
     (
         [
@@ -596,7 +597,7 @@ SINGLE_VALID_IF_AND_EXPECTED: list[tuple[list[Statement], Scope, Value]] = [
         Scope(
             {"x": VarEntry(value_types.Int(0), True, value_types.Type(value_types.Int))}, STD_LIB
         ),
-        value_types.Int(2),
+        ExpectedChangedVariableValue("x", value_types.Int(2)),
     ),
     (
         [
@@ -649,6 +650,63 @@ SINGLE_VALID_IF_AND_EXPECTED: list[tuple[list[Statement], Scope, Value]] = [
         Scope(
             {"x": VarEntry(value_types.Int(0), True, value_types.Type(value_types.Int))}, STD_LIB
         ),
-        value_types.Int(3),
+        ExpectedChangedVariableValue("x", value_types.Int(3)),
+    ),
+]
+
+SINGLE_VALID_WHILE_AND_EXPECTED: list[
+    tuple[list[Statement], Scope, ExpectedChangedVariableValue]
+] = [
+    (
+        [
+            ast_nodes.WhileStatement(
+                condition=ast_nodes.Identifier("False"),
+                actions=ast_nodes.BlockStatement(
+                    [
+                        ast_nodes.ExpressionStatement(
+                            ast_nodes.Assignment(
+                                ast_nodes.Identifier("x"),
+                                ast_nodes.InfixOperation(
+                                    ast_nodes.Identifier("x"),
+                                    Operator.PLUS,
+                                    ast_nodes.IntegerLiteral(1),
+                                ),
+                            )
+                        )
+                    ]
+                ),
+            ),
+        ],
+        Scope(
+            {"x": VarEntry(value_types.Int(0), True, value_types.Type(value_types.Int))}, STD_LIB
+        ),
+        ExpectedChangedVariableValue("x", value_types.Int(0)),
+    ),
+    (
+        [
+            ast_nodes.WhileStatement(
+                condition=ast_nodes.InfixOperation(
+                    ast_nodes.Identifier("x"), Operator.LT, ast_nodes.IntegerLiteral(5)
+                ),
+                actions=ast_nodes.BlockStatement(
+                    [
+                        ast_nodes.ExpressionStatement(
+                            ast_nodes.Assignment(
+                                ast_nodes.Identifier("x"),
+                                ast_nodes.InfixOperation(
+                                    ast_nodes.Identifier("x"),
+                                    Operator.PLUS,
+                                    ast_nodes.IntegerLiteral(1),
+                                ),
+                            )
+                        )
+                    ]
+                ),
+            ),
+        ],
+        Scope(
+            {"x": VarEntry(value_types.Int(0), True, value_types.Type(value_types.Int))}, STD_LIB
+        ),
+        ExpectedChangedVariableValue("x", value_types.Int(5)),
     ),
 ]

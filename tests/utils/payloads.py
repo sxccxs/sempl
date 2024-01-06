@@ -14,6 +14,15 @@ class ExpectedLetStatement(NamedTuple):
     value: Expression
 
 
+class ExpectedWhileStatement(NamedTuple):
+    """
+    Expected While statement payload.
+    """
+
+    condition: Expression
+    actions_statements: list[Statement]
+
+
 class ExpectedIfStatement(NamedTuple):
     """
     Expected If statement payload.
@@ -106,6 +115,13 @@ class ExpectedEvaluatedFuncCall(NamedTuple):
 
 class ExpectedEvaluatedAssignment(NamedTuple):
     """Expected evaluated assignment payload."""
+
+    var_name: str
+    new_value: Value
+
+
+class ExpectedChangedVariableValue(NamedTuple):
+    """Payload for expected variable change,."""
 
     var_name: str
     new_value: Value

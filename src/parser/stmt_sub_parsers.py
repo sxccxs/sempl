@@ -31,6 +31,8 @@ def parse_statement(
             return parse_if_statement(parser)
         case TokenType.FN:
             return parse_func_statement(parser)
+        case TokenType.WHILE:
+            return parse_while_statement(parser)
         case TokenType.ENDL:
             return Ok(None)
         case _:
@@ -152,19 +154,23 @@ def parse_if_statement(
     """
     if is_err(res := _check_cur_token(parser, TokenType.IF)):
         return res
+
+    err_with_note_ = partial(err_with_note, note="if statement parsing")
     parser.next_token()
     match parse_expression(parser, Precedence.LOWEST):
-        case Err(err):
-            return Err(err)
+        case Err() as err:
+            return err_with_note_(err)
         case Ok(expr):
             condition = expr
 
     if not parser.move_to_next_if_peek_is(TokenType.LCURLY):
-        return Err(errors.InvalidTokenTypeInStatement(TokenType.LCURLY, parser.peek_token.type))
+        return err_with_note_(
+            errors.InvalidTokenTypeInStatement(TokenType.LCURLY, parser.peek_token.type)
+        )
 
     match parse_block_statement(parser):
         case Err() as err:
-            return err
+            return err_with_note_(err)
         case Ok(stmt):
             then_clause = stmt
 
@@ -173,7 +179,7 @@ def parse_if_statement(
         if parser.move_to_next_if_peek_is(TokenType.LCURLY):  # if there is `else {`
             match parse_block_statement(parser):
                 case Err() as err:
-                    return err
+                    return err_with_note_(err)
                 case Ok(stmt):
                     else_clause = stmt
         else:  # if there is "else <smth>"
@@ -183,11 +189,44 @@ def parse_if_statement(
                 )
             match parse_if_statement(parser):  # if there is "else if"
                 case Err() as err:
-                    return err
+                    return err_with_note_(err)
                 case Ok(stmt):
                     else_clause = ast_nodes.BlockStatement([stmt])
 
     return Ok(ast_nodes.IfStatement(condition, then_clause, else_clause))
+
+
+def parse_while_statement(
+    parser: BaseParser,
+) -> Result[ast_nodes.WhileStatement, StatementValidationError | ExpressionValidationError]:
+    """
+    Parses While statement from current position of provided parser.
+    Expected and checked parser.current_token is `while`.
+    After the successful read, parser.current_token is the `}` - end of last block of if statement.
+    """
+    if is_err(res := _check_cur_token(parser, TokenType.WHILE)):
+        return res
+
+    err_with_note_ = partial(err_with_note, note="if statement parsing")
+    parser.next_token()
+    match parse_expression(parser, Precedence.LOWEST):
+        case Err() as err:
+            return err_with_note_(err)
+        case Ok(expr):
+            condition = expr
+
+    if not parser.peek_token_is(TokenType.LCURLY):
+        return err_with_note_(
+            errors.InvalidTokenTypeInStatement(TokenType.LCURLY, parser.peek_token.type)
+        )
+
+    parser.next_token()
+    match parse_block_statement(parser):
+        case Err() as err:
+            return err_with_note_(err)
+        case Ok(stmt):
+            actions = stmt
+    return Ok(ast_nodes.WhileStatement(condition, actions))
 
 
 def parse_func_statement(

@@ -20,8 +20,10 @@ from tests.static.eval_tests_data import (
     SINGLE_VALID_IF_AND_EXPECTED,
     SINGLE_VALID_INFIX_OPERATION_AND_EXPECTED,
     SINGLE_VALID_LET_AND_EXPECTED,
+    SINGLE_VALID_WHILE_AND_EXPECTED,
 )
 from tests.utils.payloads import (
+    ExpectedChangedVariableValue,
     ExpectedEvaluatedAssignment,
     ExpectedEvaluatedFuncCall,
     ExpectedEvaluatedFunction,
@@ -375,13 +377,15 @@ class TestEvaluatorTg:
         SINGLE_VALID_IF_AND_EXPECTED,
         indirect=["parser_mock"],
     )
-    def test_eval_valid_if(self, ok_eval_res: Value, evaluator: Evaluator, expected: Value) -> None:
+    def test_eval_valid_if(
+        self, ok_eval_res: Value, evaluator: Evaluator, expected: ExpectedChangedVariableValue
+    ) -> None:
         """
         Tests evaluation of program with one valid let statement.
 
-        Arrange: Provide statements to Parser Mock, so that `x`
-        is set to ad different value in each if-else block.
-        Arrange: Create scope with variable `x` defined.
+        Arrange: Create scope with used variable defined.
+        Arrange: Provide statements to Parser Mock, so that used variable
+        is set to a different value in each if-else block.
 
         Act: Evaluate program from parser.
         Assert: Returned value is NO_EFFECT constant.
@@ -392,8 +396,38 @@ class TestEvaluatorTg:
         Assert: Entry variable value is equal to expected.
         """
         assert ok_eval_res is consts.NO_EFFECT, "Invalid retuned value."
-        variable_entry = evaluator.scope.get("x")
+        variable_entry = evaluator.scope.get(expected.var_name)
         assert variable_entry is not None, "Value was not stored."
         assert variable_entry.value is not None, "Invalid entry value."
         assert isinstance(variable_entry, VarEntry), "Value was stored as a wrond entry type."
-        assert variable_entry.var_value == expected, "Invalid value."
+        assert variable_entry.var_value == expected.new_value, "Invalid value."
+
+    @pytest.mark.parametrize(
+        ("parser_mock", "scope", "expected"),
+        SINGLE_VALID_WHILE_AND_EXPECTED,
+        indirect=["parser_mock"],
+    )
+    def test_eval_valid_while(
+        self, ok_eval_res: Value, evaluator: Evaluator, expected: ExpectedChangedVariableValue
+    ) -> None:
+        """
+        Tests evaluation of program with one valid let statement.
+
+        Arrange: Create scope with used variable defined.
+        Arrange: Provide statements to Parser Mock, so that used variable
+        is changed in the while
+
+        Act: Evaluate program from parser.
+        Assert: Returned value is NO_EFFECT constant.
+        Assert: No error returned.
+        Assert: Evaluator's scope contains entry for expected variable name.
+        Assert: Entry value is not None.
+        Assert: Entry is VarEntry.
+        Assert: Entry variable value is equal to expected.
+        """
+        assert ok_eval_res is consts.NO_EFFECT, "Invalid retuned value."
+        variable_entry = evaluator.scope.get(expected.var_name)
+        assert variable_entry is not None, "Value was not stored."
+        assert variable_entry.value is not None, "Invalid entry value."
+        assert isinstance(variable_entry, VarEntry), "Value was stored as a wrond entry type."
+        assert variable_entry.var_value == expected.new_value, "Invalid value."

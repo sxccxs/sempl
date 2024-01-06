@@ -171,6 +171,17 @@ class IfStatement(Statement):
 
 
 @dataclass(slots=True)
+class WhileStatement(Statement):
+    """While statement AST node."""
+
+    condition: Expression
+    actions: BlockStatement
+
+    def __str__(self) -> str:
+        return f"{Keyword.WHILE} {self.condition} {self.actions}"
+
+
+@dataclass(slots=True)
 class FuncParameter:
     """Function parameter payload."""
 

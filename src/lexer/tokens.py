@@ -46,6 +46,7 @@ class TokenType(StrEnum):
     ELSE = auto()
     MUT = auto()
     RETURN = auto()
+    WHILE = auto()
 
 
 class Token(NamedTuple):
@@ -64,6 +65,7 @@ class Keyword(StrEnum):
     MUT = "mut"
     RETURN = "return"
     FN = "fn"
+    WHILE = "while"
 
 
 # Key words to token types mapping.
@@ -74,4 +76,5 @@ KEYWORDS: dict[str, TokenType] = {
     Keyword.MUT.value: TokenType.MUT,
     Keyword.RETURN.value: TokenType.RETURN,
     Keyword.FN.value: TokenType.FN,
+    Keyword.WHILE.value: TokenType.WHILE,
 }

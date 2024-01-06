@@ -85,6 +85,8 @@ def evaluate(node: ASTNode, scope: Scope) -> Result[Value, EvaluationError]:
             return evaluate_assignment(node, scope)
         case ast_nodes.IfStatement():
             return evaluate_if_statement(node, scope)
+        case ast_nodes.WhileStatement():
+            return evaluate_while_statement(node, scope)
         case _:
             return Err(errors.UnsuportedNodeError(node))
 
@@ -159,6 +161,23 @@ def evaluate_if_statement(
             return evaluate(node.else_, scope)
         case Ok(value):
             return Err(errors.TypeMistmatchError(value, value_types.Bool))
+
+
+def evaluate_while_statement(
+    node: ast_nodes.WhileStatement, scope: Scope
+) -> Result[Value, EvaluationError]:
+    """Evaluates given while statement in provided scope if possible."""
+    while True:
+        match evaluate(node.condition, scope):
+            case Err() as err:
+                return err
+            case Ok(value_types.Bool(True)):
+                if is_err(res := evaluate(node.actions, scope)):
+                    return res
+            case Ok(value_types.Bool(False)):
+                return Ok(consts.NO_EFFECT)
+            case Ok(value):
+                return Err(errors.TypeMistmatchError(value, value_types.Bool))
 
 
 def evaluate_indetifier(node: ast_nodes.Identifier, scope: Scope) -> Result[Value, EvaluationError]:
