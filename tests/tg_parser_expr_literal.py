@@ -2,6 +2,7 @@
 import pytest
 
 from src.ast import ast_nodes
+from src.ast.abstract import Expression
 from src.lexer.tokens import Token, TokenType
 
 
@@ -174,7 +175,7 @@ class TestParserLiteralExpressionTg:
         Assert: Program contains only one statement.
         Assert: Statement is ExpressionStatement.
         Assert: Underlying expression is StringLiteral.
-        Assert: StringLiteral value is equal to the expected value.
+        Assert: StringLiteral value is equal to the expected.
         """
         expr = expression_stmt.expression
         assert isinstance(
@@ -182,3 +183,57 @@ class TestParserLiteralExpressionTg:
         ), f"Unexpected expression in ExpressionStatement of type `{type(expr)}`."
 
         assert expr.value == expected, "Invalid string literal value."
+
+    @pytest.mark.parametrize(
+        ("lexer_mock", "expected"),
+        [
+            (
+                [
+                    Token(TokenType.LSQUARE, "["),
+                    Token(TokenType.INT, "1"),
+                    Token(TokenType.COMA, ","),
+                    Token(TokenType.INT, "2"),
+                    Token(TokenType.COMA, ","),
+                    Token(TokenType.IDENT, "f"),
+                    Token(TokenType.LPAREN, "("),
+                    Token(TokenType.RPAREN, ")"),
+                    Token(TokenType.RSQUARE, "]"),
+                ],
+                [
+                    ast_nodes.IntegerLiteral(1),
+                    ast_nodes.IntegerLiteral(2),
+                    ast_nodes.CallExpression(ast_nodes.Identifier("f"), []),
+                ],
+            ),
+            (
+                [
+                    Token(TokenType.LSQUARE, "["),
+                    Token(TokenType.RSQUARE, "]"),
+                ],
+                [],
+            ),
+        ],
+        indirect=["lexer_mock"],
+    )
+    def test_single_valid_array_literal_expression(
+        self, expression_stmt: ast_nodes.ExpressionStatement, expected: list[Expression]
+    ) -> None:
+        """
+        Tests parser parsing single array literal correctly.
+
+        Arrange: Provide tokens to Lexer Mock.
+        Arrange: Create Parser with Lexer Mock.
+
+        Act: Parse program.
+        Assert: No error returned.
+        Assert: Program contains only one statement.
+        Assert: Statement is ExpressionStatement.
+        Assert: Underlying expression is ArrayLiteral.
+        Assert: ArrayLiteral elements are equal to the expected.
+        """
+        expr = expression_stmt.expression
+        assert isinstance(
+            expr, ast_nodes.ArrayLiteral
+        ), f"Unexpected expression in ExpressionStatement of type `{type(expr)}`."
+
+        assert expr.elements == expected, "Invalid array literal elements."

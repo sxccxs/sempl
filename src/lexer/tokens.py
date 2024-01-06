@@ -33,6 +33,8 @@ class TokenType(StrEnum):
     IDENT = auto()
     STRING = auto()
 
+    LSQUARE = "["
+    RSQUARE = "]"
     LCURLY = "{"
     RCURLY = "}"
     LPAREN = "("

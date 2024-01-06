@@ -9,6 +9,8 @@ from src.lexer.tokens import Token, TokenType
 LITERAL_TOKEN_MAP: dict[str, Token] = {
     tt.value: Token(tt, tt.value)
     for tt in [
+        TokenType.LSQUARE,
+        TokenType.RSQUARE,
         TokenType.LCURLY,
         TokenType.RCURLY,
         TokenType.LPAREN,
@@ -85,6 +87,17 @@ INPUT_AND_EXPECTED: dict[str, list[Token]] = {
         Token(TokenType.ENDL, "\n"),
         Token(TokenType.ENDL, "\n"),
         Token(TokenType.EOF, "\0"),
+    ],
+    "[1, 2, f()]": [
+        Token(TokenType.LSQUARE, "["),
+        Token(TokenType.INT, "1"),
+        Token(TokenType.COMA, ","),
+        Token(TokenType.INT, "2"),
+        Token(TokenType.COMA, ","),
+        Token(TokenType.IDENT, "f"),
+        Token(TokenType.LPAREN, "("),
+        Token(TokenType.RPAREN, ")"),
+        Token(TokenType.RSQUARE, "]"),
     ],
 }
 

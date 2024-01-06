@@ -9,10 +9,10 @@ from src.evaluation.values.value_base import Value
 from src.parser.types import Operator
 from tests.utils.payloads import (
     ExpectedChangedVariableValue,
-    ExpectedEvaluatedAssignment,
     ExpectedEvaluatedFuncCall,
     ExpectedEvaluatedFuncParam,
     ExpectedEvaluatedFunction,
+    ExpectedEvaluatedIndexOperation,
     ExpectedEvaluatedLet,
 )
 
@@ -400,7 +400,7 @@ SINGLE_VALID_FUNC_CALL_AND_EXPECTED: list[
         [
             ast_nodes.ExpressionStatement(
                 expression=ast_nodes.CallExpression(
-                    callable=ast_nodes.Identifier(value="x"), arguments=[]
+                    func=ast_nodes.Identifier(value="x"), arguments=[]
                 )
             )
         ],
@@ -422,7 +422,7 @@ SINGLE_VALID_FUNC_CALL_AND_EXPECTED: list[
         [
             ast_nodes.ExpressionStatement(
                 expression=ast_nodes.CallExpression(
-                    callable=ast_nodes.Identifier(value="num"),
+                    func=ast_nodes.Identifier(value="num"),
                     arguments=[ast_nodes.IntegerLiteral(value=10)],
                 )
             )
@@ -445,7 +445,7 @@ SINGLE_VALID_FUNC_CALL_AND_EXPECTED: list[
         [
             ast_nodes.ExpressionStatement(
                 expression=ast_nodes.CallExpression(
-                    callable=ast_nodes.Identifier(value="num"),
+                    func=ast_nodes.Identifier(value="num"),
                     arguments=[ast_nodes.IntegerLiteral(value=10)],
                 )
             )
@@ -468,7 +468,7 @@ SINGLE_VALID_FUNC_CALL_AND_EXPECTED: list[
         [
             ast_nodes.ExpressionStatement(
                 expression=ast_nodes.CallExpression(
-                    callable=ast_nodes.Identifier(value="num"),
+                    func=ast_nodes.Identifier(value="num"),
                     arguments=[],
                 )
             )
@@ -491,7 +491,7 @@ SINGLE_VALID_FUNC_CALL_AND_EXPECTED: list[
         [
             ast_nodes.ExpressionStatement(
                 expression=ast_nodes.CallExpression(
-                    callable=ast_nodes.Identifier(value="num"),
+                    func=ast_nodes.Identifier(value="num"),
                     arguments=[ast_nodes.IntegerLiteral(5)],
                 )
             )
@@ -516,7 +516,7 @@ SINGLE_VALID_FUNC_CALL_AND_EXPECTED: list[
 ]
 
 SINGLE_VALID_ASSIGN_AND_EXPECTED: list[
-    tuple[list[Statement], Scope, ExpectedEvaluatedAssignment]
+    tuple[list[Statement], Scope, ExpectedChangedVariableValue]
 ] = [
     (
         [
@@ -529,7 +529,7 @@ SINGLE_VALID_ASSIGN_AND_EXPECTED: list[
         Scope(
             {"x": VarEntry(value_types.Int(20), True, value_types.Type(value_types.Int))}, STD_LIB
         ),
-        ExpectedEvaluatedAssignment("x", value_types.Int(10)),
+        ExpectedChangedVariableValue("x", value_types.Int(10)),
     ),
     (
         [
@@ -545,7 +545,7 @@ SINGLE_VALID_ASSIGN_AND_EXPECTED: list[
         Scope(
             {"y": VarEntry(value_types.Int(20), True, value_types.Type(value_types.Int))}, STD_LIB
         ),
-        ExpectedEvaluatedAssignment("y", value_types.Int(40)),
+        ExpectedChangedVariableValue("y", value_types.Int(40)),
     ),
 ]
 
@@ -804,5 +804,50 @@ SINGLE_VALID_WHILE_AND_EXPECTED: list[
             {"x": VarEntry(value_types.Int(0), True, value_types.Type(value_types.Int))}, STD_LIB
         ),
         ExpectedChangedVariableValue("x", value_types.Int(5)),
+    ),
+]
+
+SINGLE_VALID_INDEX_AND_EXPECTED: list[
+    tuple[list[Statement], Scope, ExpectedEvaluatedIndexOperation]
+] = [
+    (
+        [
+            ast_nodes.ExpressionStatement(
+                ast_nodes.IndexOperation(
+                    left=ast_nodes.Identifier("x"), index=ast_nodes.IntegerLiteral(0)
+                ),
+            )
+        ],
+        Scope(
+            {
+                "x": VarEntry(
+                    value_types.Array([value_types.Int(0), value_types.Int(1)]),
+                    True,
+                    value_types.Type(value_types.Array),
+                )
+            },
+            STD_LIB,
+        ),
+        ExpectedEvaluatedIndexOperation("x", 0),
+    ),
+    (
+        [
+            ast_nodes.ExpressionStatement(
+                ast_nodes.IndexOperation(
+                    left=ast_nodes.Identifier("x"), index=ast_nodes.IntegerLiteral(1)
+                ),
+            )
+        ],
+        Scope(
+            {
+                "x": VarEntry(
+                    value_types.String("abc"),
+                    True,
+                    value_types.Type(value_types.String),
+                )
+            },
+            STD_LIB,
+        ),
+        ExpectedEvaluatedIndexOperation("x", 1),
     ),
 ]

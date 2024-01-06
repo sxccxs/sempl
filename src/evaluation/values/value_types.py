@@ -1,7 +1,14 @@
 """Concrete evaluated values types."""
 from dataclasses import dataclass
+from io import StringIO
 
-from src.evaluation.values.value_base import NumericValue, Value, ValuedValue
+from src.evaluation.values.value_base import (
+    IndexValueMixin,
+    NumericValue,
+    SequenceValue,
+    Value,
+    ValuedValue,
+)
 
 
 @dataclass(frozen=True)
@@ -21,20 +28,21 @@ class NoEffect(Value):
 
 
 @dataclass(frozen=True)
-class Int(NumericValue):
+class Int(NumericValue, IndexValueMixin):
     """Integer value."""
 
     value: int
+
+    def index(self) -> int:
+        return self.value
 
     def __str__(self) -> str:
         return str(self.value)
 
 
 @dataclass(frozen=True)
-class Bool(ValuedValue):
+class Bool(ValuedValue[bool]):
     """Boolean value."""
-
-    value: bool
 
     def __str__(self) -> str:
         return str(self.value)
@@ -51,30 +59,46 @@ class Float(NumericValue):
 
 
 @dataclass(frozen=True)
-class String(ValuedValue):
+class String(SequenceValue[str]):
     """String value."""
 
     value: str
+
+    def get_value_from_index(self, index: int) -> Value:
+        return String(self.value[index])
 
     def __str__(self) -> str:
         return f'"{self.value}"'
 
 
 @dataclass(frozen=True)
-class Type(ValuedValue):
-    """Type value."""
+class Array(SequenceValue[Value]):
+    """Array value."""
 
-    value: type[Value]
+    value: list[Value]
+
+    def get_value_from_index(self, index: int) -> Value:
+        return self.value[index]
+
+    def __str__(self) -> str:
+        ss = StringIO()
+        ss.write("[")
+        ss.write(", ".join(str(elem) for elem in self.value))
+        ss.write("]")
+        return ss.getvalue()
+
+
+@dataclass(frozen=True)
+class Type(ValuedValue[type[Value]]):
+    """Type value."""
 
     def __str__(self) -> str:
         return str(self.value.__name__)
 
 
 @dataclass(frozen=True)
-class ReturnValue(ValuedValue):
+class ReturnValue(ValuedValue[Value]):
     """Return value."""
-
-    value: Value
 
     def __str__(self) -> str:
         return f"return {self.value}"

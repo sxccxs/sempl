@@ -1,5 +1,7 @@
 """Test group evaluator."""
 # pylint: disable=redefined-outer-name
+from typing import Any, cast
+
 import pytest
 from result import is_ok
 
@@ -8,7 +10,7 @@ from src.evaluation.evaluator import Evaluator
 from src.evaluation.std_lib import STD_LIB
 from src.evaluation.values import consts, value_types
 from src.evaluation.values.scope import FuncEntry, Scope, VarEntry
-from src.evaluation.values.value_base import Value
+from src.evaluation.values.value_base import SequenceValue, Value
 from src.parser.interfaces import IParser
 from src.parser.types import Operator
 from tests.mock.parser_mock import ParserMock
@@ -18,15 +20,16 @@ from tests.static.eval_tests_data import (
     SINGLE_VALID_FUNC_CALL_AND_EXPECTED,
     SINGLE_VALID_FUNC_DEF_AND_EXPECTED,
     SINGLE_VALID_IF_AND_EXPECTED,
+    SINGLE_VALID_INDEX_AND_EXPECTED,
     SINGLE_VALID_INFIX_OPERATION_AND_EXPECTED,
     SINGLE_VALID_LET_AND_EXPECTED,
     SINGLE_VALID_WHILE_AND_EXPECTED,
 )
 from tests.utils.payloads import (
     ExpectedChangedVariableValue,
-    ExpectedEvaluatedAssignment,
     ExpectedEvaluatedFuncCall,
     ExpectedEvaluatedFunction,
+    ExpectedEvaluatedIndexOperation,
     ExpectedEvaluatedLet,
 )
 from tests.utils.types import YieldFixture
@@ -378,10 +381,10 @@ class TestEvaluatorTg:
         indirect=["parser_mock"],
     )
     def test_eval_valid_assignment(
-        self, ok_eval_res: Value, evaluator: Evaluator, expected: ExpectedEvaluatedAssignment
+        self, ok_eval_res: Value, evaluator: Evaluator, expected: ExpectedChangedVariableValue
     ) -> None:
         """
-        Tests evaluation of program with one valid let statement.
+        Tests evaluation of program with one valid assignment expression.
 
         Arrange: Create scope with variable defined.
         Arrange: Provide statements to Parser Mock.
@@ -405,6 +408,40 @@ class TestEvaluatorTg:
         assert isinstance(
             ok_eval_res, variable_entry.type_value.value
         ), "New value is of wrong type."
+
+    @pytest.mark.parametrize(
+        ("parser_mock", "scope", "expected"),
+        SINGLE_VALID_INDEX_AND_EXPECTED,
+        indirect=["parser_mock"],
+    )
+    def test_eval_valid_index_operation(
+        self, ok_eval_res: Value, evaluator: Evaluator, expected: ExpectedEvaluatedIndexOperation
+    ) -> None:
+        """
+        Tests evaluation of program with one valid index operation.
+
+        Arrange: Create scope with variable defined of sequence type.
+        Arrange: Provide statements to Parser Mock.
+
+        Act: Evaluate program from parser.
+        Assert: No error returned.
+        Assert: Evaluator's scope contains entry for expected variable name.
+        Assert: Entry value is not None.
+        Assert: Entry is VarEntry.
+        Assert: Entry variable value is a sequence.
+        Assert: Entry variable value at index is equal to expected.
+        """
+        variable_entry = evaluator.scope.get(expected.var_name)
+        assert variable_entry is not None, "Value was not stored."
+        assert variable_entry.value is not None, "Invalid entry value."
+        assert isinstance(variable_entry, VarEntry), "Value was stored as a wrond entry type."
+        assert isinstance(variable_entry.var_value, SequenceValue), "Value is not a sequence."
+        variable_entry.var_value = cast(
+            SequenceValue[Any], variable_entry.var_value  # type: ignore
+        )
+        assert ok_eval_res == variable_entry.var_value.get_value_from_index(
+            expected.index_
+        ), "Returned wrong value."
 
     @pytest.mark.parametrize(
         ("parser_mock", "scope", "expected"),

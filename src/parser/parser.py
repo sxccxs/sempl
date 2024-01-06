@@ -95,6 +95,7 @@ class Parser(BaseParser):
             (TokenType.TRUE, expr_sub_parsers.parse_boolean_literal),
             (TokenType.FALSE, expr_sub_parsers.parse_boolean_literal),
             (TokenType.STRING, expr_sub_parsers.parse_string_literal),
+            (TokenType.LSQUARE, expr_sub_parsers.parse_array_literal),
             (TokenType.NOT, expr_sub_parsers.parse_prefix_operation),
             (TokenType.MINUS, expr_sub_parsers.parse_prefix_operation),
             (TokenType.PLUS, expr_sub_parsers.parse_prefix_operation),
@@ -125,6 +126,7 @@ class Parser(BaseParser):
         tts_and_parsers: list[tuple[TokenType, InfixParserType]] = [
             (TokenType.ASSIGN, expr_sub_parsers.parse_assignment),
             (TokenType.LPAREN, expr_sub_parsers.parse_call_expression),
+            (TokenType.LSQUARE, expr_sub_parsers.parse_index_operation),
         ]
         for tt, parser in tts_and_parsers:
             self.register_infix_parser(tt, parser)
@@ -147,6 +149,7 @@ class Parser(BaseParser):
             (TokenType.ASTERIX, Precedence.PRODUCT),
             (TokenType.SLASH, Precedence.PRODUCT),
             (TokenType.LPAREN, Precedence.CALL),
+            (TokenType.LSQUARE, Precedence.CALL),
         ]
         for tt, prec in tt_and_prec:
             self.set_precedence(tt, prec)

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from src.ast.abstract import ASTNode, Expression
 from src.errors.error import Error
-from src.evaluation.values.value_base import Value
+from src.evaluation.values.value_base import IndexValueMixin, Value
 from src.parser.types import Operator
 
 if TYPE_CHECKING:
@@ -98,6 +98,30 @@ class ExpectedIdentifierError(EvaluationError):
 
     def __init__(self, value: Expression) -> None:
         super().__init__(f"Expected an identifier, but received `{value}`.")
+
+
+@dataclass
+class ExpectedSequenceError(EvaluationError):
+    """Evaluation error if instead of sequence anything else is provided."""
+
+    def __init__(self, value: Value) -> None:
+        super().__init__(f"Expected a sequence, but received `{value}`.")
+
+
+@dataclass
+class ExpectedIndexError(EvaluationError):
+    """Evaluation error if instead of index anything else is provided."""
+
+    def __init__(self, value: Value) -> None:
+        super().__init__(f"Expected an index, but received `{value}`.")
+
+
+@dataclass
+class IndexOutOfRangeError(EvaluationError):
+    """Evaluation error if index is out of range.."""
+
+    def __init__(self, value: IndexValueMixin) -> None:
+        super().__init__(f"Index {value.index()} is out of range.")
 
 
 @dataclass

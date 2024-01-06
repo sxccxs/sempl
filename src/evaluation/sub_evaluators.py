@@ -1,7 +1,7 @@
 """Concrete AST nodes evaluators."""
 from functools import partial
 from itertools import zip_longest
-from typing import Iterable, Literal, OrderedDict, cast
+from typing import Any, Iterable, Literal, OrderedDict, cast
 
 from result import Err, Ok, Result, do, is_err
 
@@ -18,7 +18,13 @@ from src.evaluation.values.scope import (
     Scope,
     VarEntry,
 )
-from src.evaluation.values.value_base import NumericValue, Value, ValuedValue
+from src.evaluation.values.value_base import (
+    IndexValueMixin,
+    NumericValue,
+    SequenceValue,
+    Value,
+    ValuedValue,
+)
 from src.helpers.result_helpers import err_with_note, results_gather
 from src.parser.types import Operator
 
@@ -44,6 +50,12 @@ def evaluate(node: ASTNode, scope: Scope) -> Result[Value, EvaluationError]:
             return Ok(value_types.String(node.value))
         case ast_nodes.BooleanLiteral():
             return Ok(consts.TrueFalse.from_bool(node.value).value)
+        case ast_nodes.ArrayLiteral():
+            match results_gather(evaluate(element, scope) for element in node.elements):
+                case Err() as err:
+                    return err
+                case Ok(values):
+                    return Ok(value_types.Array(values))
         case ast_nodes.Program():
             match evaluate_statements(node.statements, scope):
                 case Err() as err:
@@ -86,6 +98,13 @@ def evaluate(node: ASTNode, scope: Scope) -> Result[Value, EvaluationError]:
                     return err_with_note(err, "return statement")
                 case Ok(value):
                     return Ok(value_types.ReturnValue(value))
+        case ast_nodes.IndexOperation():
+            return do(
+                Ok(val)
+                for left in evaluate(node.left, scope)
+                for index in evaluate(node.index, scope)
+                for val in evaluate_index_operation(left, index)
+            )
         case ast_nodes.LetStatement():
             return evaluate_let_statement(node, scope)
         case ast_nodes.FuncStatement():
@@ -223,6 +242,17 @@ def evaluate_assignment(node: ast_nodes.Assignment, scope: Scope) -> Result[Valu
         return Err(errors.TypeMistmatchError(new_value, var.type_value.value))
     var.var_value = new_value
     return Ok(new_value)
+
+
+def evaluate_index_operation(left: Value, index: Value) -> Result[Value, EvaluationError]:
+    """Evaluates index access if possible."""
+    if not isinstance(left, SequenceValue):
+        return Err(errors.ExpectedSequenceError(left))
+    if not isinstance(index, IndexValueMixin):
+        return Err(errors.ExpectedIndexError(index))
+    if index.index() < 0 or index.index() >= len(left.value):  # type: ignore
+        return Err(errors.IndexOutOfRangeError(index))
+    return Ok(left.get_value_from_index(index.index()))
 
 
 def evaluate_prefix_expression(
@@ -370,15 +400,17 @@ def evaluate_equality_expression(
     """Checks equality/not-equalit of to given operands if possible."""
     match (left, right):
         case (ValuedValue(), ValuedValue()):
-            pass
+            # pattern matching does not work correctly with generics
+            left_value: Any = left.value  # type: ignore
+            right_value: Any = right.value  # type: ignore
         case _:
             return Err(errors.UnsuportedInfixOperation(left, operator, right))
 
     match operator:
         case Operator.EQ:
-            return Ok(consts.TrueFalse.from_bool(left.value == right.value).value)
+            return Ok(consts.TrueFalse.from_bool(left_value == right_value).value)
         case Operator.NOT_EQ:
-            return Ok(consts.TrueFalse.from_bool(left.value != right.value).value)
+            return Ok(consts.TrueFalse.from_bool(left_value != right_value).value)
 
 
 def evaluate_comparison_expression(
@@ -528,11 +560,11 @@ def evaluate_function_call(
         node (ast_nodes.CallExpression): Call expression.
         scope (Scope): Scope in which function was called.
     """
-    match node.callable:
+    match node.func:
         case ast_nodes.Identifier():
-            name = node.callable.value
+            name = node.func.value
         case _:
-            return Err(errors.UsageError(str(node.callable), as_what="a callable."))
+            return Err(errors.UsageError(str(node.func), as_what="a callable."))
 
     err_with_note_ = partial(err_with_note, note=f"function `{name}` call")
     func = scope.get(name)
@@ -621,6 +653,7 @@ def evaluate_no_return(
 def evaluate_func_entry_body(
     func_name: str, func_entry: BaseFuncEntry, func_scope: Scope
 ) -> Result[Value, EvaluationError]:
+    """Evaluates body of a given function if possible."""
     err_with_note_ = partial(err_with_note, note=f"function `{func_name}` body")
     match func_entry:
         case BuiltInFuncEntry():

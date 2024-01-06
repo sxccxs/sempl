@@ -145,6 +145,10 @@ class Lexer:
                 token = self._token_from_current_char(TokenType.ENDL)
             case "\0":
                 token = self._token_from_current_char(TokenType.EOF)
+            case "[":
+                token = self._token_from_current_char(TokenType.LSQUARE)
+            case "]":
+                token = self._token_from_current_char(TokenType.RSQUARE)
             case "{":
                 token = self._token_from_current_char(TokenType.LCURLY)
             case "}":

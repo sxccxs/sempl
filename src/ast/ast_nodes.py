@@ -71,14 +71,35 @@ class StringLiteral(Expression):
 
 
 @dataclass(slots=True)
+class ArrayLiteral(Expression):
+    """Array literal AST node."""
+
+    elements: list[Expression]
+
+    def __str__(self) -> str:
+        return str(self.elements)
+
+
+@dataclass(slots=True)
 class Assignment(Expression):
-    """Assignment literal AST node."""
+    """Assignment AST node."""
 
     assignee: Expression
     value: Expression
 
     def __str__(self) -> str:
         return f"({self.assignee} = {self.value})"
+
+
+@dataclass(slots=True)
+class IndexOperation(Expression):
+    """Index operation AST node."""
+
+    left: Expression
+    index: Expression
+
+    def __str__(self) -> str:
+        return f"({self.left}[{self.index}])"
 
 
 @dataclass(slots=True)
@@ -108,12 +129,12 @@ class InfixOperation(Expression):
 class CallExpression(Expression):
     """Call AST node."""
 
-    callable: Expression
+    func: Expression
     arguments: list[Expression]
 
     def __str__(self) -> str:
         ss = StringIO()
-        ss.write(f"{self.callable}(")
+        ss.write(f"{self.func}(")
         sio_write_with_sep(ss, sep=", ", values=(str(arg) for arg in self.arguments))
         ss.write(")")
         return ss.getvalue()

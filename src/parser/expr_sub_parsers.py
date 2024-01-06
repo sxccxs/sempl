@@ -117,6 +117,7 @@ def parse_boolean_literal(
         )
     return Ok(ast_nodes.BooleanLiteral(value=parser.cur_token_is(TokenType.TRUE)))
 
+
 def parse_string_literal(
     parser: BaseParser,
 ) -> Result[ast_nodes.StringLiteral, ExpressionValidationError]:
@@ -128,6 +129,22 @@ def parse_string_literal(
     if is_err(res := _check_cur_token(parser, TokenType.STRING)):
         return res
     return Ok(ast_nodes.StringLiteral(parser.current_token.literal))
+
+
+def parse_array_literal(
+    parser: BaseParser,
+) -> Result[ast_nodes.ArrayLiteral, ExpressionValidationError]:
+    """
+    Parses an ArrayLiteral expression from current token of provided parser.
+    Expected and checked parser.current_token is a `[`.
+    After the successful read, parser.current_token is `]`.
+    """
+    match _parse_list_of_expression_from_to(parser, start=TokenType.LSQUARE, end=TokenType.RSQUARE):
+        case Err() as err:
+            return err
+        case Ok(elements):
+            return Ok(ast_nodes.ArrayLiteral(elements))
+
 
 def parse_prefix_operation(
     parser: BaseParser,
@@ -177,7 +194,7 @@ def parse_assignment(
     parser: BaseParser, assignee: ast_nodes.Expression
 ) -> Result[ast_nodes.Assignment, ExpressionValidationError]:
     """
-    Parses an Assignme with provided assignee,
+    Parses an Assignment with provided assignee,
     and value parsed from next token of provided parser, if possible.
     Expected and checked parser.current_token is an `=`.
     After the successful read, parser.current_token is the last token of the assignment value.
@@ -191,6 +208,31 @@ def parse_assignment(
             return err
         case Ok(value):
             return Ok(ast_nodes.Assignment(assignee, value))
+
+
+def parse_index_operation(
+    parser: BaseParser, left: ast_nodes.Expression
+) -> Result[ast_nodes.IndexOperation, ExpressionValidationError]:
+    """
+    Parses an IndexOperation with provided left part,
+    and value parsed from next token of provided parser, if possible.
+    Expected and checked parser.current_token is an `[`.
+    After the successful read, parser.current_token is `]`.
+    """
+    if is_err(res := _check_cur_token(parser, TokenType.LSQUARE)):
+        return res
+
+    parser.next_token()
+    match parse_expression(parser, Precedence.LOWEST):
+        case Err() as err:
+            return err
+        case Ok(value):
+            index = value
+
+    parser.next_token()
+    if is_err(res := _check_cur_token(parser, TokenType.RSQUARE)):
+        return res
+    return Ok(ast_nodes.IndexOperation(left, index))
 
 
 def parse_grouped_expression(parser: BaseParser) -> Result[Expression, ExpressionValidationError]:
@@ -246,10 +288,22 @@ def parse_call_argument(parser: BaseParser) -> Result[list[Expression], Expressi
     Expected and checked parser.current_token is a `(`.
     After the successful read, parser.current_token is `)`.
     """
-    if is_err(res := _check_cur_token(parser, TokenType.LPAREN)):
+    return _parse_list_of_expression_from_to(parser, start=TokenType.LPAREN, end=TokenType.RPAREN)
+
+
+def _parse_list_of_expression_from_to(
+    parser: BaseParser, *, start: TokenType, end: TokenType
+) -> Result[list[Expression], ExpressionValidationError]:
+    """
+    Parses comma separated expression between given token types
+    from current token of provided parser, if possible.
+    Expected and checked parser.current_token is `start` parameter.
+    After the successful read, parser.current_token is `end` parameter.
+    """
+    if is_err(res := _check_cur_token(parser, start)):
         return res
 
-    if parser.peek_token_is(TokenType.RPAREN):
+    if parser.peek_token_is(end):
         parser.next_token()
         return Ok([])
 
@@ -266,13 +320,13 @@ def parse_call_argument(parser: BaseParser) -> Result[list[Expression], Expressi
         case Err() as err:
             return err
         case Ok(value):
-            args = value
+            expr_list = value
 
     parser.next_token()
-    if is_err(res := _check_cur_token(parser, TokenType.RPAREN)):
+    if is_err(res := _check_cur_token(parser, end)):
         return res
 
-    return Ok(args)
+    return Ok(expr_list)
 
 
 def _check_cur_token(

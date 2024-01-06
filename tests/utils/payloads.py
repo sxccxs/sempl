@@ -80,6 +80,13 @@ class ExpectedAssignmentExpression(NamedTuple):
     value: Expression
 
 
+class ExpectedIndexOperation(NamedTuple):
+    """Expected index operation payload."""
+
+    left: Expression
+    index_: Expression
+
+
 class ExpectedEvaluatedLet(NamedTuple):
     """Expected evaluated let statement payload."""
 
@@ -113,15 +120,15 @@ class ExpectedEvaluatedFuncCall(NamedTuple):
     returned_value: Value
 
 
-class ExpectedEvaluatedAssignment(NamedTuple):
-    """Expected evaluated assignment payload."""
-
-    var_name: str
-    new_value: Value
-
-
 class ExpectedChangedVariableValue(NamedTuple):
-    """Payload for expected variable change,."""
+    """Payload for expected variable change."""
 
     var_name: str
     new_value: Value
+
+
+class ExpectedEvaluatedIndexOperation(NamedTuple):
+    """Expected evaluated infix operation payload."""
+
+    var_name: str
+    index_: int
