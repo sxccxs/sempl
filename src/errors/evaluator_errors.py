@@ -1,10 +1,16 @@
 """Evalutaion errors."""
+from __future__ import annotations
+
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from src.ast.abstract import ASTNode, Expression
 from src.errors.error import Error
 from src.evaluation.values.value_base import Value
 from src.parser.types import Operator
+
+if TYPE_CHECKING:
+    from src.evaluation.values.scope import BaseEntry
 
 
 @dataclass
@@ -21,6 +27,14 @@ class UnsuportedNodeError(EvaluationError):
 
 
 @dataclass
+class UnsuportedEntryError(EvaluationError):
+    """Evaluation error for scope entry for which there is no handler."""
+
+    def __init__(self, entry: BaseEntry) -> None:
+        super().__init__(f"Scope entry of type `{type(entry)}` is not supported.")
+
+
+@dataclass
 class UnsuportedPrefixOperator(EvaluationError):
     """Evaluation error for prefix operator which is not supported."""
 
@@ -33,7 +47,9 @@ class UnsuportedPrefixOperation(EvaluationError):
     """Evaluation error for prefix opperation which is not supported on given ast node type."""
 
     def __init__(self, operator: Operator, operand: Value) -> None:
-        super().__init__(f"Prefix operator `{operator}` on `{type(operand)}` is not supported.")
+        super().__init__(
+            f"Prefix operator `{operator}` on `{type(operand).__name__}` is not supported."
+        )
 
 
 @dataclass
@@ -42,7 +58,8 @@ class UnsuportedInfixOperation(EvaluationError):
 
     def __init__(self, left: Value, operator: Operator, right: Value) -> None:
         super().__init__(
-            f"Infix operator `{operator}` on `{type(left)}` and `{type(right)}` is not supported."
+            f"Infix operator `{operator}` on `{type(left).__name__}` and "
+            f"`{type(right).__name__}` is not supported."
         )
 
 
@@ -61,7 +78,7 @@ class TypeMistmatchError(EvaluationError):
     def __init__(self, value: Value, expected_type: type[Value]) -> None:
         super().__init__(
             f"Expected type {expected_type}, but received "
-            f"value `{value}` of type {type(value)}."
+            f"value `{value}` of type {type(value).__name__}."
         )
 
 

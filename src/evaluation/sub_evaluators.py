@@ -10,7 +10,14 @@ from src.ast.abstract import ASTNode, Statement
 from src.errors import evaluator_errors as errors
 from src.errors.evaluator_errors import EvaluationError
 from src.evaluation.values import consts, value_types
-from src.evaluation.values.scope import FuncEntry, FuncParam, Scope, VarEntry
+from src.evaluation.values.scope import (
+    BaseFuncEntry,
+    BuiltInFuncEntry,
+    FuncEntry,
+    FuncParam,
+    Scope,
+    VarEntry,
+)
 from src.evaluation.values.value_base import NumericValue, Value, ValuedValue
 from src.helpers.result_helpers import err_with_note, results_gather
 from src.parser.types import Operator
@@ -426,10 +433,10 @@ def evaluate_function_statement(
         case Err() as err:
             return err_with_note_(err)
         case Ok(value_types.Type() as value):
-            type_ = value
+            ret_type = value
         case Ok(value):
             return err_with_note_(errors.ExpectedTypeIdentifierError(value))
-    scope[node.name.value] = FuncEntry(params, node.body, type_)
+    scope[node.name.value] = FuncEntry(params, ret_type, node.body)
     return Ok(consts.NO_EFFECT)
 
 
@@ -528,8 +535,11 @@ def evaluate_function_call(
             return Err(errors.UsageError(str(node.callable), as_what="a callable."))
 
     err_with_note_ = partial(err_with_note, note=f"function `{name}` call")
-    if (func := scope.get(name)) is None or not isinstance(func, FuncEntry):
+    func = scope.get(name)
+    if func is None:
         return err_with_note_(errors.NameNotDefinedError(name))
+    if not isinstance(func, BaseFuncEntry):
+        return err_with_note_(errors.UsageError(name, as_what="a callable."))
 
     match results_gather(evaluate(arg, scope) for arg in node.arguments):
         case Err() as err:
@@ -541,17 +551,11 @@ def evaluate_function_call(
     if is_err(res := bind_call_arguments(name, func.parameters, args, func_scope)):
         return err_with_note_(res)
 
-    match evaluate_statements(func.body.statements, func_scope):
+    match evaluate_func_entry_body(name, func, func_scope):
         case Err() as err:
             return err_with_note_(err)
-        case Ok(value_types.ReturnValue(value)):
-            ret_value = value
         case Ok(value):
-            match evaluate_no_return(name, func, value):
-                case Err() as err:
-                    return err_with_note_(err)
-                case Ok(no_return_val):
-                    ret_value = no_return_val
+            ret_value = value
 
     if not isinstance(ret_value, func.ret_type.value):
         return err_with_note_(errors.TypeMistmatchError(ret_value, func.ret_type.value))
@@ -612,3 +616,28 @@ def evaluate_no_return(
             return Ok(consts.SINGULARITY)
         case _:
             return Err(errors.NoReturnError(func_name, func.ret_type.value))
+
+
+def evaluate_func_entry_body(
+    func_name: str, func_entry: BaseFuncEntry, func_scope: Scope
+) -> Result[Value, EvaluationError]:
+    err_with_note_ = partial(err_with_note, note=f"function `{func_name}` body")
+    match func_entry:
+        case BuiltInFuncEntry():
+            args = [func_scope[arg.name].value for arg in func_entry.parameters]
+            return func_entry.func(*args)
+        case FuncEntry():
+            match evaluate_statements(func_entry.body.statements, func_scope):
+                case Err() as err:
+                    return err_with_note_(err)
+                case Ok(value_types.ReturnValue(value)):
+                    ret_value = value
+                case Ok(value):
+                    match evaluate_no_return(func_name, func_entry, value):
+                        case Err() as err:
+                            return err_with_note_(err)
+                        case Ok(no_return_val):
+                            ret_value = no_return_val
+            return Ok(ret_value)
+        case _:
+            return Err(errors.UnsuportedEntryError(func_entry))

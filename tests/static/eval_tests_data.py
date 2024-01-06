@@ -408,10 +408,10 @@ SINGLE_VALID_FUNC_CALL_AND_EXPECTED: list[
             {
                 "x": FuncEntry(
                     [],
+                    value_types.Type(value_types.Int),
                     ast_nodes.BlockStatement(
                         [ast_nodes.ReturnStatement(ast_nodes.IntegerLiteral(10))]
                     ),
-                    value_types.Type(value_types.Int),
                 )
             },
             STD_LIB,
@@ -431,10 +431,10 @@ SINGLE_VALID_FUNC_CALL_AND_EXPECTED: list[
             {
                 "num": FuncEntry(
                     [FuncParam("x", value_types.Type(value_types.Int), None)],
+                    value_types.Type(value_types.Int),
                     ast_nodes.BlockStatement(
                         [ast_nodes.ReturnStatement(ast_nodes.Identifier("x"))]
                     ),
-                    value_types.Type(value_types.Int),
                 )
             },
             STD_LIB,
@@ -454,10 +454,10 @@ SINGLE_VALID_FUNC_CALL_AND_EXPECTED: list[
             {
                 "num": FuncEntry(
                     [FuncParam("x", value_types.Type(value_types.Int), value_types.Int(1))],
+                    value_types.Type(value_types.Int),
                     ast_nodes.BlockStatement(
                         [ast_nodes.ReturnStatement(ast_nodes.Identifier("x"))]
                     ),
-                    value_types.Type(value_types.Int),
                 )
             },
             STD_LIB,
@@ -477,10 +477,10 @@ SINGLE_VALID_FUNC_CALL_AND_EXPECTED: list[
             {
                 "num": FuncEntry(
                     [FuncParam("x", value_types.Type(value_types.Int), value_types.Int(5))],
+                    value_types.Type(value_types.Int),
                     ast_nodes.BlockStatement(
                         [ast_nodes.ReturnStatement(ast_nodes.Identifier("x"))]
                     ),
-                    value_types.Type(value_types.Int),
                 )
             },
             STD_LIB,
@@ -503,10 +503,10 @@ SINGLE_VALID_FUNC_CALL_AND_EXPECTED: list[
                         FuncParam("x", value_types.Type(value_types.Int), None),
                         FuncParam("y", value_types.Type(value_types.Float), value_types.Float(0.5)),
                     ],
+                    value_types.Type(value_types.Float),
                     ast_nodes.BlockStatement(
                         [ast_nodes.ReturnStatement(ast_nodes.Identifier("y"))]
                     ),
-                    value_types.Type(value_types.Float),
                 )
             },
             STD_LIB,

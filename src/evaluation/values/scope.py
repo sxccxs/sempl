@@ -4,9 +4,12 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import TypeVar
+from typing import Callable, TypeVar
+
+from result import Result
 
 from src.ast import ast_nodes
+from src.errors.evaluator_errors import EvaluationError
 from src.evaluation.values.value_base import Value
 from src.evaluation.values.value_types import Type
 
@@ -47,16 +50,29 @@ class FuncParam:
 
 
 @dataclass(slots=True)
-class FuncEntry(BaseEntry):
-    """Scope entry for function definition."""
+class BaseFuncEntry(BaseEntry, ABC):
+    """Base scope entry for function definition."""
 
     parameters: list[FuncParam]
-    body: ast_nodes.BlockStatement
     ret_type: Type
 
     @property
     def value(self) -> None:
         return None
+
+
+@dataclass(slots=True)
+class FuncEntry(BaseFuncEntry):
+    """Scope entry for function definition."""
+
+    body: ast_nodes.BlockStatement
+
+
+@dataclass(slots=True)
+class BuiltInFuncEntry(BaseFuncEntry):
+    """Scope entry for built-in function."""
+
+    func: Callable[..., Result[Value, EvaluationError]]
 
 
 @dataclass(slots=True)
@@ -71,7 +87,7 @@ class TypeEntry(BaseEntry):
 
 
 # Allowed scope entries
-ScopeEntry = VarEntry | FuncEntry | TypeEntry
+ScopeEntry = VarEntry | BaseFuncEntry | TypeEntry
 
 
 @dataclass(slots=True)

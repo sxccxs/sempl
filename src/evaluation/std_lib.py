@@ -1,4 +1,5 @@
 """Std library scope defenition."""
+from src.evaluation.builtin_funcs import INPUT_ENTRY, PRINT_ENTRY
 from src.evaluation.values import value_types
 from src.evaluation.values.consts import SINGULARITY
 from src.evaluation.values.scope import Scope, TypeEntry, VarEntry
@@ -15,5 +16,7 @@ STD_LIB = Scope(
         "Singularity": SINGULARITY_TYPE_ENTRY,
         "O": SINGULARITY_TYPE_ENTRY,
         "singularity": VarEntry(SINGULARITY, False, value_types.Type(value_types.Singularity)),
+        "print": PRINT_ENTRY,
+        "input": INPUT_ENTRY,
     }
 )
