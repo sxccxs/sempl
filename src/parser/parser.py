@@ -2,10 +2,10 @@
 from result import Err, Ok, Result
 
 from src.ast import ast_nodes
+from src.errors.parser_errors import ParsingError
 from src.lexer.interfaces import ILexer
 from src.lexer.tokens import Token, TokenType
 from src.parser import expr_sub_parsers, stmt_sub_parsers
-from src.errors.parser_errors import ParsingError
 from src.parser.parser_base import BaseParser
 from src.parser.types import InfixParserType, Precedence, PrefixParserType
 
@@ -88,39 +88,64 @@ class Parser(BaseParser):
 
     def _register_prefix(self) -> None:
         """Registers all prefix parsers."""
-        self.register_prefix_parser(TokenType.IDENT, expr_sub_parsers.parse_identifier)
-        self.register_prefix_parser(TokenType.INT, expr_sub_parsers.parse_integer_literal)
-        self.register_prefix_parser(TokenType.FLOAT, expr_sub_parsers.parse_float_literal)
-        self.register_prefix_parser(TokenType.MINUS, expr_sub_parsers.parse_prefix_operation)
-        self.register_prefix_parser(TokenType.PLUS, expr_sub_parsers.parse_prefix_operation)
-        self.register_prefix_parser(TokenType.LPAREN, expr_sub_parsers.parse_grouped_expression)
+        tts_and_parsers: list[tuple[TokenType, PrefixParserType]] = [
+            (TokenType.IDENT, expr_sub_parsers.parse_identifier),
+            (TokenType.INT, expr_sub_parsers.parse_integer_literal),
+            (TokenType.FLOAT, expr_sub_parsers.parse_float_literal),
+            (TokenType.TRUE, expr_sub_parsers.parse_boolean_literal),
+            (TokenType.FALSE, expr_sub_parsers.parse_boolean_literal),
+            (TokenType.NOT, expr_sub_parsers.parse_prefix_operation),
+            (TokenType.MINUS, expr_sub_parsers.parse_prefix_operation),
+            (TokenType.PLUS, expr_sub_parsers.parse_prefix_operation),
+            (TokenType.LPAREN, expr_sub_parsers.parse_grouped_expression),
+        ]
+        for tt, parser in tts_and_parsers:
+            self.register_prefix_parser(tt, parser)
 
     def _register_infix(self) -> None:
         """Registers all infix parsers."""
-        self.register_infix_parser(TokenType.PLUS, expr_sub_parsers.parse_inifix_operation)
-        self.register_infix_parser(TokenType.MINUS, expr_sub_parsers.parse_inifix_operation)
-        self.register_infix_parser(TokenType.SLASH, expr_sub_parsers.parse_inifix_operation)
-        self.register_infix_parser(TokenType.ASTERIX, expr_sub_parsers.parse_inifix_operation)
-        self.register_infix_parser(TokenType.EQ, expr_sub_parsers.parse_inifix_operation)
-        self.register_infix_parser(TokenType.NOT_EQ, expr_sub_parsers.parse_inifix_operation)
-        self.register_infix_parser(TokenType.GT, expr_sub_parsers.parse_inifix_operation)
-        self.register_infix_parser(TokenType.GTEQ, expr_sub_parsers.parse_inifix_operation)
-        self.register_infix_parser(TokenType.LT, expr_sub_parsers.parse_inifix_operation)
-        self.register_infix_parser(TokenType.LTEQ, expr_sub_parsers.parse_inifix_operation)
-        self.register_infix_parser(TokenType.LPAREN, expr_sub_parsers.parse_call_expression)
-        self.register_infix_parser(TokenType.ASSIGN, expr_sub_parsers.parse_assignment)
+        operation_tts: list[TokenType] = [
+            TokenType.PLUS,
+            TokenType.MINUS,
+            TokenType.SLASH,
+            TokenType.ASTERIX,
+            TokenType.EQ,
+            TokenType.NOT_EQ,
+            TokenType.GT,
+            TokenType.GTEQ,
+            TokenType.LT,
+            TokenType.LTEQ,
+            TokenType.AND,
+            TokenType.OR,
+        ]
+        for tt in operation_tts:
+            self.register_infix_parser(tt, expr_sub_parsers.parse_inifix_operation)
+
+        tts_and_parsers: list[tuple[TokenType, InfixParserType]] = [
+            (TokenType.ASSIGN, expr_sub_parsers.parse_assignment),
+            (TokenType.LPAREN, expr_sub_parsers.parse_call_expression),
+        ]
+        for tt, parser in tts_and_parsers:
+            self.register_infix_parser(tt, parser)
 
     def _set_precedences(self) -> None:
         """Sets all precedences."""
-        self.set_precedence(TokenType.EQ, Precedence.EQUALS)
-        self.set_precedence(TokenType.NOT_EQ, Precedence.EQUALS)
-        self.set_precedence(TokenType.LT, Precedence.LESSGREATER)
-        self.set_precedence(TokenType.LTEQ, Precedence.LESSGREATER)
-        self.set_precedence(TokenType.GT, Precedence.LESSGREATER)
-        self.set_precedence(TokenType.GTEQ, Precedence.LESSGREATER)
-        self.set_precedence(TokenType.PLUS, Precedence.SUM)
-        self.set_precedence(TokenType.MINUS, Precedence.SUM)
-        self.set_precedence(TokenType.ASTERIX, Precedence.PRODUCT)
-        self.set_precedence(TokenType.SLASH, Precedence.PRODUCT)
-        self.set_precedence(TokenType.LPAREN, Precedence.CALL)
-        self.set_precedence(TokenType.ASSIGN, Precedence.ASSIGN)
+        tt_and_prec: list[tuple[TokenType, Precedence]] = [
+            (TokenType.ASSIGN, Precedence.ASSIGN),
+            (TokenType.OR, Precedence.OR),
+            (TokenType.AND, Precedence.AND),
+            (TokenType.NOT, Precedence.NOT),
+            (TokenType.EQ, Precedence.COMPARE),
+            (TokenType.NOT_EQ, Precedence.COMPARE),
+            (TokenType.LT, Precedence.COMPARE),
+            (TokenType.LTEQ, Precedence.COMPARE),
+            (TokenType.GT, Precedence.COMPARE),
+            (TokenType.GTEQ, Precedence.COMPARE),
+            (TokenType.PLUS, Precedence.SUM),
+            (TokenType.MINUS, Precedence.SUM),
+            (TokenType.ASTERIX, Precedence.PRODUCT),
+            (TokenType.SLASH, Precedence.PRODUCT),
+            (TokenType.LPAREN, Precedence.CALL),
+        ]
+        for tt, prec in tt_and_prec:
+            self.set_precedence(tt, prec)

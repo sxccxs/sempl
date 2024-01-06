@@ -101,6 +101,102 @@ SINGLE_VALID_INFIX_OPERATION_AND_EXPECTED: list[tuple[list[Statement], Value]] =
         ],
         value_types.Float(8.0),
     ),
+    (
+        [
+            ast_nodes.ExpressionStatement(
+                expression=ast_nodes.InfixOperation(
+                    left=ast_nodes.BooleanLiteral(True),
+                    operator=Operator.AND,
+                    right=ast_nodes.BooleanLiteral(True),
+                )
+            )
+        ],
+        value_types.Bool(True),
+    ),
+    (
+        [
+            ast_nodes.ExpressionStatement(
+                expression=ast_nodes.InfixOperation(
+                    left=ast_nodes.BooleanLiteral(False),
+                    operator=Operator.AND,
+                    right=ast_nodes.BooleanLiteral(True),
+                )
+            )
+        ],
+        value_types.Bool(False),
+    ),
+    (
+        [
+            ast_nodes.ExpressionStatement(
+                expression=ast_nodes.InfixOperation(
+                    left=ast_nodes.BooleanLiteral(False),
+                    operator=Operator.AND,
+                    right=ast_nodes.BooleanLiteral(False),
+                )
+            )
+        ],
+        value_types.Bool(False),
+    ),
+    (
+        [
+            ast_nodes.ExpressionStatement(
+                expression=ast_nodes.InfixOperation(
+                    left=ast_nodes.BooleanLiteral(True),
+                    operator=Operator.AND,
+                    right=ast_nodes.BooleanLiteral(False),
+                )
+            )
+        ],
+        value_types.Bool(False),
+    ),
+    (
+        [
+            ast_nodes.ExpressionStatement(
+                expression=ast_nodes.InfixOperation(
+                    left=ast_nodes.BooleanLiteral(True),
+                    operator=Operator.OR,
+                    right=ast_nodes.BooleanLiteral(True),
+                )
+            )
+        ],
+        value_types.Bool(True),
+    ),
+    (
+        [
+            ast_nodes.ExpressionStatement(
+                expression=ast_nodes.InfixOperation(
+                    left=ast_nodes.BooleanLiteral(False),
+                    operator=Operator.OR,
+                    right=ast_nodes.BooleanLiteral(True),
+                )
+            )
+        ],
+        value_types.Bool(True),
+    ),
+    (
+        [
+            ast_nodes.ExpressionStatement(
+                expression=ast_nodes.InfixOperation(
+                    left=ast_nodes.BooleanLiteral(False),
+                    operator=Operator.OR,
+                    right=ast_nodes.BooleanLiteral(False),
+                )
+            )
+        ],
+        value_types.Bool(False),
+    ),
+    (
+        [
+            ast_nodes.ExpressionStatement(
+                expression=ast_nodes.InfixOperation(
+                    left=ast_nodes.BooleanLiteral(True),
+                    operator=Operator.OR,
+                    right=ast_nodes.BooleanLiteral(False),
+                )
+            )
+        ],
+        value_types.Bool(True),
+    ),
 ]
 
 SINGLE_VALID_COMPARISON_AND_EXPECTED: list[tuple[list[Statement], TrueFalse]] = [
@@ -108,9 +204,9 @@ SINGLE_VALID_COMPARISON_AND_EXPECTED: list[tuple[list[Statement], TrueFalse]] = 
         [
             ast_nodes.ExpressionStatement(
                 expression=ast_nodes.InfixOperation(
-                    left=ast_nodes.Identifier(str(TrueFalse.TRUE.value)),
+                    left=ast_nodes.BooleanLiteral(True),
                     operator=Operator.EQ,
-                    right=ast_nodes.Identifier(str(TrueFalse.TRUE.value)),
+                    right=ast_nodes.BooleanLiteral(True),
                 )
             )
         ],
@@ -120,9 +216,9 @@ SINGLE_VALID_COMPARISON_AND_EXPECTED: list[tuple[list[Statement], TrueFalse]] = 
         [
             ast_nodes.ExpressionStatement(
                 expression=ast_nodes.InfixOperation(
-                    left=ast_nodes.Identifier(str(TrueFalse.FALSE.value)),
+                    left=ast_nodes.BooleanLiteral(False),
                     operator=Operator.EQ,
-                    right=ast_nodes.Identifier(str(TrueFalse.FALSE.value)),
+                    right=ast_nodes.BooleanLiteral(False),
                 )
             )
         ],
@@ -132,9 +228,9 @@ SINGLE_VALID_COMPARISON_AND_EXPECTED: list[tuple[list[Statement], TrueFalse]] = 
         [
             ast_nodes.ExpressionStatement(
                 expression=ast_nodes.InfixOperation(
-                    left=ast_nodes.Identifier(str(TrueFalse.TRUE.value)),
+                    left=ast_nodes.BooleanLiteral(True),
                     operator=Operator.EQ,
-                    right=ast_nodes.Identifier(str(TrueFalse.FALSE.value)),
+                    right=ast_nodes.BooleanLiteral(False),
                 )
             )
         ],
@@ -144,9 +240,9 @@ SINGLE_VALID_COMPARISON_AND_EXPECTED: list[tuple[list[Statement], TrueFalse]] = 
         [
             ast_nodes.ExpressionStatement(
                 expression=ast_nodes.InfixOperation(
-                    left=ast_nodes.Identifier(str(TrueFalse.TRUE.value)),
+                    left=ast_nodes.BooleanLiteral(True),
                     operator=Operator.NOT_EQ,
-                    right=ast_nodes.Identifier(str(TrueFalse.FALSE.value)),
+                    right=ast_nodes.BooleanLiteral(False),
                 )
             )
         ],
@@ -162,7 +258,7 @@ SINGLE_VALID_COMPARISON_AND_EXPECTED: list[tuple[list[Statement], TrueFalse]] = 
                         right=ast_nodes.IntegerLiteral(value=2),
                     ),
                     operator=Operator.NOT_EQ,
-                    right=ast_nodes.Identifier(str(TrueFalse.TRUE.value)),
+                    right=ast_nodes.BooleanLiteral(True),
                 )
             )
         ],
@@ -172,7 +268,7 @@ SINGLE_VALID_COMPARISON_AND_EXPECTED: list[tuple[list[Statement], TrueFalse]] = 
         [
             ast_nodes.ExpressionStatement(
                 expression=ast_nodes.InfixOperation(
-                    left=ast_nodes.Identifier(str(TrueFalse.FALSE.value)),
+                    left=ast_nodes.BooleanLiteral(False),
                     operator=Operator.EQ,
                     right=ast_nodes.InfixOperation(
                         left=ast_nodes.IntegerLiteral(value=2),
@@ -457,7 +553,7 @@ SINGLE_VALID_IF_AND_EXPECTED: list[tuple[list[Statement], Scope, ExpectedChanged
     (
         [
             ast_nodes.IfStatement(
-                condition=ast_nodes.Identifier("True"),
+                condition=ast_nodes.BooleanLiteral(True),
                 then=ast_nodes.BlockStatement(
                     [
                         ast_nodes.ExpressionStatement(
@@ -478,7 +574,7 @@ SINGLE_VALID_IF_AND_EXPECTED: list[tuple[list[Statement], Scope, ExpectedChanged
     (
         [
             ast_nodes.IfStatement(
-                condition=ast_nodes.Identifier("False"),
+                condition=ast_nodes.BooleanLiteral(False),
                 then=ast_nodes.BlockStatement(
                     [
                         ast_nodes.ExpressionStatement(
@@ -499,7 +595,7 @@ SINGLE_VALID_IF_AND_EXPECTED: list[tuple[list[Statement], Scope, ExpectedChanged
     (
         [
             ast_nodes.IfStatement(
-                condition=ast_nodes.Identifier("False"),
+                condition=ast_nodes.BooleanLiteral(False),
                 then=ast_nodes.BlockStatement(
                     [
                         ast_nodes.ExpressionStatement(
@@ -528,7 +624,7 @@ SINGLE_VALID_IF_AND_EXPECTED: list[tuple[list[Statement], Scope, ExpectedChanged
     (
         [
             ast_nodes.IfStatement(
-                condition=ast_nodes.Identifier("True"),
+                condition=ast_nodes.BooleanLiteral(True),
                 then=ast_nodes.BlockStatement(
                     [
                         ast_nodes.ExpressionStatement(
@@ -660,7 +756,7 @@ SINGLE_VALID_WHILE_AND_EXPECTED: list[
     (
         [
             ast_nodes.WhileStatement(
-                condition=ast_nodes.Identifier("False"),
+                condition=ast_nodes.BooleanLiteral(False),
                 actions=ast_nodes.BlockStatement(
                     [
                         ast_nodes.ExpressionStatement(

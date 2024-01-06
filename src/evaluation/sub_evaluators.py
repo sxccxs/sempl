@@ -33,6 +33,8 @@ def evaluate(node: ASTNode, scope: Scope) -> Result[Value, EvaluationError]:
             return Ok(value_types.Int(node.value))
         case ast_nodes.FloatLiteral():
             return Ok(value_types.Float(node.value))
+        case ast_nodes.BooleanLiteral():
+            return Ok(consts.TrueFalse.from_bool(node.value).value)
         case ast_nodes.Program():
             match evaluate_statements(node.statements, scope):
                 case Err() as err:
@@ -223,6 +225,8 @@ def evaluate_prefix_expression(
             return evaluate_prefix_minus_expression(operand)
         case Operator.PLUS:
             return evaluate_prefix_plus_expression(operand)
+        case Operator.NOT:
+            return evaluate_not_expression(operand)
         case _:
             return Err(errors.UnsuportedPrefixOperator(operator))
 
@@ -249,6 +253,15 @@ def evaluate_prefix_plus_expression(operand: Value) -> Result[Value, EvaluationE
             return Err(errors.UnsuportedPrefixOperation(Operator.PLUS, operand))
 
 
+def evaluate_not_expression(operand: Value) -> Result[value_types.Bool, EvaluationError]:
+    """Applies `not` on given operand if possible."""
+    match operand:
+        case value_types.Bool(value):
+            return Ok(consts.TrueFalse.from_bool(not value).value)
+        case _:
+            return Err(errors.TypeMistmatchError(operand, value_types.Bool))
+
+
 def evaluate_infix_expression(
     left_operand: Value, operator: Operator, right_operand: Value
 ) -> Result[Value, EvaluationError]:
@@ -268,13 +281,15 @@ def evaluate_infix_expression(
             value_types.Int() | value_types.Float(),
         ):
             return evaluate_float_infix_expression(left_operand, operator, right_operand)
+        case (value_types.Bool(), value_types.Bool()):
+            return evaluate_boolean_infix_expression(left_operand, operator, right_operand)
         case _:
             return Err(errors.UnsuportedInfixOperation(left_operand, operator, right_operand))
 
 
 def evaluate_integer_infix_expression(
     left_operand: value_types.Int, operator: Operator, right_operand: value_types.Int
-) -> Result[Value, EvaluationError]:
+) -> Result[value_types.Int, EvaluationError]:
     """
     Applies given binary operator on given integer operands,
     with result of an integer value if possible.
@@ -300,7 +315,7 @@ def evaluate_float_infix_expression(
     left_operand: value_types.Float | value_types.Int,
     operator: Operator,
     right_operand: value_types.Float | value_types.Int,
-) -> Result[Value, EvaluationError]:
+) -> Result[value_types.Float, EvaluationError]:
     """
     Applies given binary operator on given integer/float operands,
     with result of a float value if possible.
@@ -318,6 +333,24 @@ def evaluate_float_infix_expression(
             if right != 0:
                 return Ok(value_types.Float(left / right))
             return Err(errors.DivideByZeroError())
+        case _:
+            return Err(errors.UnsuportedInfixOperation(left_operand, operator, right_operand))
+
+
+def evaluate_boolean_infix_expression(
+    left_operand: value_types.Bool, operator: Operator, right_operand: value_types.Bool
+) -> Result[value_types.Bool, EvaluationError]:
+    """
+    Applies given binary operator on given boolean operands,
+    with result of an boolean value if possible.
+    """
+    left = left_operand.value
+    right = right_operand.value
+    match operator:
+        case Operator.AND:
+            return Ok(consts.TrueFalse.from_bool(left and right).value)
+        case Operator.OR:
+            return Ok(consts.TrueFalse.from_bool(left or right).value)
         case _:
             return Err(errors.UnsuportedInfixOperation(left_operand, operator, right_operand))
 

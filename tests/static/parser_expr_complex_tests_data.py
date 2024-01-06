@@ -52,4 +52,12 @@ VALID_SINGLE_INFIX_OPERATIONS_AND_EXPECTED: list[tuple[list[Token], ExpectedInfi
         ],
         ExpectedInfixOperation(ast_nodes.IntegerLiteral(5), "!=", ast_nodes.IntegerLiteral(5)),
     ),
+    (
+        [Token(TokenType.INT, "5"), Token(TokenType.AND, "and"), Token(TokenType.INT, "5")],
+        ExpectedInfixOperation(ast_nodes.IntegerLiteral(5), "and", ast_nodes.IntegerLiteral(5)),
+    ),
+    (
+        [Token(TokenType.INT, "5"), Token(TokenType.OR, "or"), Token(TokenType.INT, "5")],
+        ExpectedInfixOperation(ast_nodes.IntegerLiteral(5), "or", ast_nodes.IntegerLiteral(5)),
+    ),
 ]

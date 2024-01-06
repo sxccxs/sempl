@@ -28,6 +28,18 @@ LITERAL_TOKEN_MAP: dict[str, Token] = {
         TokenType.LT,
         TokenType.GTEQ,
         TokenType.LTEQ,
+        TokenType.FN,
+        TokenType.IF,
+        TokenType.ELSE,
+        TokenType.RETURN,
+        TokenType.MUT,
+        TokenType.LET,
+        TokenType.WHILE,
+        TokenType.AND,
+        TokenType.OR,
+        TokenType.NOT,
+        TokenType.TRUE,
+        TokenType.FALSE,
     ]
 } | {
     "\n": Token(TokenType.ENDL, "\n"),
@@ -36,13 +48,6 @@ LITERAL_TOKEN_MAP: dict[str, Token] = {
     "name": Token(TokenType.IDENT, "name"),
     "10": Token(TokenType.INT, "10"),
     "1.5": Token(TokenType.FLOAT, "1.5"),
-    "fn": Token(TokenType.FN, "fn"),
-    "if": Token(TokenType.IF, "if"),
-    "else": Token(TokenType.ELSE, "else"),
-    "return": Token(TokenType.RETURN, "return"),
-    "mut": Token(TokenType.MUT, "mut"),
-    "let": Token(TokenType.LET, "let"),
-    "while": Token(TokenType.WHILE, "while"),
 }
 
 INPUT_AND_EXPECTED: dict[str, list[Token]] = {

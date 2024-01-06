@@ -35,6 +35,10 @@ class TestParserComplexExpressionTg:
                 [Token(TokenType.MINUS, "+"), Token(TokenType.FLOAT, "0.3")],
                 ExpectedPrefixOperation("+", ast_nodes.FloatLiteral(0.3)),
             ),
+            (
+                [Token(TokenType.NOT, "not"), Token(TokenType.IDENT, "x")],
+                ExpectedPrefixOperation("not", ast_nodes.Identifier("x")),
+            ),
         ],
         indirect=["lexer_mock"],
     )

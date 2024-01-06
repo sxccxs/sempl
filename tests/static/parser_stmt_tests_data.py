@@ -153,14 +153,14 @@ VALID_IF_STATEMENT_AND_EXPECTED: list[tuple[list[Token], ExpectedIfStatement]] =
     (
         [
             Token(TokenType.IF, literal="if"),
-            Token(TokenType.IDENT, literal="True"),
+            Token(TokenType.TRUE, literal="True"),
             Token(TokenType.LCURLY, literal="{"),
             Token(TokenType.ENDL, literal="\n"),
             Token(TokenType.RCURLY, literal="}"),
             Token(TokenType.ENDL, literal="\n"),
         ],
         ExpectedIfStatement(
-            ast_nodes.Identifier("True"),
+            ast_nodes.BooleanLiteral(True),
             [],
             None,
         ),
@@ -168,7 +168,7 @@ VALID_IF_STATEMENT_AND_EXPECTED: list[tuple[list[Token], ExpectedIfStatement]] =
     (
         [
             Token(TokenType.IF, literal="if"),
-            Token(TokenType.IDENT, literal="True"),
+            Token(TokenType.TRUE, literal="True"),
             Token(TokenType.LCURLY, literal="{"),
             Token(TokenType.ENDL, literal="\n"),
             Token(TokenType.RCURLY, literal="}"),
@@ -179,7 +179,7 @@ VALID_IF_STATEMENT_AND_EXPECTED: list[tuple[list[Token], ExpectedIfStatement]] =
             Token(TokenType.ENDL, literal="\n"),
         ],
         ExpectedIfStatement(
-            ast_nodes.Identifier("True"),
+            ast_nodes.BooleanLiteral(True),
             [],
             [],
         ),
@@ -292,24 +292,24 @@ VALID_IF_STATEMENT_AND_EXPECTED: list[tuple[list[Token], ExpectedIfStatement]] =
     (
         [
             Token(TokenType.IF, literal="if"),
-            Token(TokenType.IDENT, literal="True"),
+            Token(TokenType.TRUE, literal="True"),
             Token(TokenType.LCURLY, literal="{"),
             Token(TokenType.ENDL, literal="\n"),
             Token(TokenType.RCURLY, literal="}"),
             Token(TokenType.ELSE, literal="else"),
             Token(TokenType.IF, literal="if"),
-            Token(TokenType.IDENT, literal="False"),
+            Token(TokenType.FALSE, literal="False"),
             Token(TokenType.LCURLY, literal="{"),
             Token(TokenType.ENDL, literal="\n"),
             Token(TokenType.RCURLY, literal="}"),
             Token(TokenType.ENDL, literal="\n"),
         ],
         ExpectedIfStatement(
-            ast_nodes.Identifier("True"),
+            ast_nodes.BooleanLiteral(True),
             [],
             [
                 ast_nodes.IfStatement(
-                    ast_nodes.Identifier("False"), ast_nodes.BlockStatement([]), None
+                    ast_nodes.BooleanLiteral(False), ast_nodes.BlockStatement([]), None
                 )
             ],
         ),
@@ -317,7 +317,7 @@ VALID_IF_STATEMENT_AND_EXPECTED: list[tuple[list[Token], ExpectedIfStatement]] =
     (
         [
             Token(TokenType.IF, literal="if"),
-            Token(TokenType.IDENT, literal="True"),
+            Token(TokenType.TRUE, literal="True"),
             Token(TokenType.LCURLY, literal="{"),
             Token(TokenType.ENDL, literal="\n"),
             Token(TokenType.RCURLY, literal="}"),
@@ -325,7 +325,7 @@ VALID_IF_STATEMENT_AND_EXPECTED: list[tuple[list[Token], ExpectedIfStatement]] =
             Token(TokenType.LCURLY, literal="{"),
             Token(TokenType.ENDL, literal="\n"),
             Token(TokenType.IF, literal="if"),
-            Token(TokenType.IDENT, literal="False"),
+            Token(TokenType.FALSE, literal="False"),
             Token(TokenType.LCURLY, literal="{"),
             Token(TokenType.ENDL, literal="\n"),
             Token(TokenType.RCURLY, literal="}"),
@@ -334,11 +334,11 @@ VALID_IF_STATEMENT_AND_EXPECTED: list[tuple[list[Token], ExpectedIfStatement]] =
             Token(TokenType.ENDL, literal="\n"),
         ],
         ExpectedIfStatement(
-            ast_nodes.Identifier("True"),
+            ast_nodes.BooleanLiteral(True),
             [],
             [
                 ast_nodes.IfStatement(
-                    ast_nodes.Identifier("False"), ast_nodes.BlockStatement([]), None
+                    ast_nodes.BooleanLiteral(False), ast_nodes.BlockStatement([]), None
                 )
             ],
         ),
@@ -346,7 +346,7 @@ VALID_IF_STATEMENT_AND_EXPECTED: list[tuple[list[Token], ExpectedIfStatement]] =
     (
         [
             Token(TokenType.IF, literal="if"),
-            Token(TokenType.IDENT, literal="True"),
+            Token(TokenType.TRUE, literal="True"),
             Token(TokenType.LCURLY, literal="{"),
             Token(TokenType.ENDL, literal="\n"),
             Token(TokenType.RCURLY, literal="}"),
@@ -354,7 +354,7 @@ VALID_IF_STATEMENT_AND_EXPECTED: list[tuple[list[Token], ExpectedIfStatement]] =
             Token(TokenType.LCURLY, literal="{"),
             Token(TokenType.ENDL, literal="\n"),
             Token(TokenType.IF, literal="if"),
-            Token(TokenType.IDENT, literal="False"),
+            Token(TokenType.FALSE, literal="False"),
             Token(TokenType.LCURLY, literal="{"),
             Token(TokenType.ENDL, literal="\n"),
             Token(TokenType.RCURLY, literal="}"),
@@ -367,11 +367,11 @@ VALID_IF_STATEMENT_AND_EXPECTED: list[tuple[list[Token], ExpectedIfStatement]] =
             Token(TokenType.ENDL, literal="\n"),
         ],
         ExpectedIfStatement(
-            ast_nodes.Identifier("True"),
+            ast_nodes.BooleanLiteral(True),
             [],
             [
                 ast_nodes.IfStatement(
-                    ast_nodes.Identifier("False"),
+                    ast_nodes.BooleanLiteral(False),
                     ast_nodes.BlockStatement([]),
                     ast_nodes.BlockStatement([]),
                 )
@@ -472,20 +472,20 @@ VALID_WHILE_STATEMENT_AND_EXPECTED: list[tuple[list[Token], ExpectedWhileStateme
     (
         [
             Token(TokenType.WHILE, literal="while"),
-            Token(TokenType.IDENT, literal="True"),
+            Token(TokenType.TRUE, literal="True"),
             Token(TokenType.LCURLY, literal="{"),
             Token(TokenType.ENDL, literal="\n"),
             Token(TokenType.RCURLY, literal="}"),
         ],
         ExpectedWhileStatement(
-            ast_nodes.Identifier("True"),
+            ast_nodes.BooleanLiteral(True),
             [],
         ),
     ),
     (
         [
             Token(TokenType.WHILE, literal="while"),
-            Token(TokenType.IDENT, literal="True"),
+            Token(TokenType.TRUE, literal="True"),
             Token(TokenType.LCURLY, literal="{"),
             Token(TokenType.ENDL, literal="\n"),
             Token(TokenType.IDENT, literal="xx"),
@@ -495,7 +495,7 @@ VALID_WHILE_STATEMENT_AND_EXPECTED: list[tuple[list[Token], ExpectedWhileStateme
             Token(TokenType.RCURLY, literal="}"),
         ],
         ExpectedWhileStatement(
-            ast_nodes.Identifier("True"),
+            ast_nodes.BooleanLiteral(True),
             [
                 ast_nodes.ExpressionStatement(
                     ast_nodes.CallExpression(ast_nodes.Identifier("xx"), []),

@@ -8,7 +8,7 @@ INFIX_OPERATIONS_PRECEDENCE_AND_EXPECTED: list[tuple[list[Token], str]] = [
             Token(TokenType.MINUS, literal="-"),
             Token(TokenType.IDENT, literal="a"),
         ],
-        "(-(-a))",
+        "(- (- a))",
     ),
     (
         [
@@ -86,7 +86,7 @@ INFIX_OPERATIONS_PRECEDENCE_AND_EXPECTED: list[tuple[list[Token], str]] = [
             Token(TokenType.LT, literal="<"),
             Token(TokenType.INT, literal="4"),
         ],
-        "((5 > 4) == (3 < 4))",
+        "(((5 > 4) == 3) < 4)",
     ),
     (
         [
@@ -98,7 +98,7 @@ INFIX_OPERATIONS_PRECEDENCE_AND_EXPECTED: list[tuple[list[Token], str]] = [
             Token(TokenType.GT, literal=">"),
             Token(TokenType.INT, literal="4"),
         ],
-        "((5 < 4) != (3 > 4))",
+        "(((5 < 4) != 3) > 4)",
     ),
     (
         [
@@ -249,7 +249,7 @@ GROUPED_EXPRESSION_AND_EXPECTED: list[tuple[list[Token], str]] = [
             Token(type=TokenType.INT, literal="5"),
             Token(type=TokenType.RPAREN, literal=")"),
         ],
-        "(-(5 + 5))",
+        "(- (5 + 5))",
     ),
     (
         [
@@ -268,5 +268,44 @@ GROUPED_EXPRESSION_AND_EXPECTED: list[tuple[list[Token], str]] = [
             Token(type=TokenType.RPAREN, literal=")"),
         ],
         "(1 + (2 + (3 + 4)))",
+    ),
+    (
+        [
+            Token(TokenType.IDENT, literal="x"),
+            Token(TokenType.ASSIGN, literal="="),
+            Token(TokenType.INT, literal="10"),
+            Token(TokenType.PLUS, literal="+"),
+            Token(TokenType.INT, literal="10"),
+            Token(TokenType.ASTERIX, literal="*"),
+            Token(TokenType.INT, literal="2"),
+        ],
+        "(x = (10 + (10 * 2)))",
+    ),
+    (
+        [
+            Token(TokenType.LPAREN, literal="("),
+            Token(TokenType.IDENT, literal="x"),
+            Token(TokenType.ASSIGN, literal="="),
+            Token(TokenType.INT, literal="10"),
+            Token(TokenType.PLUS, literal="+"),
+            Token(TokenType.INT, literal="10"),
+            Token(TokenType.ASTERIX, literal="*"),
+            Token(TokenType.INT, literal="2"),
+            Token(TokenType.RPAREN, literal=")"),
+            Token(TokenType.EQ, literal="=="),
+            Token(TokenType.INT, literal="5"),
+        ],
+        "((x = (10 + (10 * 2))) == 5)",
+    ),
+    (
+        [
+            Token(TokenType.IDENT, literal="x"),
+            Token(TokenType.OR, literal="or"),
+            Token(TokenType.IDENT, literal="y"),
+            Token(TokenType.AND, literal="and"),
+            Token(TokenType.NOT, literal="not"),
+            Token(TokenType.IDENT, literal="z"),
+        ],
+        "(x or (y and (not z)))",
     ),
 ]

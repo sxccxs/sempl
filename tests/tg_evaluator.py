@@ -49,14 +49,12 @@ def scope() -> YieldFixture[Scope]:
 @pytest.fixture
 def evaluator(scope: Scope) -> YieldFixture[Evaluator]:
     """Creates evaluator with required scope."""
-    print(scope)
     yield Evaluator(scope)
 
 
 @pytest.fixture
 def ok_eval_res(parser_mock: IParser, evaluator: Evaluator) -> YieldFixture[Value]:
     """Gets ok value from evaluation result with parser mock."""
-    print(evaluator.scope)
     result = evaluator.evaluate(parser_mock)
     assert is_ok(result), "Evaluation unexpetedly failed."
     yield result.ok_value
@@ -114,6 +112,33 @@ class TestEvaluatorTg:
     @pytest.mark.parametrize(
         ("parser_mock", "expected"),
         [
+            ([ast_nodes.BooleanLiteral(True)], True),
+            ([ast_nodes.BooleanLiteral(False)], False),
+        ],
+        indirect=["parser_mock"],
+    )
+    def test_eval_valid_boolean_expression(self, ok_eval_res: Value, expected: bool) -> None:
+        """
+        Tests evaluation of program with one boolean literal.
+
+        Arrange: Provide statements to Parser Mock.
+
+        Act: Evaluate program from parser.
+        Assert: No error returned.
+        Assert: Returned value is of type Bool.
+        Assert: Returned value is equal to expected.
+        Assert: The correct constant object is used.
+        """
+        assert isinstance(ok_eval_res, value_types.Bool), "Evaluated is of invalid type."
+        assert ok_eval_res.value == expected, "Invalid evaluated value."
+        if ok_eval_res.value:
+            assert ok_eval_res is consts.TrueFalse.TRUE.value, "Invalid True object."
+        else:
+            assert ok_eval_res is consts.TrueFalse.FALSE.value, "Invalid False object."
+
+    @pytest.mark.parametrize(
+        ("parser_mock", "expected"),
+        [
             (
                 [ast_nodes.PrefixOperation(Operator.MINUS, ast_nodes.IntegerLiteral(5))],
                 value_types.Int(-5),
@@ -130,26 +155,6 @@ class TestEvaluatorTg:
                 [ast_nodes.PrefixOperation(Operator.MINUS, ast_nodes.FloatLiteral(0.0))],
                 value_types.Float(0.0),
             ),
-        ],
-        indirect=["parser_mock"],
-    )
-    def test_eval_valid_unary_minus(self, ok_eval_res: Value, expected: Value) -> None:
-        """
-        Tests evaluation of program with one valid unary minus operation.
-
-        Arrange: Provide statements to Parser Mock.
-
-        Act: Evaluate program from parser.
-        Assert: No error returned.
-        Assert: Returned value is of expected type.
-        Assert: Returned value is equal to expected.
-        """
-        assert isinstance(ok_eval_res, type(expected)), "Evaluated is of invalid type."
-        assert ok_eval_res == expected, "Invalid evaluated."
-
-    @pytest.mark.parametrize(
-        ("parser_mock", "expected"),
-        [
             (
                 [ast_nodes.PrefixOperation(Operator.PLUS, ast_nodes.IntegerLiteral(5))],
                 value_types.Int(5),
@@ -166,12 +171,20 @@ class TestEvaluatorTg:
                 [ast_nodes.PrefixOperation(Operator.PLUS, ast_nodes.FloatLiteral(0.0))],
                 value_types.Float(0.0),
             ),
+            (
+                [ast_nodes.PrefixOperation(Operator.NOT, ast_nodes.BooleanLiteral(True))],
+                consts.TrueFalse.FALSE.value,
+            ),
+            (
+                [ast_nodes.PrefixOperation(Operator.NOT, ast_nodes.BooleanLiteral(False))],
+                consts.TrueFalse.TRUE.value,
+            ),
         ],
         indirect=["parser_mock"],
     )
-    def test_eval_valid_unary_plus(self, ok_eval_res: Value, expected: Value) -> None:
+    def test_eval_valid_prefix_operator(self, ok_eval_res: Value, expected: Value) -> None:
         """
-        Tests evaluation of program with one valid unary plus operation.
+        Tests evaluation of program with one valid unary minus operation.
 
         Arrange: Provide statements to Parser Mock.
 

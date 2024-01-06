@@ -3,8 +3,9 @@
 from io import StringIO
 from typing import TextIO
 
+from src.helpers.enum_helpers import enum_contains
 from src.lexer import matchers
-from src.lexer.tokens import KEYWORDS, Token, TokenType
+from src.lexer.tokens import Keyword, Token, TokenType
 
 
 class Lexer:
@@ -96,7 +97,9 @@ class Lexer:
     @staticmethod
     def _create_identifier_token(literal: str) -> Token:
         """Creates a keyword token or an identifier token."""
-        return Token(KEYWORDS.get(literal, TokenType.IDENT), literal)
+        if enum_contains(Keyword, literal):
+            return Token(TokenType(literal), literal)
+        return Token(TokenType.IDENT, literal)
 
     @staticmethod
     def _create_number_token(literal: str) -> Token:

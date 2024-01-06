@@ -3,6 +3,23 @@ from enum import StrEnum, auto
 from typing import NamedTuple
 
 
+class Keyword(StrEnum):
+    """Key words."""
+
+    TRUE = "True"
+    FALSE = "False"
+    LET = "let"
+    IF = "if"
+    ELSE = "else"
+    MUT = "mut"
+    RETURN = "return"
+    FN = "fn"
+    WHILE = "while"
+    AND = "and"
+    OR = "or"
+    NOT = "not"
+
+
 class TokenType(StrEnum):
     """Token type."""
 
@@ -40,13 +57,18 @@ class TokenType(StrEnum):
     LTEQ = "<="
 
     # keywords
-    FN = auto()
-    LET = auto()
-    IF = auto()
-    ELSE = auto()
-    MUT = auto()
-    RETURN = auto()
-    WHILE = auto()
+    FN = Keyword.FN.value
+    LET = Keyword.LET.value
+    IF = Keyword.IF.value
+    ELSE = Keyword.ELSE.value
+    MUT = Keyword.MUT.value
+    RETURN = Keyword.RETURN.value
+    WHILE = Keyword.WHILE.value
+    AND = Keyword.AND.value
+    TRUE = Keyword.TRUE.value
+    FALSE = Keyword.FALSE.value
+    OR = Keyword.OR.value
+    NOT = Keyword.NOT.value
 
 
 class Token(NamedTuple):
@@ -54,27 +76,3 @@ class Token(NamedTuple):
 
     type: TokenType
     literal: str
-
-
-class Keyword(StrEnum):
-    """Key words."""
-
-    LET = "let"
-    IF = "if"
-    ELSE = "else"
-    MUT = "mut"
-    RETURN = "return"
-    FN = "fn"
-    WHILE = "while"
-
-
-# Key words to token types mapping.
-KEYWORDS: dict[str, TokenType] = {
-    Keyword.LET.value: TokenType.LET,
-    Keyword.IF.value: TokenType.IF,
-    Keyword.ELSE.value: TokenType.ELSE,
-    Keyword.MUT.value: TokenType.MUT,
-    Keyword.RETURN.value: TokenType.RETURN,
-    Keyword.FN.value: TokenType.FN,
-    Keyword.WHILE.value: TokenType.WHILE,
-}

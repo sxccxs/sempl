@@ -3,14 +3,14 @@ from result import Err, Ok, Result, is_err
 
 from src.ast import ast_nodes
 from src.ast.abstract import Expression
-from src.helpers.enum_helpers import enum_contains
-from src.helpers.result_helpers import results_gather
-from src.lexer.tokens import TokenType
 from src.errors.parser_errors import (
     ExpressionValidationError,
     InvalidTokenTypeInExpression,
     UnsupportedExpressionError,
 )
+from src.helpers.enum_helpers import enum_contains
+from src.helpers.result_helpers import results_gather
+from src.lexer.tokens import TokenType
 from src.parser.parser_base import BaseParser
 from src.parser.types import Operator, Precedence
 
@@ -98,6 +98,24 @@ def parse_float_literal(
     except ValueError as err:
         return Err(ExpressionValidationError(f"Unexpected error in float literal: {err}"))
     return Ok(ast_nodes.FloatLiteral(value))
+
+
+def parse_boolean_literal(
+    parser: BaseParser,
+) -> Result[ast_nodes.BooleanLiteral, ExpressionValidationError]:
+    """
+    Parses an BooleanLiteral expression from current token of provided parser.
+    Expected and checked parser.current_token is TRUE or FALSE.
+    After the successful read, parser.current_token does not change.
+    """
+    if not parser.cur_token_is(TokenType.FALSE) and not parser.cur_token_is(TokenType.TRUE):
+        return Err(
+            ExpressionValidationError(
+                f"Token in expressin was expected to be {repr(TokenType.TRUE)} "
+                f"or {repr(TokenType.FALSE)}, but actually was {parser.current_token.type}."
+            )
+        )
+    return Ok(ast_nodes.BooleanLiteral(value=parser.cur_token_is(TokenType.TRUE)))
 
 
 def parse_prefix_operation(
@@ -264,6 +282,6 @@ def _check_cur_token_is_operator(parser: BaseParser) -> Result[None, ExpressionV
     return Err(
         ExpressionValidationError(
             f"Token in expressin was expected to be a valid Operator, "
-            f"but actually was {parser.current_token.type}."
+            f"but actually was `{parser.current_token.type}`."
         )
     )
