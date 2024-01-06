@@ -117,6 +117,17 @@ def parse_boolean_literal(
         )
     return Ok(ast_nodes.BooleanLiteral(value=parser.cur_token_is(TokenType.TRUE)))
 
+def parse_string_literal(
+    parser: BaseParser,
+) -> Result[ast_nodes.StringLiteral, ExpressionValidationError]:
+    """
+    Parses an StringLiteral expression from current token of provided parser.
+    Expected and checked parser.current_token is a STRING.
+    After the successful read, parser.current_token does not change.
+    """
+    if is_err(res := _check_cur_token(parser, TokenType.STRING)):
+        return res
+    return Ok(ast_nodes.StringLiteral(parser.current_token.literal))
 
 def parse_prefix_operation(
     parser: BaseParser,

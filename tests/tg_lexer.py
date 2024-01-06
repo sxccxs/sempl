@@ -21,7 +21,6 @@ LITERAL_TOKEN_MAP: dict[str, Token] = {
         TokenType.MINUS,
         TokenType.ASTERIX,
         TokenType.SLASH,
-        TokenType.APOSTROPHE,
         TokenType.EQ,
         TokenType.NOT_EQ,
         TokenType.GT,
@@ -48,10 +47,12 @@ LITERAL_TOKEN_MAP: dict[str, Token] = {
     "name": Token(TokenType.IDENT, "name"),
     "10": Token(TokenType.INT, "10"),
     "1.5": Token(TokenType.FLOAT, "1.5"),
+    '"text"': Token(TokenType.STRING, "text"),
+    '"text text2`"': Token(TokenType.STRING, "text text2`"),
 }
 
 INPUT_AND_EXPECTED: dict[str, list[Token]] = {
-    "+-/*=\n)(: '><\n\t": [
+    "+-/*=\n)(: ><\n\t": [
         Token(TokenType.PLUS, "+"),
         Token(TokenType.MINUS, "-"),
         Token(TokenType.SLASH, "/"),
@@ -61,7 +62,6 @@ INPUT_AND_EXPECTED: dict[str, list[Token]] = {
         Token(TokenType.RPAREN, ")"),
         Token(TokenType.LPAREN, "("),
         Token(TokenType.COLON, ":"),
-        Token(TokenType.APOSTROPHE, "'"),
         Token(TokenType.GT, ">"),
         Token(TokenType.LT, "<"),
         Token(TokenType.ENDL, "\n"),

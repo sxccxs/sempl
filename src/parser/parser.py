@@ -94,6 +94,7 @@ class Parser(BaseParser):
             (TokenType.FLOAT, expr_sub_parsers.parse_float_literal),
             (TokenType.TRUE, expr_sub_parsers.parse_boolean_literal),
             (TokenType.FALSE, expr_sub_parsers.parse_boolean_literal),
+            (TokenType.STRING, expr_sub_parsers.parse_string_literal),
             (TokenType.NOT, expr_sub_parsers.parse_prefix_operation),
             (TokenType.MINUS, expr_sub_parsers.parse_prefix_operation),
             (TokenType.PLUS, expr_sub_parsers.parse_prefix_operation),

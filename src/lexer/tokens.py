@@ -31,6 +31,7 @@ class TokenType(StrEnum):
     INT = auto()
     FLOAT = auto()
     IDENT = auto()
+    STRING = auto()
 
     LCURLY = "{"
     RCURLY = "}"
@@ -39,7 +40,6 @@ class TokenType(StrEnum):
     COLON = ":"
     ARROW = "->"
     COMA = ","
-    APOSTROPHE = "'"
     ASSIGN = "="
 
     # operators

@@ -51,6 +51,16 @@ class Float(NumericValue):
 
 
 @dataclass(frozen=True)
+class String(ValuedValue):
+    """String value."""
+
+    value: str
+
+    def __str__(self) -> str:
+        return f'"{self.value}"'
+
+
+@dataclass(frozen=True)
 class Type(ValuedValue):
     """Type value."""
 

@@ -33,6 +33,8 @@ def evaluate(node: ASTNode, scope: Scope) -> Result[Value, EvaluationError]:
             return Ok(value_types.Int(node.value))
         case ast_nodes.FloatLiteral():
             return Ok(value_types.Float(node.value))
+        case ast_nodes.StringLiteral():
+            return Ok(value_types.String(node.value))
         case ast_nodes.BooleanLiteral():
             return Ok(consts.TrueFalse.from_bool(node.value).value)
         case ast_nodes.Program():

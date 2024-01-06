@@ -23,3 +23,8 @@ def is_whitespace(char: str) -> bool:
 def is_valid_unsigned_float(num: str) -> bool:
     """Returns True if given string is a valid unsigned float number."""
     return bool(re.fullmatch(r"[0-9]+\.[0-9]*", num))
+
+
+def is_valid_string_literal(string: str) -> bool:
+    """Returns True if given string is a valid single string literal."""
+    return bool(re.fullmatch(r'".*?"', string))

@@ -133,7 +133,7 @@ class TestParserLiteralExpressionTg:
         self, expression_stmt: ast_nodes.ExpressionStatement, expected: bool
     ) -> None:
         """
-        Tests parser parsing single integer literal correctly.
+        Tests parser parsing single boolean literal correctly.
 
         Arrange: Provide tokens to Lexer Mock.
         Arrange: Create Parser with Lexer Mock.
@@ -151,3 +151,34 @@ class TestParserLiteralExpressionTg:
         ), f"Unexpected expression in ExpressionStatement of type `{type(expr)}`."
 
         assert expr.value == expected, "Invalid boolean literal value."
+
+    @pytest.mark.parametrize(
+        ("lexer_mock", "expected"),
+        [
+            ([Token(TokenType.STRING, "True")], "True"),
+            ([Token(TokenType.STRING, "False False")], "False False"),
+        ],
+        indirect=["lexer_mock"],
+    )
+    def test_single_valid_string_literal_expression(
+        self, expression_stmt: ast_nodes.ExpressionStatement, expected: str
+    ) -> None:
+        """
+        Tests parser parsing single string literal correctly.
+
+        Arrange: Provide tokens to Lexer Mock.
+        Arrange: Create Parser with Lexer Mock.
+
+        Act: Parse program.
+        Assert: No error returned.
+        Assert: Program contains only one statement.
+        Assert: Statement is ExpressionStatement.
+        Assert: Underlying expression is StringLiteral.
+        Assert: StringLiteral value is equal to the expected value.
+        """
+        expr = expression_stmt.expression
+        assert isinstance(
+            expr, ast_nodes.StringLiteral
+        ), f"Unexpected expression in ExpressionStatement of type `{type(expr)}`."
+
+        assert expr.value == expected, "Invalid string literal value."

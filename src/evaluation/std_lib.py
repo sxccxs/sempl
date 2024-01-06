@@ -11,6 +11,7 @@ STD_LIB = Scope(
         "Int": TypeEntry(value_types.Type(value_types.Int)),
         "Float": TypeEntry(value_types.Type(value_types.Float)),
         "Bool": TypeEntry(value_types.Type(value_types.Bool)),
+        "Str": TypeEntry(value_types.Type(value_types.String)),
         "Singularity": SINGULARITY_TYPE_ENTRY,
         "O": SINGULARITY_TYPE_ENTRY,
         "singularity": VarEntry(SINGULARITY, False, value_types.Type(value_types.Singularity)),

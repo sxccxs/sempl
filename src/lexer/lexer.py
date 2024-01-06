@@ -64,6 +64,23 @@ class Lexer:
             self._read_char()
         return sio.getvalue()
 
+    def _read_string_literal(self) -> str:
+        """
+        Reads string literal from input stream.
+        After reading lexer points to the last
+        symbol of string literal (correctly closing `"`).
+        """
+        if self.current_char != '"':
+            return ""
+        sio = StringIO()
+        sio.write(self.current_char)
+        self._read_char()
+        while self.current_char not in ('"', "\0"):
+            sio.write(self.current_char)
+            self._read_char()
+        sio.write(self.current_char)
+        return sio.getvalue()
+
     def _skip_whitespaces(self) -> None:
         while matchers.is_whitespace(self.current_char):
             self._read_char()
@@ -110,6 +127,13 @@ class Lexer:
             return Token(TokenType.FLOAT, literal)
         return Token(TokenType.ILLEGAL, literal)
 
+    @staticmethod
+    def _create_string_token(literal: str) -> Token:
+        """Creates a string or an illegal token."""
+        if matchers.is_valid_string_literal(literal):
+            return Token(TokenType.STRING, literal.removeprefix('"').removesuffix('"'))
+        return Token(TokenType.ILLEGAL, literal)
+
     def next_token(self) -> Token:
         """Reads a token."""
         token: Token
@@ -139,8 +163,8 @@ class Lexer:
                 token = self._token_from_current_char(TokenType.ASTERIX)
             case "/":
                 token = self._token_from_current_char(TokenType.SLASH)
-            case "'":
-                token = self._token_from_current_char(TokenType.APOSTROPHE)
+            case '"':
+                token = self._create_string_token(self._read_string_literal())
             case "-":
                 token = self._create_2_symbol_token(
                     expected_second_char=">",

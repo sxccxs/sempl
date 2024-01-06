@@ -3,8 +3,7 @@ from dataclasses import dataclass, field
 from io import StringIO
 
 from src.ast.abstract import ASTNode, Expression, Statement
-from src.ast.to_str_helpers import (sio_write_with_after_value,
-                                    sio_write_with_sep)
+from src.ast.to_str_helpers import sio_write_with_after_value, sio_write_with_sep
 from src.lexer.tokens import Keyword
 from src.parser.types import Operator
 
@@ -49,15 +48,26 @@ class FloatLiteral(Expression):
 
     def __str__(self) -> str:
         return str(self.value)
-    
+
+
 @dataclass(slots=True)
 class BooleanLiteral(Expression):
     """Bool literal AST node."""
+
     value: bool
 
     def __str__(self) -> str:
         return Keyword.TRUE.value if self.value else Keyword.FALSE.value
 
+
+@dataclass(slots=True)
+class StringLiteral(Expression):
+    """String literal AST node."""
+
+    value: str
+
+    def __str__(self) -> str:
+        return f'"{self.value}"'
 
 
 @dataclass(slots=True)

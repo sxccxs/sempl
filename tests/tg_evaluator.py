@@ -80,7 +80,6 @@ class TestEvaluatorTg:
         Act: Evaluate program from parser.
         Assert: No error returned.
         Assert: Returned value is of type Integer.
-        Assert: Returned value has value_type of ValueType.INT.
         Assert: Returned value has expected value.
         """
         assert isinstance(ok_eval_res, value_types.Int), "Result is of invalid type."
@@ -103,10 +102,32 @@ class TestEvaluatorTg:
         Act: Evaluate program from parser.
         Assert: No error returned.
         Assert: Returned value is of type Float.
-        Assert: Returned value has value_type of ValueType.FLOAT.
         Assert: Returned value has expected value.
         """
         assert isinstance(ok_eval_res, value_types.Float), "Evaluated is of invalid type."
+        assert ok_eval_res.value == expected, "Invalid evaluated value."
+
+    @pytest.mark.parametrize(
+        ("parser_mock", "expected"),
+        [
+            ([ast_nodes.StringLiteral("10")], "10"),
+            ([ast_nodes.StringLiteral("10 abc")], "10 abc"),
+            ([ast_nodes.StringLiteral("")], ""),
+        ],
+        indirect=["parser_mock"],
+    )
+    def test_eval_valid_string_expression(self, ok_eval_res: Value, expected: str) -> None:
+        """
+        Tests evaluation of program with one string literal.
+
+        Arrange: Provide statements to Parser Mock.
+
+        Act: Evaluate program from parser.
+        Assert: No error returned.
+        Assert: Returned value is of type String.
+        Assert: Returned value has expected value.
+        """
+        assert isinstance(ok_eval_res, value_types.String), "Evaluated is of invalid type."
         assert ok_eval_res.value == expected, "Invalid evaluated value."
 
     @pytest.mark.parametrize(
