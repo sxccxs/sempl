@@ -1,4 +1,4 @@
-"Sempl main"
+"""Sempl main"""
 import argparse
 import pathlib
 import sys
