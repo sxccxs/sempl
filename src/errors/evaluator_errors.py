@@ -159,6 +159,11 @@ class ArgumentBindingError(EvaluationError):
 
 
 @dataclass
+class BuiltInError(EvaluationError):
+    """Evaluation error for built-in functions errors."""
+
+
+@dataclass
 class NoReturnError(EvaluationError):
     """Evaluation error for no return."""
 

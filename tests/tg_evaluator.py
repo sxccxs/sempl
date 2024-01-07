@@ -123,14 +123,14 @@ class TestEvaluatorTg:
         """
         Tests evaluation of program with one string literal.
 
-        Arrange: Provide statements to Parser Mock.
+        Arrange: Provide statements to Parser Mock.Str
 
         Act: Evaluate program from parser.
         Assert: No error returned.
         Assert: Returned value is of type String.
         Assert: Returned value has expected value.
         """
-        assert isinstance(ok_eval_res, value_types.String), "Evaluated is of invalid type."
+        assert isinstance(ok_eval_res, value_types.Str), "Evaluated is of invalid type."
         assert ok_eval_res.value == expected, "Invalid evaluated value."
 
     @pytest.mark.parametrize(

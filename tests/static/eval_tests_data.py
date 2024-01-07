@@ -821,9 +821,9 @@ SINGLE_VALID_INDEX_AND_EXPECTED: list[
         Scope(
             {
                 "x": VarEntry(
-                    value_types.Array([value_types.Int(0), value_types.Int(1)]),
+                    value_types.Arr([value_types.Int(0), value_types.Int(1)]),
                     True,
-                    value_types.Type(value_types.Array),
+                    value_types.Type(value_types.Arr),
                 )
             },
             STD_LIB,
@@ -841,9 +841,9 @@ SINGLE_VALID_INDEX_AND_EXPECTED: list[
         Scope(
             {
                 "x": VarEntry(
-                    value_types.String("abc"),
+                    value_types.Str("abc"),
                     True,
-                    value_types.Type(value_types.String),
+                    value_types.Type(value_types.Str),
                 )
             },
             STD_LIB,

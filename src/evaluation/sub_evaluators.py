@@ -10,21 +10,11 @@ from src.ast.abstract import ASTNode, Statement
 from src.errors import evaluator_errors as errors
 from src.errors.evaluator_errors import EvaluationError
 from src.evaluation.values import consts, value_types
-from src.evaluation.values.scope import (
-    BaseFuncEntry,
-    BuiltInFuncEntry,
-    FuncEntry,
-    FuncParam,
-    Scope,
-    VarEntry,
-)
-from src.evaluation.values.value_base import (
-    IndexValueMixin,
-    NumericValue,
-    SequenceValue,
-    Value,
-    ValuedValue,
-)
+from src.evaluation.values.scope import (BaseFuncEntry, BuiltInFuncEntry,
+                                         FuncEntry, FuncParam, Scope, VarEntry)
+from src.evaluation.values.value_base import (IndexValueMixin, NumericValue,
+                                              SequenceValue, Value,
+                                              ValuedValue)
 from src.helpers.result_helpers import err_with_note, results_gather
 from src.parser.types import Operator
 
@@ -47,7 +37,7 @@ def evaluate(node: ASTNode, scope: Scope) -> Result[Value, EvaluationError]:
         case ast_nodes.FloatLiteral():
             return Ok(value_types.Float(node.value))
         case ast_nodes.StringLiteral():
-            return Ok(value_types.String(node.value))
+            return Ok(value_types.Str(node.value))
         case ast_nodes.BooleanLiteral():
             return Ok(consts.TrueFalse.from_bool(node.value).value)
         case ast_nodes.ArrayLiteral():
@@ -55,7 +45,7 @@ def evaluate(node: ASTNode, scope: Scope) -> Result[Value, EvaluationError]:
                 case Err() as err:
                     return err
                 case Ok(values):
-                    return Ok(value_types.Array(values))
+                    return Ok(value_types.Arr(values))
         case ast_nodes.Program():
             match evaluate_statements(node.statements, scope):
                 case Err() as err:
@@ -172,6 +162,9 @@ def evaluate_let_statement(
             return err_with_note_(errors.ExpectedTypeIdentifierError(var_type))
     if not isinstance(var_value, var_type.value):
         return err_with_note_(errors.TypeMistmatchError(var_value, var_type.value))
+    if var_type.value is value_types.Arr and not node.is_mut:
+        return err_with_note_(EvaluationError(f"Value of type {value_types.Arr.__name__} "
+                                              "must be mutable."))
     scope[node.var_name.value] = VarEntry(var_value, node.is_mut, var_type)
     return Ok(consts.NO_EFFECT)
 

@@ -59,20 +59,20 @@ class Float(NumericValue):
 
 
 @dataclass(frozen=True)
-class String(SequenceValue[str]):
+class Str(SequenceValue[str]):
     """String value."""
 
     value: str
 
     def get_value_from_index(self, index: int) -> Value:
-        return String(self.value[index])
+        return Str(self.value[index])
 
     def __str__(self) -> str:
         return f'"{self.value}"'
 
 
 @dataclass(frozen=True)
-class Array(SequenceValue[Value]):
+class Arr(SequenceValue[Value]):
     """Array value."""
 
     value: list[Value]
