@@ -25,12 +25,6 @@ Installing all dependencies:
 python -m pip install -r requirements.txt
 
 ```
-## Tests
-Running all tests (requires dev dependencies):
-```
-pytest ${TEST_DIR}/tg*.py -vvv --md-report --md-report-output=./reports/report.md
-```
-(Needed pytest parameters can be used to selecet some tests.)
 
 ## Running
 
@@ -56,3 +50,9 @@ chmod +x ./sempl
 ./sempl [filename]
 ```
 
+## Tests
+Running all tests (requires dev dependencies):
+```
+pytest ${TEST_DIR}/tg*.py -vvv --md-report --md-report-output=./reports/report.md
+```
+(Needed pytest parameters can be used to selecet some tests.)

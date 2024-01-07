@@ -23,7 +23,7 @@ STD_LIB = Scope(
         value_types.Bool.__name__: TypeEntry(value_types.Type(value_types.Bool)),
         value_types.Str.__name__: TypeEntry(value_types.Type(value_types.Str)),
         value_types.Arr.__name__: TypeEntry(value_types.Type(value_types.Arr)),
-        "Singularity": SINGULARITY_TYPE_ENTRY,
+        value_types.Singularity.__name__: SINGULARITY_TYPE_ENTRY,
         "O": SINGULARITY_TYPE_ENTRY,
         "singularity": VarEntry(SINGULARITY, False, value_types.Type(value_types.Singularity)),
         "print": PRINT_ENTRY,
