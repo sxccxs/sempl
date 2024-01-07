@@ -27,14 +27,28 @@ def _append(arr: value_types.Arr, value: Value) -> Ok[value_types.Singularity]:
     return Ok(consts.SINGULARITY)
 
 
-def _remove(
-    arr: value_types.Arr, value: Value
-) -> Result[value_types.Singularity, EvaluationError]:
+def _remove(arr: value_types.Arr, value: Value) -> Result[value_types.Singularity, EvaluationError]:
     try:
         arr.value.remove(value)
     except ValueError:
         return Err(BuiltInError(f"Value `{value}` is not in array."))
     return Ok(consts.SINGULARITY)
+
+
+def _int(value: ValuedValue[Any]) -> Result[value_types.Int, EvaluationError]:
+    try:
+        int_value = int(value.value)
+    except ValueError:
+        return Err(BuiltInError(f"Integer value expected, got `{value.value}`."))
+    return Ok(value_types.Int(int_value))
+
+
+def _float(value: ValuedValue[Any]) -> Result[value_types.Float, EvaluationError]:
+    try:
+        float_value = float(value.value)
+    except ValueError:
+        return Err(BuiltInError(f"Numeric value expected, got `{value.value}`."))
+    return Ok(value_types.Float(float_value))
 
 
 PRINT_ENTRY = BuiltInFuncEntry(
@@ -78,4 +92,20 @@ REMOVE_ENTRY = BuiltInFuncEntry(
     ],
     value_types.Type(value_types.Singularity),
     _remove,
+)
+
+INT_ENTRY = BuiltInFuncEntry(
+    [
+        FuncParam("value", value_types.Type(ValuedValue), None),
+    ],
+    value_types.Type(value_types.Int),
+    _int,
+)
+
+FLOAT_ENTRY = BuiltInFuncEntry(
+    [
+        FuncParam("value", value_types.Type(ValuedValue), None),
+    ],
+    value_types.Type(value_types.Float),
+    _float,
 )

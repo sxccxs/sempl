@@ -1,7 +1,9 @@
 """Std library scope defenition."""
 from src.evaluation.builtin_funcs import (
     APPEND_ENTRY,
+    FLOAT_ENTRY,
     INPUT_ENTRY,
+    INT_ENTRY,
     LEN_ENTRY,
     PRINT_ENTRY,
     REMOVE_ENTRY,
@@ -29,5 +31,7 @@ STD_LIB = Scope(
         "len": LEN_ENTRY,
         "append": APPEND_ENTRY,
         "remove": REMOVE_ENTRY,
+        "int": INT_ENTRY,
+        "float": FLOAT_ENTRY,
     }
 )
