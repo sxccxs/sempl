@@ -1,0 +1,67 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  linting:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: [3.12]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python }}
+
+    - name: Install Poetry
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 - --version 1.7.1
+        export PATH=~/.local/bin:$PATH
+        poetry --version
+
+    - name: Install dependencies
+      run: poetry install
+
+    - name: Run pylint
+      run: poetry run pylint --rcfile=.pylintrc src tests sempl.py
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: [3.11]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python }}
+
+    - name: Install Poetry
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 - --version 1.7.1
+        export PATH=~/.local/bin:$PATH
+        poetry --version
+
+    - name: Install dependencies
+      run: poetry install
+
+    - name: Run tests
+      run: |
+        mkdir -p ./reports
+        poetry run pytest tests/tg*.py -vvv --md-report --md-report-output=./reports/report.md
+
+    - name: Upload test reports
+      if: always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: test-reports
+        path: ./reports

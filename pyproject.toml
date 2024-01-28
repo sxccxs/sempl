@@ -6,7 +6,7 @@ authors = ["Hryhorii Biloshenko <biloshry@cvut.cz>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.12"
 result = "^0.16"
 
 [tool.poetry.group.dev.dependencies]
