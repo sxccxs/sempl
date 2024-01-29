@@ -5,7 +5,7 @@ from typing import Iterable, Iterator
 
 from src.lexer.interfaces import ILexer
 from src.lexer.tokens import Token, TokenType
-from tests.mock.exceptions import UnexpectedMockCallException
+from tests.mock.exceptions import UnexpectedMockCallError
 
 
 class LexerMock(ILexer):
@@ -38,7 +38,7 @@ class LexerMock(ILexer):
             )
             return Token(TokenType.EOF, "\0")
 
-        raise UnexpectedMockCallException(
+        raise UnexpectedMockCallError(
             "Unexpected call of `LexerMock.next_token()`: "
             "the provided sequence of tokens is already exhausted."
         )

@@ -1,11 +1,9 @@
 """Base classes for evaluated values."""
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from decimal import Decimal
-from typing import Generic, Sequence, TypeVar
+from typing import Sequence
 
-V = TypeVar("V")
-Numeric = int | float | Decimal
+type Numeric = int | float
 
 
 @dataclass(frozen=True)
@@ -18,7 +16,7 @@ class Value(ABC):
 
 
 @dataclass(frozen=True)
-class ValuedValue(Generic[V], Value):
+class ValuedValue[V](Value):
     """Base class for evaluated value containing underlying value."""
 
     value: V
@@ -42,17 +40,9 @@ class IndexValueMixin(ABC):
 
 
 @dataclass(frozen=True)
-class SequenceValue(ValuedValue[Sequence[V]]):
+class SequenceValue[V](ValuedValue[Sequence[V]]):
     """Base class for evaluated value containing a sequence underyling value."""
 
     @abstractmethod
     def get_value_from_index(self, index: int) -> Value:
         """Returns data at given index as a Value."""
-
-
-# T = TypeVar("T", bound=Value)
-
-
-# @dataclass(frozen=True)
-# class GenericValue(Generic[T], Value, ABC):
-#     """Type value."""

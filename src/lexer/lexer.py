@@ -30,9 +30,9 @@ class Lexer:
         self.after_char = self.in_stream.read(1)
 
     def _peek_char(self) -> str:
-        """
+        r"""
         Returns the next character, but does not move the lexer.
-        If there is no characters left, returns zero-terminator ("\\0").
+        If there is no characters left, returns zero-terminator ("\0").
         """
         return self.after_char if self.after_char != "" else "\0"
 

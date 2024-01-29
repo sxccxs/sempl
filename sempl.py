@@ -1,4 +1,4 @@
-"""Sempl main"""
+"""Sempl main."""
 import argparse
 import pathlib
 import sys
@@ -23,7 +23,7 @@ def run_file() -> None:
     parser = argparse.ArgumentParser(description="Sempl interpretator", prog="sempl")
     parser.add_argument("file", type=pathlib.Path)
     args = parser.parse_args()
-    with open(args.file, "r", encoding="utf-8") as f:
+    with args.file.open("r") as f:
         match Evaluator().evaluate(Parser(Lexer(f))):
             case Err(err):
                 print(str(err))
@@ -32,7 +32,7 @@ def run_file() -> None:
 
 
 def main() -> None:
-    """Main function"""
+    """Main function."""
     func = run_repl if len(sys.argv) == 1 else run_file
     try:
         func()

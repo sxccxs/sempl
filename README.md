@@ -53,6 +53,6 @@ chmod +x ./sempl
 ## Tests
 Running all tests (requires dev dependencies):
 ```
-pytest ${TEST_DIR}/tg*.py -vvv --md-report --md-report-output=./reports/report.md
+pytest ./tests/tg*.py -vvv --md-report --md-report-output=./reports/report.md
 ```
 (Needed pytest parameters can be used to selecet some tests.)

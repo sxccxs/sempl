@@ -2,8 +2,13 @@
 
 TEST_DIR=./tests
 
-poetry run pylint --rcfile=.pylintrc src tests sempl.py
+poetry run ruff check 
+
+if [[ $? -eq 0 ]]; then
+    echo "RUFF: CHECK SUCCESS"
+fi
 
 mkdir -p ./reports
+poetry run pytest ${TEST_DIR}/tg*.py -vvv --md-report --md-report-output=./reports/report.md $@
 
-poetry run pytest ${TEST_DIR}/tg*.py -vvv --md-report --md-report-output=./reports/report.md 
+# docstring-code-format 

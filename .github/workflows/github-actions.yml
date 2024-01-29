@@ -25,10 +25,10 @@ jobs:
         poetry --version
 
     - name: Install dependencies
-      run: poetry install
+      run: poetry install --no-root
 
-    - name: Run pylint
-      run: poetry run pylint --rcfile=.pylintrc src tests sempl.py
+    - name: Run ruff
+      run: poetry run ruff check
 
   test:
     runs-on: ubuntu-latest
@@ -52,7 +52,7 @@ jobs:
         poetry --version
 
     - name: Install dependencies
-      run: poetry install
+      run: poetry install --no-root
 
     - name: Run tests
       run: |

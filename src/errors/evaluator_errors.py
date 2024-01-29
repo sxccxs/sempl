@@ -35,7 +35,7 @@ class UnsuportedEntryError(EvaluationError):
 
 
 @dataclass
-class UnsuportedPrefixOperator(EvaluationError):
+class UnsuportedPrefixOperatorError(EvaluationError):
     """Evaluation error for prefix operator which is not supported."""
 
     def __init__(self, operator: Operator) -> None:
@@ -43,7 +43,7 @@ class UnsuportedPrefixOperator(EvaluationError):
 
 
 @dataclass
-class UnsuportedPrefixOperation(EvaluationError):
+class UnsuportedPrefixOperationError(EvaluationError):
     """Evaluation error for prefix opperation which is not supported on given ast node type."""
 
     def __init__(self, operator: Operator, operand: Value) -> None:
@@ -53,7 +53,7 @@ class UnsuportedPrefixOperation(EvaluationError):
 
 
 @dataclass
-class UnsuportedInfixOperation(EvaluationError):
+class UnsuportedInfixOperationError(EvaluationError):
     """Evaluation error for infix opperation which is not supported on given ast node types."""
 
     def __init__(self, left: Value, operator: Operator, right: Value) -> None:
@@ -169,5 +169,6 @@ class NoReturnError(EvaluationError):
 
     def __init__(self, func_name: str, ret_type: type[Value]) -> None:
         super().__init__(
-            f"Function {func_name} has to return a value of type {ret_type.__name__} on all code passes."
+            f"Function {func_name} has to return a value of type {ret_type.__name__} "
+            "on all code passes."
         )

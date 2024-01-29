@@ -53,9 +53,7 @@ def ok_len_program(
         ast_nodes.Program: Parsed Program node.
     """
     program_result = parser.parse_program()
-    assert isinstance(
-        program_result, Ok
-    ), f"Unexpected error returned: `{repr(program_result.err())}`."
+    assert isinstance(program_result, Ok), f"Unexpected error returned: `{program_result.err()!r}`."
 
     program = program_result.ok_value
     if expected_stmts_len is not None:

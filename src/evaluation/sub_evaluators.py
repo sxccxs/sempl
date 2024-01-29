@@ -10,11 +10,21 @@ from src.ast.abstract import ASTNode, Statement
 from src.errors import evaluator_errors as errors
 from src.errors.evaluator_errors import EvaluationError
 from src.evaluation.values import consts, value_types
-from src.evaluation.values.scope import (BaseFuncEntry, BuiltInFuncEntry,
-                                         FuncEntry, FuncParam, Scope, VarEntry)
-from src.evaluation.values.value_base import (IndexValueMixin, NumericValue,
-                                              SequenceValue, Value,
-                                              ValuedValue)
+from src.evaluation.values.scope import (
+    BaseFuncEntry,
+    BuiltInFuncEntry,
+    FuncEntry,
+    FuncParam,
+    Scope,
+    VarEntry,
+)
+from src.evaluation.values.value_base import (
+    IndexValueMixin,
+    NumericValue,
+    SequenceValue,
+    Value,
+    ValuedValue,
+)
 from src.helpers.result_helpers import err_with_note, results_gather
 from src.parser.types import Operator
 
@@ -163,8 +173,9 @@ def evaluate_let_statement(
     if not isinstance(var_value, var_type.value):
         return err_with_note_(errors.TypeMistmatchError(var_value, var_type.value))
     if var_type.value is value_types.Arr and not node.is_mut:
-        return err_with_note_(EvaluationError(f"Value of type {value_types.Arr.__name__} "
-                                              "must be mutable."))
+        return err_with_note_(
+            EvaluationError(f"Value of type {value_types.Arr.__name__} " "must be mutable.")
+        )
     scope[node.var_name.value] = VarEntry(var_value, node.is_mut, var_type)
     return Ok(consts.NO_EFFECT)
 
@@ -260,7 +271,7 @@ def evaluate_prefix_expression(
         case Operator.NOT:
             return evaluate_not_expression(operand)
         case _:
-            return Err(errors.UnsuportedPrefixOperator(operator))
+            return Err(errors.UnsuportedPrefixOperatorError(operator))
 
 
 def evaluate_prefix_minus_expression(operand: Value) -> Result[Value, EvaluationError]:
@@ -271,7 +282,7 @@ def evaluate_prefix_minus_expression(operand: Value) -> Result[Value, Evaluation
         case value_types.Float() as f:
             return Ok(value_types.Float(-1 * f.value))
         case _:
-            return Err(errors.UnsuportedPrefixOperation(Operator.MINUS, operand))
+            return Err(errors.UnsuportedPrefixOperationError(Operator.MINUS, operand))
 
 
 def evaluate_prefix_plus_expression(operand: Value) -> Result[Value, EvaluationError]:
@@ -282,7 +293,7 @@ def evaluate_prefix_plus_expression(operand: Value) -> Result[Value, EvaluationE
         case value_types.Float() as f:
             return Ok(f)
         case _:
-            return Err(errors.UnsuportedPrefixOperation(Operator.PLUS, operand))
+            return Err(errors.UnsuportedPrefixOperationError(Operator.PLUS, operand))
 
 
 def evaluate_not_expression(operand: Value) -> Result[value_types.Bool, EvaluationError]:
@@ -309,14 +320,16 @@ def evaluate_infix_expression(
         case (value_types.Int(), value_types.Int()):
             return evaluate_integer_infix_expression(left_operand, operator, right_operand)
         case (
-            value_types.Int() | value_types.Float(),
-            value_types.Int() | value_types.Float(),
+            value_types.Int()
+            | value_types.Float(),
+            value_types.Int()
+            | value_types.Float(),
         ):
             return evaluate_float_infix_expression(left_operand, operator, right_operand)
         case (value_types.Bool(), value_types.Bool()):
             return evaluate_boolean_infix_expression(left_operand, operator, right_operand)
         case _:
-            return Err(errors.UnsuportedInfixOperation(left_operand, operator, right_operand))
+            return Err(errors.UnsuportedInfixOperationError(left_operand, operator, right_operand))
 
 
 def evaluate_integer_infix_expression(
@@ -340,7 +353,7 @@ def evaluate_integer_infix_expression(
                 return Ok(value_types.Int(left // right))
             return Err(errors.DivideByZeroError())
         case _:
-            return Err(errors.UnsuportedInfixOperation(left_operand, operator, right_operand))
+            return Err(errors.UnsuportedInfixOperationError(left_operand, operator, right_operand))
 
 
 def evaluate_float_infix_expression(
@@ -366,7 +379,7 @@ def evaluate_float_infix_expression(
                 return Ok(value_types.Float(left / right))
             return Err(errors.DivideByZeroError())
         case _:
-            return Err(errors.UnsuportedInfixOperation(left_operand, operator, right_operand))
+            return Err(errors.UnsuportedInfixOperationError(left_operand, operator, right_operand))
 
 
 def evaluate_boolean_infix_expression(
@@ -384,7 +397,7 @@ def evaluate_boolean_infix_expression(
         case Operator.OR:
             return Ok(consts.TrueFalse.from_bool(left or right).value)
         case _:
-            return Err(errors.UnsuportedInfixOperation(left_operand, operator, right_operand))
+            return Err(errors.UnsuportedInfixOperationError(left_operand, operator, right_operand))
 
 
 def evaluate_equality_expression(
@@ -397,7 +410,7 @@ def evaluate_equality_expression(
             left_value: Any = left.value  # type: ignore
             right_value: Any = right.value  # type: ignore
         case _:
-            return Err(errors.UnsuportedInfixOperation(left, operator, right))
+            return Err(errors.UnsuportedInfixOperationError(left, operator, right))
 
     match operator:
         case Operator.EQ:
@@ -419,7 +432,7 @@ def evaluate_comparison_expression(
         case (NumericValue(), NumericValue()):
             pass
         case _:
-            return Err(errors.UnsuportedInfixOperation(left, operator, right))
+            return Err(errors.UnsuportedInfixOperationError(left, operator, right))
 
     match operator:
         case Operator.GT:
@@ -471,7 +484,7 @@ def evaluate_function_parameters(
     """
     Evaluates parameters of given function statement if possible.
 
-        Args:
+    Args:
         node (ast_nodes.FuncStatement): Function statement.
         scope (Scope): Scope when function is being defined.
     """
@@ -505,9 +518,10 @@ def evaluate_function_parameter(
     """
     Evaluates given function parameter if possible.
 
-        Args:
-        node (ast_nodes.FuncStatement): Function statement.
+    Args:
+        parameter (ast_nodes.FuncStatement): Function statement.
         scope (Scope): Scope when function is being defined.
+        must_have_default (bool): If a parameter must be optional.
     """
     err_with_note_ = partial(
         err_with_note, note=f"function parameter `{parameter.name.value}` definition"
@@ -594,6 +608,7 @@ def bind_call_arguments(
     """Binds given arguments to given parameters in provided scope if possible.
 
     Args:
+        func_name (str): Name of the function being called.
         params (list[FuncParam]): Function parameters to bind to.
         args (list[Value]): Argument values to bind.
         func_scope (Scope): Function scope where parameters has to be bind.

@@ -15,9 +15,7 @@ class ExpectedLetStatement(NamedTuple):
 
 
 class ExpectedWhileStatement(NamedTuple):
-    """
-    Expected While statement payload.
-    """
+    """Expected While statement payload."""
 
     condition: Expression
     actions_statements: list[Statement]

@@ -1,26 +1,21 @@
 """Results helper functions."""
 from itertools import chain
-from typing import Iterable, TypeVar, overload
+from typing import Iterable, overload
 
 from result import Err, Ok, Result
 
 from src.errors.error import Error
 
-T = TypeVar("T")
-E = TypeVar("E")
-
-ErrT = TypeVar("ErrT", bound=Error)
-
 
 @overload
-def results_gather(*results_it: Result[T, E]) -> Result[list[T], E]:
+def results_gather[T, E](*results_it: Result[T, E]) -> Result[list[T], E]:
     """
     Returns ok values of provided results as a list, if all results were OK.
     Else returns first encountered Err result.
     Ok values order corresponds to the order of results.
 
     Args:
-        *results (Result[T, E]): Results to gather.
+        *results_it (Result[T, E]): Results to gather.
 
     Returns:
         Result[list[T], E]: Result of gathering.
@@ -28,22 +23,7 @@ def results_gather(*results_it: Result[T, E]) -> Result[list[T], E]:
 
 
 @overload
-def results_gather(*results_it: Iterable[Result[T, E]]) -> Result[list[T], E]:
-    """
-    Returns ok values of provided results iterables as a list, if all results were OK.
-    Else returns first encountered Err result.
-    Ok values order corresponds to the order of results.
-
-    Args:
-        *results_it (Iterable[Result[T, E]]): Results iterables to gather.
-
-    Returns:
-        Result[list[T], E]: Result of gathering.
-    """
-
-
-@overload
-def results_gather(results: Iterable[Result[T, E]]) -> Result[list[T], E]:
+def results_gather[T, E](results: Iterable[Result[T, E]]) -> Result[list[T], E]:
     """
     Returns ok values of provided results as a list, if all results were OK.
     Else returns first encountered Err result.
@@ -57,8 +37,23 @@ def results_gather(results: Iterable[Result[T, E]]) -> Result[list[T], E]:
     """
 
 
-def results_gather(
-    results: Iterable[Result[T, E]] | Result[T, E],
+@overload
+def results_gather[T, E](*results_it: Iterable[Result[T, E]]) -> Result[list[T], E]:
+    """
+    Returns ok values of provided results iterables as a list, if all results were OK.
+    Else returns first encountered Err result.
+    Ok values order corresponds to the order of results.
+
+    Args:
+        *results_it (Iterable[Result[T, E]]): Results iterables to gather.
+
+    Returns:
+        Result[list[T], E]: Result of gathering.
+    """
+
+
+def results_gather[T, E](
+    results: Iterable[Result[T, E]] | Result[T, E],  # type: ignore
     *results_it: Iterable[Result[T, E]] | Result[T, E],
 ) -> Result[list[T], E]:
     """
@@ -83,38 +78,38 @@ def results_gather(
 
 
 @overload
-def err_with_note(err: ErrT, note: str, template: str = "Error in {}.") -> Err[ErrT]:
+def err_with_note[E: Error](err: E, note: str, template: str = "Error in {}.") -> Err[E]:
     """
     Creates full note from given template and note,
     adds it to the given Error and returns it as Err[Error].
 
     Args:
-        err (ErrT): Error.
+        err (E): Error.
         note (str): Note part.
         template (str, optional): Note template. Defaults to "Error in {}.".
     """
 
 
 @overload
-def err_with_note(err: Err[ErrT], note: str, template: str = "Error in {}.") -> Err[ErrT]:
+def err_with_note[E: Error](err: Err[E], note: str, template: str = "Error in {}.") -> Err[E]:
     """
     Creates full note from given template and note,
     adds it to the Error of the given Err[Error] and returns it as Err[Error].
 
     Args:
-        err (Err[ErrT]): Err[Error].
+        err (Err[E]): Err[Error].
         note (str): Note part.
         template (str, optional): Note template. Defaults to "Error in {}.".
     """
 
 
-def err_with_note(err: Err[ErrT] | ErrT, note: str, template: str = "Error in {}.") -> Err[ErrT]:
+def err_with_note[E: Error](err: Err[E] | E, note: str, template: str = "Error in {}.") -> Err[E]:
     """
     Creates full note from given template and note,
     adds it to the given Error or Err[Error] and returns it as Err[Error].
 
     Args:
-        err (ErrT | Err[ErrT]): Error or Err[Error].
+        err (E | Err[E]): Error or Err[Error].
         note (str): Note part.
         template (str, optional): Note template. Defaults to "Error in {}.".
     """
