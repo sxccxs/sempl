@@ -15,22 +15,20 @@ jobs:
       with:
         python-version: '3.12'
 
-    - name: Install Poetry
-      run: |
-        curl -sSL https://install.python-poetry.org | python3 - --version 1.7.1
-        export PATH=~/.local/bin:$PATH
-        poetry --version
-    
-    - name: Install Poetry export plugin
-      run: poetry self add poetry-plugin-export
+    - name: Set up Poetry
+      uses: .github/actions/set-up-poetry
+      with:
+        poetry-version: '1.7.1'
 
     - name: Install dependencies
       run: poetry install --no-root
     
-    - name: Poetry freeze dependencies to requirement.txt
-      run: poetry export -f requirements.txt --without-hashes --output requirements.txt
-      shell: bash
-
+    - name: Set up Poetry
+      uses: .github/actions/poetry-freeze
+      with:
+        output-file: 'requirements.txt'
+        extra-args: '--only main'
+      
     - name: Run ruff
       run: poetry run ruff check
 

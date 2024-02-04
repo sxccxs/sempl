@@ -1,0 +1,16 @@
+name: 'Poetry set up'
+description: 'Sets up poetry'
+inputs:
+  poetry-version:
+    description: 'poetry version'
+    required: true
+runs:
+  using: composite
+  steps:
+    - run: |
+        curl -sSL https://install.python-poetry.org | python3 - --version ${{ inputs.poetry-version }}
+        export PATH=~/.local/bin:$PATH
+      shell: bash
+    
+    - run : poetry --version
+      shell: bash
