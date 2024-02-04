@@ -22,7 +22,11 @@ runs:
 
     - run: poetry export -f requirements.txt ${{ inputs.extra-args }} --output ${{ inputs.output-file }}
       shell: bash
-    - run: echo ${{ GITHUB_REF_NAME }}
+
+    - run: echo ${{ github.ref_name }}
+      shell: bash
+    - run: git remote
+      shell: bash
     # - run: |
     #     git config --global user.email "requirements-bot@github.com"
     #     git config --global user.name "Requirements Bot"
