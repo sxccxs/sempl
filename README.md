@@ -9,11 +9,11 @@ SEMPL is an iterpreted, staticly-typed programing language.
 ### Poetry
 Installing all dependencies:
 ```
-poetry install
+poetry install --no-root
 ```
 Instaling only main dependencies:
 ```
-poetry install --only-root
+poetry install --only main
 ```
 Installing only developement dependencies:
 ```
@@ -33,7 +33,7 @@ To start REPl you can use python:
 ```
 python ./sempl.py
 ```
-or use predifined script
+or use predefined script
 ```
 chmod +x ./sempl
 ./sempl
@@ -44,7 +44,7 @@ To run code from file you can use python:
 ```
 python ./sempl.py [filename]
 ```
-or use predifined script
+or use predefined script
 ```
 chmod +x ./sempl
 ./sempl [filename]
@@ -55,4 +55,4 @@ Running all tests (requires dev dependencies):
 ```
 pytest ./tests/tg*.py -vvv --md-report --md-report-output=./reports/report.md
 ```
-(Needed pytest parameters can be used to selecet some tests.)
+(Needed pytest parameters can be used to select some tests.)
