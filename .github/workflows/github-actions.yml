@@ -3,7 +3,7 @@ name: CI
 on: [push, pull_request]
 
 jobs:
-  linting:
+  main:
     runs-on: ubuntu-latest
 
     steps:
@@ -29,6 +29,7 @@ jobs:
     
     - name: Poetry freeze dependencies to requirement.txt
       run: poetry export -f requirements.txt --without-hashes --output requirements.txt
+      shell: bash
 
     - name: Run ruff
       run: poetry run ruff check
