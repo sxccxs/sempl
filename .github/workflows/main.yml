@@ -1,0 +1,44 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Set up Poetry
+      uses: ./.github/actions/set-up-poetry
+      with:
+        poetry-version: '1.7.1'
+
+    - name: Install dependencies
+      run: poetry install --no-root
+    
+    - name: Poetry export
+      uses: ./.github/actions/poetry-freeze
+      with:
+        output-file: 'requirements'
+      
+    - name: Run ruff
+      run: poetry run ruff check
+
+    - name: Run tests
+      run: |
+        mkdir -p ./reports
+        poetry run pytest tests/tg*.py -vvv --md-report --md-report-output=./reports/report.md
+
+    - name: Upload test reports
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-reports
+        path: ./reports

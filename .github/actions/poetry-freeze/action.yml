@@ -1,0 +1,44 @@
+name: 'Poetry freeze'
+description: 'Exports poetry dev and main dependencies to pip requirements'
+inputs:
+  output-file:
+    description: 'Name of the requirements file without extension'
+    required: true
+  file-extension:
+    description: 'Requirements file extension'
+    required: false
+    default: 'txt'
+  dev-postfix:
+    description: 'Dev requirements file postfix'
+    required: false
+    default: 'dev'
+runs:
+  using: composite
+  steps:
+    - run: |
+        poetry self add poetry-plugin-export
+        poetry config warnings.export false
+      shell: bash
+
+    - run: |
+        poetry export -f requirements.txt --only main \
+          --output ${{ inputs.output-file }}.${{ inputs.file-extension }}
+        poetry export -f requirements.txt --with dev \
+          --output ${{ inputs.output-file }}-${{ inputs.dev-postfix }}.${{ inputs.file-extension }}
+      shell: bash
+
+    - run: |
+        if ! git diff --exit-code; then
+          echo "[DEBUG] Requirements change detected."
+          git config --global user.email "requirements-bot@github.com"
+          git config --global user.name "Requirements Bot"
+
+          git add -f ./${{ inputs.output-file }}.${{ inputs.file-extension }} \
+            ./${{ inputs.output-file }}-${{ inputs.dev-postfix }}.${{ inputs.file-extension }}
+          git commit -m "chore: freeze requirements"
+
+          git push origin ${{ github.ref_name }}
+        else
+          echo "[DEBUG] No requirements change."
+        fi
+      shell: bash
