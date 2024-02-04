@@ -43,10 +43,10 @@ class BracesStorage:
 
     def all_closed(self) -> bool:
         """Returns True if all stored brace were closed, else False."""
-        for count in self.storage.values():
-            if count.open_count != count.close_count:
-                return False
-        return True
+        return all(
+            brace_count.open_count == brace_count.close_count
+            for brace_count in self.storage.values()
+        )
 
     def add_line(self, line: str) -> None:
         """Finds all braces in given line and updates counts."""
