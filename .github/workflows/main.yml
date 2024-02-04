@@ -23,7 +23,7 @@ jobs:
     - name: Install dependencies
       run: poetry install --no-root
     
-    - name: Set up Poetry
+    - name: Poetry export
       uses: ./.github/actions/poetry-freeze
       with:
         output-file: 'requirements.txt'
