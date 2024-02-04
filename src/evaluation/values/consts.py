@@ -7,14 +7,14 @@ from src.evaluation.values import value_types
 
 
 class TrueFalse(Enum):
-    """The only two True and False constants"""
+    """The only two True and False constants."""
 
     TRUE = value_types.Bool(True)
     FALSE = value_types.Bool(False)
 
     @classmethod
     def from_bool(cls, value: bool) -> TrueFalse:
-        """Gets value"""
+        """Gets value."""
         return TrueFalse.TRUE if value else TrueFalse.FALSE
 
 

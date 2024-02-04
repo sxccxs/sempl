@@ -67,7 +67,7 @@ def parse_let_statement(
 
     if not parser.peek_token_is(TokenType.ASSIGN):
         return err_with_note_(
-            errors.InvalidTokenTypeInStatement(TokenType.ASSIGN, parser.peek_token.type)
+            errors.InvalidTokenTypeInStatementError(TokenType.ASSIGN, parser.peek_token.type)
         )
 
     parser.next_token()
@@ -165,7 +165,7 @@ def parse_if_statement(
 
     if not parser.move_to_next_if_peek_is(TokenType.LCURLY):
         return err_with_note_(
-            errors.InvalidTokenTypeInStatement(TokenType.LCURLY, parser.peek_token.type)
+            errors.InvalidTokenTypeInStatementError(TokenType.LCURLY, parser.peek_token.type)
         )
 
     match parse_block_statement(parser):
@@ -185,7 +185,9 @@ def parse_if_statement(
         else:  # if there is "else <smth>"
             if not parser.move_to_next_if_peek_is(TokenType.IF):  # if <smth> is not "if"
                 return Err(
-                    errors.InvalidTokenTypeInStatement(TokenType.LCURLY, parser.peek_token.type)
+                    errors.InvalidTokenTypeInStatementError(
+                        TokenType.LCURLY, parser.peek_token.type
+                    )
                 )
             match parse_if_statement(parser):  # if there is "else if"
                 case Err() as err:
@@ -217,7 +219,7 @@ def parse_while_statement(
 
     if not parser.peek_token_is(TokenType.LCURLY):
         return err_with_note_(
-            errors.InvalidTokenTypeInStatement(TokenType.LCURLY, parser.peek_token.type)
+            errors.InvalidTokenTypeInStatementError(TokenType.LCURLY, parser.peek_token.type)
         )
 
     parser.next_token()
@@ -360,7 +362,6 @@ def parse_expression_statement(
     Parses expression statement from current position of provided parser.
     After the successful read, parser.current_token is the last token of the statement.
     """
-
     match parse_expression(parser, Precedence.LOWEST):
         case Err() as err:
             return err
@@ -370,7 +371,7 @@ def parse_expression_statement(
 
 def _check_cur_and_peek_tokens(
     parser: BaseParser, cur_tt: TokenType, peek_tt: TokenType
-) -> Result[None, errors.InvalidTokenTypeInStatement]:
+) -> Result[None, errors.InvalidTokenTypeInStatementError]:
     """
     Checks if current token of parser is `cur_tt`.
     If not, returns corresponding error.
@@ -386,14 +387,14 @@ def _check_cur_and_peek_tokens(
     """
     if not parser.cur_token_is(cur_tt):
         return Err(
-            errors.InvalidTokenTypeInStatement(
+            errors.InvalidTokenTypeInStatementError(
                 cur_tt,
                 parser.current_token.type,
             )
         )
     if not parser.peek_token_is(peek_tt):
         return Err(
-            errors.InvalidTokenTypeInStatement(
+            errors.InvalidTokenTypeInStatementError(
                 peek_tt,
                 parser.peek_token.type,
             )
@@ -411,4 +412,4 @@ def _check_cur_token(
     """
     if parser.cur_token_is(expected_tt):
         return Ok(None)
-    return Err(errors.InvalidTokenTypeInStatement(expected_tt, parser.current_token.type))
+    return Err(errors.InvalidTokenTypeInStatementError(expected_tt, parser.current_token.type))

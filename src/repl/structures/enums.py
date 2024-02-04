@@ -1,4 +1,4 @@
-"""Repl enums"""
+"""Repl enums."""
 from enum import StrEnum
 
 

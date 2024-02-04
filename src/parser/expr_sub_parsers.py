@@ -5,7 +5,7 @@ from src.ast import ast_nodes
 from src.ast.abstract import Expression
 from src.errors.parser_errors import (
     ExpressionValidationError,
-    InvalidTokenTypeInExpression,
+    InvalidTokenTypeInExpressionError,
     UnsupportedExpressionError,
 )
 from src.helpers.enum_helpers import enum_contains
@@ -111,8 +111,8 @@ def parse_boolean_literal(
     if not parser.cur_token_is(TokenType.FALSE) and not parser.cur_token_is(TokenType.TRUE):
         return Err(
             ExpressionValidationError(
-                f"Token in expressin was expected to be {repr(TokenType.TRUE)} "
-                f"or {repr(TokenType.FALSE)}, but actually was {parser.current_token.type}."
+                f"Token in expressin was expected to be {TokenType.TRUE!r} "
+                f"or {TokenType.FALSE!r}, but actually was {parser.current_token.type}."
             )
         )
     return Ok(ast_nodes.BooleanLiteral(value=parser.cur_token_is(TokenType.TRUE)))
@@ -338,7 +338,7 @@ def _check_cur_token(
     """
     if parser.cur_token_is(expected_tt):
         return Ok(None)
-    return Err(InvalidTokenTypeInExpression(expected_tt, parser.current_token.type))
+    return Err(InvalidTokenTypeInExpressionError(expected_tt, parser.current_token.type))
 
 
 def _check_cur_token_is_operator(parser: BaseParser) -> Result[None, ExpressionValidationError]:

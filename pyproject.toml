@@ -1,22 +1,37 @@
 [tool.poetry]
-name = "interpreter"
+name = "Sempl lang"
 version = "0.0.1"
 description = ""
 authors = ["Hryhorii Biloshenko <biloshry@cvut.cz>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.12"
 result = "^0.16"
 
 [tool.poetry.group.dev.dependencies]
-pylint = "^3.0.2"
-black = "^23.11.0"
 ipython = "^8.17.2"
 pytest = "^7.4.3"
 pytest-md-report = "^0.5.0"
-pylint-pytest = "^1.1.7"
+ruff = "^0.1.14"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+include = ["pyproject.toml", "src/**/*.py", "tests/**/*.py", "sempl.py"]
+
+[tool.ruff.lint]
+select = ["F", "E", "W", "I", "N", "RUF", "PL", "ANN", "D", "SIM", "PTH"]
+ignore = ["D401", "D212", "D205", "D418", "D105", "D415", "D107", "PLR0911", "ANN101", "ANN102"]
+extend-fixable = ["D400"]
+extend-select = ["D400"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.pylint]
+max-args = 7

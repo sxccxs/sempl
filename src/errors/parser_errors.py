@@ -1,6 +1,6 @@
 """Parsing errors."""
-from src.lexer.tokens import TokenType
 from src.errors.error import Error
+from src.lexer.tokens import TokenType
 
 
 class ParsingError(Error):
@@ -17,16 +17,18 @@ class ExpressionValidationError(ParsingError):
 
 class UnsupportedExpressionError(ExpressionValidationError):
     """Error for expression which is not supported."""
+
     def __init__(self, token_type: TokenType) -> None:
         """
         Args:
             token_type (TokenType): Token type with which no expression begins.
         """
-        super().__init__(f"Expression from token of type={repr(token_type)} does not exist.")
+        super().__init__(f"Expression from token of type={token_type!r} does not exist.")
 
 
-class InvalidTokenTypeInStatement(StatementValidationError):
+class InvalidTokenTypeInStatementError(StatementValidationError):
     """Error for invalid token in statement."""
+
     def __init__(self, expected_tt: TokenType, received_tt: TokenType) -> None:
         """
         Args:
@@ -34,13 +36,14 @@ class InvalidTokenTypeInStatement(StatementValidationError):
             received_tt (TokenType): Actual token type.
         """
         super().__init__(
-            f"Token in statement was expected to be `{repr(expected_tt)}`, "
-            f"but actually was `{repr(received_tt)}`."
+            f"Token in statement was expected to be `{expected_tt!r}`, "
+            f"but actually was `{received_tt!r}`."
         )
 
 
-class InvalidTokenTypeInExpression(ExpressionValidationError):
+class InvalidTokenTypeInExpressionError(ExpressionValidationError):
     """Error for invalid token in expression."""
+
     def __init__(self, expected_tt: TokenType, received_tt: TokenType) -> None:
         """
         Args:
@@ -48,6 +51,6 @@ class InvalidTokenTypeInExpression(ExpressionValidationError):
             received_tt (TokenType): Actual token type.
         """
         super().__init__(
-            f"Token in expression was expected to be `{repr(expected_tt)}`, "
-            f"but actually was `{repr(received_tt)}`."
+            f"Token in expression was expected to be `{expected_tt!r}`, "
+            f"but actually was `{received_tt!r}`."
         )

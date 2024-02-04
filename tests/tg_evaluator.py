@@ -437,7 +437,8 @@ class TestEvaluatorTg:
         assert isinstance(variable_entry, VarEntry), "Value was stored as a wrond entry type."
         assert isinstance(variable_entry.var_value, SequenceValue), "Value is not a sequence."
         variable_entry.var_value = cast(
-            SequenceValue[Any], variable_entry.var_value  # type: ignore
+            SequenceValue[Any],
+            variable_entry.var_value,  # type: ignore
         )
         assert ok_eval_res == variable_entry.var_value.get_value_from_index(
             expected.index_

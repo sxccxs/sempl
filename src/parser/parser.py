@@ -1,4 +1,6 @@
 """Parser class."""
+from typing import override
+
 from result import Err, Ok, Result
 
 from src.ast import ast_nodes
@@ -29,26 +31,32 @@ class Parser(BaseParser):
         self._register_infix()
 
     @property
+    @override
     def current_token(self) -> Token:
         return self._current_token
 
     @property
+    @override
     def peek_token(self) -> Token:
         return self._peek_token
 
     @property
+    @override
     def prefix_parsers(self) -> dict[TokenType, PrefixParserType]:
         return self._prefix_parsers
 
     @property
+    @override
     def infix_parsers(self) -> dict[TokenType, InfixParserType]:
         return self._infix_parsers
 
     @property
+    @override
     def cur_token_precedence(self) -> Precedence:
         return self._precedences.get(self.current_token.type, Precedence.LOWEST)
 
     @property
+    @override
     def peek_token_precedence(self) -> Precedence:
         return self._precedences.get(self.peek_token.type, Precedence.LOWEST)
 
@@ -152,4 +160,5 @@ class Parser(BaseParser):
             (TokenType.LSQUARE, Precedence.CALL),
         ]
         for tt, prec in tt_and_prec:
+            self.set_precedence(tt, prec)
             self.set_precedence(tt, prec)

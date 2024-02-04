@@ -1,5 +1,5 @@
 """Mock errors."""
 
 
-class UnexpectedMockCallException(Exception):
+class UnexpectedMockCallError(Exception):
     """Error for unexpected mock call."""

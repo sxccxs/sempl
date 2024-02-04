@@ -1,6 +1,7 @@
 """Concrete evaluated values types."""
 from dataclasses import dataclass
 from io import StringIO
+from typing import override
 
 from src.evaluation.values.value_base import (
     IndexValueMixin,
@@ -33,6 +34,7 @@ class Int(NumericValue, IndexValueMixin):
 
     value: int
 
+    @override
     def index(self) -> int:
         return self.value
 
@@ -64,6 +66,7 @@ class Str(SequenceValue[str]):
 
     value: str
 
+    @override
     def get_value_from_index(self, index: int) -> Value:
         return Str(self.value[index])
 
@@ -77,6 +80,7 @@ class Arr(SequenceValue[Value]):
 
     value: list[Value]
 
+    @override
     def get_value_from_index(self, index: int) -> Value:
         return self.value[index]
 

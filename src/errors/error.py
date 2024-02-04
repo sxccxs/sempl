@@ -1,10 +1,11 @@
+"""Base Error type."""
 from dataclasses import dataclass, field
 from io import StringIO
 
 
 @dataclass(slots=True)
 class Error:
-    """Base error type."""
+    """Base Error type."""
 
     msg: str
     notes: list[str] = field(init=False, default_factory=list)
