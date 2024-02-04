@@ -16,7 +16,7 @@ jobs:
         python-version: '3.12'
 
     - name: Set up Poetry
-      uses: .github/actions/set-up-poetry
+      uses: ./.github/actions/set-up-poetry
       with:
         poetry-version: '1.7.1'
 
@@ -24,7 +24,7 @@ jobs:
       run: poetry install --no-root
     
     - name: Set up Poetry
-      uses: .github/actions/poetry-freeze
+      uses: ./.github/actions/poetry-freeze
       with:
         output-file: 'requirements.txt'
         extra-args: '--only main'
