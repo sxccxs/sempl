@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "Sempl lang"
-version = "0.0.1"
+version = "0.0.2"
 description = "Sempl programing language"
 authors = ["Hryhorii Biloshenko <hryhorii.biloshenko@gmail.com>"]
 readme = "README.md"
