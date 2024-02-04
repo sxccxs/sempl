@@ -23,14 +23,10 @@ runs:
     - run: poetry export -f requirements.txt ${{ inputs.extra-args }} --output ${{ inputs.output-file }}
       shell: bash
 
-    - run: echo ${{ github.ref_name }}
+    - run: |
+        git config --global user.email "requirements-bot@github.com"
+        git config --global user.name "Requirements Bot"
+        git add ./${{ inputs.output-file }}
+        git commit -m "chore: freeze requirements"
+        git push origin ${{ github.ref_name }}
       shell: bash
-    - run: git remote
-      shell: bash
-    # - run: |
-    #     git config --global user.email "requirements-bot@github.com"
-    #     git config --global user.name "Requirements Bot"
-    #     git add ./${{ inputs.output-file }}
-    #     git commit -m "chore: freeze requirements"
-    #     # git push origin
-    #   shell: bash
