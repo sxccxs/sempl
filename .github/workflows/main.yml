@@ -26,7 +26,7 @@ jobs:
     - name: Poetry export
       uses: ./.github/actions/poetry-freeze
       with:
-        output-file: 'requirements.txt'
+        output-file: 'requirements'
       
     - name: Run ruff
       run: poetry run ruff check

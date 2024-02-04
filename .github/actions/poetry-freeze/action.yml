@@ -11,7 +11,7 @@ inputs:
   dev-postfix:
     description: 'Dev requirements file postfix'
     required: false
-    default: 'txt'
+    default: 'dev'
 runs:
   using: composite
   steps:
