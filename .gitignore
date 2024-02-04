@@ -1,6 +1,7 @@
 .vscode
 tmp
 reports/
+*.txt
 
 *.doc*
 # Byte-compiled / optimized / DLL files

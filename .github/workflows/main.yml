@@ -27,7 +27,6 @@ jobs:
       uses: ./.github/actions/poetry-freeze
       with:
         output-file: 'requirements.txt'
-        extra-args: '--only main'
       
     - name: Run ruff
       run: poetry run ruff check

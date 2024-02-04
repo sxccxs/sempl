@@ -1,16 +1,17 @@
 name: 'Poetry freeze'
-description: 'Exports poetry requirements to pip requirements format'
+description: 'Exports poetry dev and main dependencies to pip requirements'
 inputs:
   output-file:
-    description: 'Name of the output file'
+    description: 'Name of the requirements file without extension'
     required: true
-  extra-args:
-    description: 'Extra poetry arguments'
-    required: true
-outputs:
-  requirements-file:
-    description: Pip requirements file
-    value: ${{ inputs.output-file }}
+  file-extension:
+    description: 'Requirements file extension'
+    required: false
+    default: 'txt'
+  dev-postfix:
+    description: 'Dev requirements file postfix'
+    required: false
+    default: 'txt'
 runs:
   using: composite
   steps:
@@ -20,13 +21,21 @@ runs:
     - run: poetry config warnings.export false
       shell: bash
 
-    - run: poetry export -f requirements.txt ${{ inputs.extra-args }} --output ${{ inputs.output-file }}
+    - run: |
+        poetry export -f requirements.txt --only main \
+          --output ${{ inputs.output-file }}.${{ inputs.file-extension }}
+      shell: bash
+    
+    - run: |
+        poetry export -f requirements.txt --with dev \
+          --output ${{ inputs.output-file }}-${{ inputs.dev-postfix }}.${{ inputs.file-extension }}
       shell: bash
 
     - run: |
         git config --global user.email "requirements-bot@github.com"
         git config --global user.name "Requirements Bot"
-        git add ./${{ inputs.output-file }}
+        git add ./${{ inputs.output-file }}.${{ inputs.file-extension }}
+        git add ./${{ inputs.output-file }}-${{ inputs.dev-postfix }}.${{ inputs.file-extension }}
         git commit -m "chore: freeze requirements"
         git push origin ${{ github.ref_name }}
       shell: bash
