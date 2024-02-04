@@ -32,12 +32,17 @@ runs:
       shell: bash
 
     - run: |
-        git config --global user.email "requirements-bot@github.com"
-        git config --global user.name "Requirements Bot"
         if ! git diff --exit-code; then
+          echo "[DEBUG] Requirements change detected."
+          git config --global user.email "requirements-bot@github.com"
+          git config --global user.name "Requirements Bot"
+
           git add -f ./${{ inputs.output-file }}.${{ inputs.file-extension }} \
             ./${{ inputs.output-file }}-${{ inputs.dev-postfix }}.${{ inputs.file-extension }}
           git commit -m "chore: freeze requirements"
+
           git push origin ${{ github.ref_name }}
+        else
+          echo "[DEBUG] No requirements change."
         fi
       shell: bash
