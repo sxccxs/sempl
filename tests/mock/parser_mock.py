@@ -1,4 +1,9 @@
-"""Parser mock."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+Parser mock.
+"""
 from typing import Iterable
 
 from result import Ok

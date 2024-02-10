@@ -1,4 +1,9 @@
-"""Repl enums."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+REPL enums.
+"""
 from enum import StrEnum
 
 

@@ -1,4 +1,9 @@
-"""Test data for evaluation tests."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+Test data for evaluation tests.
+"""
 from src.ast import ast_nodes
 from src.ast.abstract import Statement
 from src.evaluation.std_lib import STD_LIB

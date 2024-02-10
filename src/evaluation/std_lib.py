@@ -1,4 +1,9 @@
-"""Std library scope defenition."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+Std library scope defenition.
+"""
 from src.evaluation.builtin_funcs import (
     APPEND_ENTRY,
     FLOAT_ENTRY,

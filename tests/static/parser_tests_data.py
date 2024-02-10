@@ -1,4 +1,9 @@
-"""Test data for complex parser tests."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+Test data for complex parser tests.
+"""
 from src.lexer.tokens import Token, TokenType
 
 INFIX_OPERATIONS_PRECEDENCE_AND_EXPECTED: list[tuple[list[Token], str]] = [

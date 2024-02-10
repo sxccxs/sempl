@@ -1,4 +1,9 @@
-"""Types required in parsing."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+Types required in parsing.
+"""
 from enum import IntEnum, StrEnum, auto
 from typing import Callable
 

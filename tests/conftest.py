@@ -1,4 +1,9 @@
-"""Conftest."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+Conftest.
+"""
 # pylint: disable=redefined-outer-name
 import pytest
 from result import Ok

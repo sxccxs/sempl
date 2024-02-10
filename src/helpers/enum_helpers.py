@@ -1,4 +1,9 @@
-"""Enum helper functions."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+Enum helper functions.
+"""
 from enum import Enum
 
 

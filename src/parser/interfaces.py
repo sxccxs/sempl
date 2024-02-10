@@ -1,4 +1,9 @@
-"""Parser interface."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+Parser interface.
+"""
 from abc import abstractmethod
 from typing import Protocol
 

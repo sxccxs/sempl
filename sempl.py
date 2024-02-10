@@ -1,4 +1,9 @@
-"""Sempl main."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+Sempl runner.
+"""
 import argparse
 import pathlib
 import sys

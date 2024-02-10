@@ -1,4 +1,9 @@
-"""Concrete nodes of AST."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+Concrete nodes of AST.
+"""
 from dataclasses import dataclass, field
 from io import StringIO
 

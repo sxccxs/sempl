@@ -1,4 +1,9 @@
-"""Concrete AST nodes evaluators."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+Concrete AST nodes evaluators.
+"""
 from functools import partial
 from itertools import zip_longest
 from typing import Any, Iterable, Literal, OrderedDict, cast

@@ -1,4 +1,9 @@
-"""Test group evaluator."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+Test group evaluator.
+"""
 # pylint: disable=redefined-outer-name
 from typing import Any, cast
 

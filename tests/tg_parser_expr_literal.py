@@ -1,4 +1,9 @@
-"""Test group parsing literal expressions."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+Test group parsing literal expressions.
+"""
 import pytest
 
 from src.ast import ast_nodes

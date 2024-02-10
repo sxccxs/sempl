@@ -1,4 +1,9 @@
-"""Lexer class definition."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+Lexer class definition.
+"""
 # pylint: disable=too-few-public-methods
 from io import StringIO
 from typing import TextIO

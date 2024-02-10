@@ -58,4 +58,5 @@ pytest ./tests/tg*.py -vvv --md-report --md-report-output=./reports/report.md
 (Needed pytest parameters can be used to select some tests.)
 
 ## Copyright
-Copyright (c) 2024 Hryhorii Biloshenko - All Rights Reserved
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.

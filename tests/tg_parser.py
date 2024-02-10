@@ -1,4 +1,9 @@
-"""Test group parsing complex statements."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+Test group parsing complex statements.
+"""
 import pytest
 
 from src.ast import ast_nodes

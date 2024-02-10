@@ -1,4 +1,9 @@
-"""Tokens related objects."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+Tokens related objects.
+"""
 from enum import StrEnum, auto
 from typing import NamedTuple
 

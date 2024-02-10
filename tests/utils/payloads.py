@@ -1,4 +1,9 @@
-"""Tests payloads."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+Tests payloads.
+"""
 from typing import NamedTuple
 
 from src.ast.abstract import Expression, Statement

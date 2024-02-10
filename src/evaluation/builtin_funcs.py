@@ -1,4 +1,9 @@
-"""Module for built-in functions and their entries."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+Module for built-in functions and their entries.
+"""
 from typing import Any
 
 from result import Err, Ok, Result

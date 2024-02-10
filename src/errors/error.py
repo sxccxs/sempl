@@ -1,4 +1,9 @@
-"""Base Error type."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+Base Error type.
+"""
 from dataclasses import dataclass, field
 from io import StringIO
 

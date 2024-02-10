@@ -1,4 +1,9 @@
-"""Constant Values - ones, for which only one object instance is enough."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+Constant Values - ones, for which only one object instance is enough.
+"""
 from __future__ import annotations
 
 from enum import Enum

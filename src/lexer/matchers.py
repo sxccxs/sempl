@@ -1,4 +1,9 @@
-"""character or string matchers."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+Character or string matchers.
+"""
 import re
 
 

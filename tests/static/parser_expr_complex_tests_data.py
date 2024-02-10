@@ -1,4 +1,9 @@
-"""Test data for complex expression parsing tests."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+Test data for complex expression parsing tests.
+"""
 from src.ast import ast_nodes
 from src.lexer.tokens import Token, TokenType
 from tests.utils.payloads import ExpectedInfixOperation

@@ -1,4 +1,9 @@
-"""REPL."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+REPL.
+"""
 import sys
 from io import StringIO
 from typing import TextIO

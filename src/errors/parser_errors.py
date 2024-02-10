@@ -1,4 +1,9 @@
-"""Parsing errors."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+Parsing errors.
+"""
 from src.errors.error import Error
 from src.lexer.tokens import TokenType
 

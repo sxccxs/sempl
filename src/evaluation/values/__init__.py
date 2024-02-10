@@ -1,1 +1,6 @@
-"""Package for evaluated values."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+Package for evaluated values.
+"""

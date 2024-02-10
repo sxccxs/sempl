@@ -1,4 +1,9 @@
-"""AST nodes helper functions."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+AST nodes helper functions.
+"""
 from io import StringIO
 from typing import Iterable
 

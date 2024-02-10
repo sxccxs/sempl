@@ -1,4 +1,9 @@
-"""Base parser class."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+Base parser class.
+"""
 from __future__ import annotations
 
 from abc import ABC, abstractmethod

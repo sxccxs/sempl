@@ -1,4 +1,9 @@
-"""Concrete evaluated values types."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+Concrete evaluated values types.
+"""
 from dataclasses import dataclass
 from io import StringIO
 from typing import override

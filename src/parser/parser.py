@@ -1,4 +1,9 @@
-"""Parser class."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+Parser class.
+"""
 from typing import override
 
 from result import Err, Ok, Result

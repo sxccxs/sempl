@@ -1,4 +1,9 @@
-"""Results helper functions."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+Results helper functions.
+"""
 from itertools import chain
 from typing import Iterable, overload
 
@@ -53,7 +58,7 @@ def results_gather[T, E](*results_it: Iterable[Result[T, E]]) -> Result[list[T],
 
 
 def results_gather[T, E](
-    results: Iterable[Result[T, E]] | Result[T, E],  # type: ignore
+    results: Iterable[Result[T, E]] | Result[T, E],
     *results_it: Iterable[Result[T, E]] | Result[T, E],
 ) -> Result[list[T], E]:
     """

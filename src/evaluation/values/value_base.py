@@ -1,4 +1,9 @@
-"""Base classes for evaluated values."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+Base classes for evaluated values.
+"""
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Sequence

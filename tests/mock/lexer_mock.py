@@ -1,4 +1,9 @@
-"""Lexer mock."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+Lexer mock.
+"""
 import logging
 from itertools import chain
 from typing import Iterable, Iterator

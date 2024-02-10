@@ -1,1 +1,6 @@
-"""Package for static data used in tests."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+Package for static data used in tests.
+"""

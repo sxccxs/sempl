@@ -1,4 +1,9 @@
-"""Base nodes for Abstract Syntax Tree."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+Base nodes for Abstract Syntax Tree.
+"""
 # pylint: disable=too-few-public-methods
 from abc import ABC, abstractmethod
 

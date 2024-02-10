@@ -1,1 +1,6 @@
-"""Tests package."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+Tests package.
+"""

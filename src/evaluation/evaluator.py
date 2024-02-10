@@ -1,4 +1,9 @@
-"""AST evaluator."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+AST evaluator.
+"""
 from result import Err, Ok, Result
 
 from src.errors.evaluator_errors import EvaluationError

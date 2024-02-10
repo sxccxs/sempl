@@ -1,4 +1,9 @@
-"""Test group lexer."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+Test group lexer.
+"""
 from io import StringIO
 
 import pytest

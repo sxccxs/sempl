@@ -1,4 +1,9 @@
-"""Scope and related objects."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+Scope and related objects.
+"""
 # pylint: disable=too-few-public-methods
 from __future__ import annotations
 

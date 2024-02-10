@@ -1,4 +1,9 @@
-"""Repl payloads."""
+"""
+Copyright (c) 2024 Hryhorii Biloshenko.
+All Rights Reserved.
+
+REPL payloads.
+"""
 from dataclasses import dataclass
 from typing import NamedTuple
 
