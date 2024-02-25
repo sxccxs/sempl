@@ -28,7 +28,7 @@ def run_file() -> None:
     parser = argparse.ArgumentParser(description="Sempl interpretator", prog="sempl")
     parser.add_argument("file", type=pathlib.Path)
     args = parser.parse_args()
-    code_file: pathlib.Path = args.path
+    code_file: pathlib.Path = args.file
     with code_file.open("r") as f:
         match Evaluator().evaluate(Parser(Lexer(f))):
             case Err(err):
